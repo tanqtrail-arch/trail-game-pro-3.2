@@ -397,28 +397,17 @@ function renderPortal(){
 }
 
 function renderPortalHome(){
-  const total=getPlayerCoins(state.user);
-  const myBadges=getPlayerBadges(state.user);
-  // 総合ランキング（TOP5のみ）
-  const ranking=getRanking();
-  const rankHtml=ranking.slice(0,5).map((r,i)=>{
-    const itemCls=i===0?' rank-gold':i===1?' rank-silver':i===2?' rank-bronze':'';
-    const numHtml=i<3
-      ?'<div class="rank-medal">'+(i===0?'👑':i===1?'🥈':'🥉')+'</div>'
-      :'<div class="rank-num">'+(i+1)+'</div>';
-    const cls=getPlayerClass(r.name);
-    const clsTag=cls?'<span style="font-size:.65rem;color:var(--text-dim);margin-left:6px;font-weight:400;background:rgba(0,0,0,0.04);padding:1px 8px;border-radius:10px">'+cls+'</span>':'';
-    return'<div class="rank-item'+itemCls+'">'+numHtml+'<div class="rank-name">'+r.name+clsTag+'</div><div class="rank-alt">'+r.alt+' ALT</div></div>';
+  // 新着ゲーム：URLが設定済みのものを登録順（id降順）で表示、なければ全ゲーム
+  const available=state.games.filter(g=>g.url&&g.url.trim());
+  const newGames=(available.length?available:[...state.games]).slice().reverse();
+  const cards=newGames.map(g=>{
+    const hasUrl=g.url&&g.url.trim();const tag=hasUrl?'a':'div';const href=hasUrl?` href="${g.url}" target="_blank" rel="noopener"`:'';
+    const c=getPlayerGameCoins(state.user,g.id);
+    return`<${tag} class="game-card"${href}><span class="game-emoji">${g.emoji}</span><div class="game-name">${g.name}</div>${g.category?`<span class="game-category-badge">${g.category}</span>`:''}<div class="game-coins">🪙 ${c} ALT</div>${hasUrl?'<div class="game-link-hint">▶ タップでプレイ</div>':'<div class="game-link-hint">準備中...</div>'}</${tag}>`;
   }).join('');
-
-  // 自分のゲーム別獲得ALT（上位3ゲーム）
-  const myGameCoins=state.games.map(g=>({g,c:getPlayerGameCoins(state.user,g.id)})).filter(x=>x.c>0).sort((a,b)=>b.c-a.c);
-  const myTopGames=myGameCoins.slice(0,3).map(x=>`<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(0,0,0,0.015);border-radius:8px"><span style="font-size:1.2rem">${x.g.emoji}</span><span style="flex:1;font-size:.85rem;font-weight:700">${x.g.name}</span><span style="font-family:'Orbitron';font-size:.75rem;color:var(--accent-gold)">🪙 ${x.c}</span></div>`).join('');
-
   return`
-    <div class="section-title">🏆 総合ランキング TOP5</div>
-    <div class="ranking-section"><div class="ranking-list">${rankHtml||'<div class="no-data">まだ記録がありません</div>'}</div></div>
-    ${myTopGames?`<div class="section-title">🎮 よくあそぶゲーム</div><div style="display:flex;flex-direction:column;gap:6px;margin-bottom:24px">${myTopGames}</div>`:''}
+    <div class="section-title">🆕 NEW GAMES</div>
+    <div class="game-grid">${cards||'<div class="no-data">ゲームがまだありません</div>'}</div>
   `;
 }
 
@@ -475,19 +464,45 @@ function renderPortalRanking(){
 }
 
 function renderPortalGames(){
-  const catBtns=['すべて',...CATEGORIES].map(c=>{
+  const usedCats=[...new Set(state.games.map(g=>g.category||'その他'))];
+  // カテゴリフィルターボタン
+  const catBtns=['すべて',...CATEGORIES.filter(c=>usedCats.includes(c))].map(c=>{
     const count=c==='すべて'?state.games.length:state.games.filter(g=>g.category===c).length;
-    return`<button class="cat-btn ${state.selectedCategory===c?'active':''}" data-cat="${c}">${c}${c!=='すべて'&&count>0?' ('+count+')':''}</button>`;
+    return`<button class="cat-btn ${state.selectedCategory===c?'active':''}" data-cat="${c}">${c}${c!=='すべて'?` (${count})`:''}</button>`;
   }).join('');
+
   const filtered=state.selectedCategory==='すべて'?state.games:state.games.filter(g=>g.category===state.selectedCategory);
-  const cards=filtered.map(g=>{
-    const c=getPlayerGameCoins(state.user,g.id);const hasUrl=g.url&&g.url.trim();const tag=hasUrl?'a':'div';const href=hasUrl?` href="${g.url}" target="_blank" rel="noopener"`:'';
-    // マイランキング順位
-    const gr=getGameRanking(g.id);const myRank=gr.findIndex(r=>r.player===state.user);
-    const myRankTag=myRank>=0?`<div style="font-size:.6rem;color:var(--accent-cyan);margin-top:3px">#${myRank+1} / ${gr.length}人</div>`:'';
-    return`<${tag} class="game-card"${href}><span class="game-emoji">${g.emoji}</span><div class="game-name">${g.name}</div>${g.category?`<span class="game-category-badge">${g.category}</span>`:''}<div class="game-coins">🪙 ${c} ALT</div>${myRankTag}${hasUrl?'<div class="game-link-hint">▶ タップでプレイ</div>':'<div class="game-link-hint">準備中...</div>'}</${tag}>`;
-  }).join('');
-  return`<div class="category-filter">${catBtns}</div><div class="game-grid">${cards}</div>`;
+
+  let content='';
+  if(state.selectedCategory==='すべて'){
+    // カテゴリ別セクション表示
+    const catsToShow=CATEGORIES.filter(c=>filtered.some(g=>g.category===c));
+    const uncategorized=filtered.filter(g=>!g.category);
+    content=catsToShow.map(cat=>{
+      const games=filtered.filter(g=>g.category===cat);
+      const cards=games.map(g=>makeGameCard(g)).join('');
+      return`<div class="section-title" style="margin-top:8px">${getCatEmoji(cat)} ${cat}</div><div class="game-grid" style="margin-bottom:24px">${cards}</div>`;
+    }).join('');
+    if(uncategorized.length){
+      content+=`<div class="section-title" style="margin-top:8px">🎮 その他</div><div class="game-grid" style="margin-bottom:24px">${uncategorized.map(g=>makeGameCard(g)).join('')}</div>`;
+    }
+  } else {
+    content=`<div class="game-grid">${filtered.map(g=>makeGameCard(g)).join('')}</div>`;
+  }
+  return`<div class="category-filter">${catBtns}</div>${content}`;
+}
+
+function getCatEmoji(cat){
+  const map={'算数':'🔢','地理':'🗾','歴史':'🏯','理科':'🔬','国語':'📖','その他':'🎮'};
+  return map[cat]||'🎮';
+}
+
+function makeGameCard(g){
+  const c=getPlayerGameCoins(state.user,g.id);
+  const hasUrl=g.url&&g.url.trim();const tag=hasUrl?'a':'div';const href=hasUrl?` href="${g.url}" target="_blank" rel="noopener"`:'';
+  const gr=getGameRanking(g.id);const myRank=gr.findIndex(r=>r.player===state.user);
+  const myRankTag=myRank>=0?`<div style="font-size:.6rem;color:var(--accent-cyan);margin-top:3px">#${myRank+1} / ${gr.length}人</div>`:'';
+  return`<${tag} class="game-card"${href}><span class="game-emoji">${g.emoji}</span><div class="game-name">${g.name}</div><div class="game-coins">🪙 ${c} ALT</div>${myRankTag}${hasUrl?'<div class="game-link-hint">▶ タップでプレイ</div>':'<div class="game-link-hint">準備中...</div>'}</${tag}>`;
 }
 
 function renderPortalHistory(){
