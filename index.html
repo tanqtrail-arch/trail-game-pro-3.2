@@ -713,7 +713,7 @@ function renderAdminSummary(){
 function bindEvents(){
   // Class select
   document.querySelectorAll('.class-select-btn').forEach(b=>{
-    b.onclick=()=>{state.loginClass=b.dataset.cls;render()};
+    b.onclick=()=>{state.loginClass=b.dataset.cls;render();const ni=document.getElementById('nameInput');if(ni)ni.scrollIntoView({behavior:'smooth',block:'center'});};
   });
   // Name input login
   const loginBtn=document.getElementById('loginBtn');
