@@ -225,6 +225,14 @@ body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:
 @keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.4}}
 .online-chip .online-dur{font-family:'Orbitron',sans-serif;font-size:.65rem;color:var(--text-dim);margin-left:4px}
 .duration-badge{font-family:'Orbitron',sans-serif;font-size:.75rem;color:var(--accent-purple)}
+.usage-card{background:var(--bg-card);border:1.5px solid rgba(0,0,0,0.06);border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,0.03)}
+.usage-card h4{font-size:.85rem;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.usage-game-bars{display:flex;flex-direction:column;gap:6px}
+.usage-bar-row{display:flex;align-items:center;gap:8px;font-size:.8rem}
+.usage-bar-label{min-width:90px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0}
+.usage-bar-track{flex:1;height:18px;background:rgba(0,0,0,0.04);border-radius:9px;overflow:hidden;position:relative}
+.usage-bar-fill{height:100%;border-radius:9px;background:linear-gradient(90deg,var(--accent-cyan),var(--accent-purple));transition:width .3s}
+.usage-bar-val{font-family:'Orbitron',sans-serif;font-size:.65rem;color:var(--text-dim);min-width:50px;text-align:right;flex-shrink:0}
 
 /* Desktop enhancements */
 @media(min-width:600px){
@@ -374,6 +382,71 @@ const loginTracker = {
 };
 loginTracker.load();
 
+// ═══ ゲームプレイトラッカー ═══
+const gamePlayTracker = {
+  KEY: 'trail_gp3_gameplay',
+  sessions: [],
+  currentPlay: null,
+  load(){
+    try{const d=JSON.parse(localStorage.getItem(this.KEY));if(d&&Array.isArray(d))this.sessions=d}catch(e){}
+  },
+  save(){
+    try{localStorage.setItem(this.KEY,JSON.stringify(this.sessions.slice(0,1000)))}catch(e){}
+  },
+  startPlay(user, gameId, gameName){
+    if(this.currentPlay) this.endPlay();
+    this.currentPlay={user, gameId, gameName, startTs:Date.now()};
+  },
+  endPlay(){
+    if(!this.currentPlay) return;
+    const s=this.currentPlay;
+    const dur=Date.now()-s.startTs;
+    this.currentPlay=null;
+    if(dur<3000) return; // 3秒未満は無視
+    const now=new Date();
+    const time=`${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
+    this.sessions.unshift({user:s.user, gameId:s.gameId, gameName:s.gameName, startTs:s.startTs, duration:dur, date:time});
+    if(this.sessions.length>1000) this.sessions.length=1000;
+    this.save();
+    apiPost({action:'logGamePlay', user:s.user, gameId:s.gameId, gameName:s.gameName, duration:dur, date:time}).catch(()=>{});
+  },
+  getPlayerStats(){
+    const map={};
+    this.sessions.forEach(s=>{
+      const k=s.user;
+      if(!map[k]) map[k]={user:k, games:{}, totalPlays:0, totalDuration:0};
+      if(!map[k].games[s.gameId]) map[k].games[s.gameId]={gameId:s.gameId, gameName:s.gameName, plays:0, duration:0};
+      map[k].games[s.gameId].plays++;
+      map[k].games[s.gameId].duration+=s.duration;
+      map[k].totalPlays++;
+      map[k].totalDuration+=s.duration;
+    });
+    return Object.values(map).sort((a,b)=>b.totalPlays-a.totalPlays);
+  },
+  getGameStats(){
+    const map={};
+    this.sessions.forEach(s=>{
+      const k=s.gameId;
+      if(!map[k]) map[k]={gameId:s.gameId, gameName:s.gameName, players:new Set(), plays:0, totalDuration:0};
+      map[k].players.add(s.user);
+      map[k].plays++;
+      map[k].totalDuration+=s.duration;
+    });
+    return Object.values(map).map(g=>({...g, uniquePlayers:g.players.size})).sort((a,b)=>b.plays-a.plays);
+  },
+  formatDuration(ms){
+    const secs=Math.floor(ms/1000);
+    if(secs<60) return `${secs}秒`;
+    const mins=Math.floor(secs/60);
+    if(mins<60) return `${mins}分`;
+    const h=Math.floor(mins/60);const m=mins%60;
+    return `${h}時間${m}分`;
+  }
+};
+gamePlayTracker.load();
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')gamePlayTracker.endPlay()});
+window.addEventListener('focus',()=>gamePlayTracker.endPlay());
+
 let state = {
   screen:'login', user:null, loginClass:null, adminTab:'coins', selectedCategory:'すべて',
   portalTab:'home', selectedRankGame:null, // ★ 追加
@@ -433,6 +506,12 @@ async function loadData(){
           d.loginLog.forEach(s=>{if(!localTs.has(s.loginTs))loginTracker.sessions.push(s)});
           loginTracker.sessions.sort((a,b)=>b.loginTs-a.loginTs);
           loginTracker.save();
+        }
+        if(d.gamePlayLog&&Array.isArray(d.gamePlayLog)){
+          const localTs=new Set(gamePlayTracker.sessions.map(s=>s.startTs));
+          d.gamePlayLog.forEach(s=>{if(!localTs.has(s.startTs))gamePlayTracker.sessions.push(s)});
+          gamePlayTracker.sessions.sort((a,b)=>b.startTs-a.startTs);
+          gamePlayTracker.save();
         }
       }
     }
@@ -514,7 +593,7 @@ function renderLogin(){
 function renderGuest(){
   const cards=state.games.map(g=>{
     const hasUrl=g.url&&g.url.trim();const tag=hasUrl?'a':'div';const href=hasUrl?` href="${escHtml(g.url)}" target="_blank" rel="noopener"`:'';
-    return`<${tag} class="game-card"${href}><span class="game-emoji">${escHtml(g.emoji)}</span><div class="game-name">${escHtml(g.name)}</div>${g.category?`<span class="game-category-badge">${escHtml(g.category)}</span>`:''}<div class="game-link-hint">${hasUrl?'▶ タップでプレイ':'準備中...'}</div></${tag}>`;
+    return`<${tag} class="game-card" data-gid="${g.id}"${href}><span class="game-emoji">${escHtml(g.emoji)}</span><div class="game-name">${escHtml(g.name)}</div>${g.category?`<span class="game-category-badge">${escHtml(g.category)}</span>`:''}<div class="game-link-hint">${hasUrl?'▶ タップでプレイ':'準備中...'}</div></${tag}>`;
   }).join('');
 
   return`<div class="portal">
@@ -572,7 +651,7 @@ function renderPortalHome(){
   const cards=newGames.map(g=>{
     const hasUrl=g.url&&g.url.trim();const tag=hasUrl?'a':'div';const href=hasUrl?` href="${escHtml(g.url)}" target="_blank" rel="noopener"`:'';
     const c=getPlayerGameCoins(state.user,g.id);
-    return`<${tag} class="game-card"${href}><span class="game-emoji">${escHtml(g.emoji)}</span><div class="game-name">${escHtml(g.name)}</div>${g.category?`<span class="game-category-badge">${escHtml(g.category)}</span>`:''}<div class="game-coins">🪙 ${c} ALT</div>${hasUrl?'<div class="game-link-hint">▶ タップでプレイ</div>':'<div class="game-link-hint">準備中...</div>'}</${tag}>`;
+    return`<${tag} class="game-card" data-gid="${g.id}"${href}><span class="game-emoji">${escHtml(g.emoji)}</span><div class="game-name">${escHtml(g.name)}</div>${g.category?`<span class="game-category-badge">${escHtml(g.category)}</span>`:''}<div class="game-coins">🪙 ${c} ALT</div>${hasUrl?'<div class="game-link-hint">▶ タップでプレイ</div>':'<div class="game-link-hint">準備中...</div>'}</${tag}>`;
   }).join('');
   return`
     <div class="section-title">🆕 NEW GAMES</div>
@@ -671,7 +750,7 @@ function makeGameCard(g){
   const hasUrl=g.url&&g.url.trim();const tag=hasUrl?'a':'div';const href=hasUrl?` href="${escHtml(g.url)}" target="_blank" rel="noopener"`:'';
   const gr=getGameRanking(g.id);const myRank=gr.findIndex(r=>r.player===state.user);
   const myRankTag=myRank>=0?`<div style="font-size:.6rem;color:var(--accent-cyan);margin-top:3px">#${myRank+1} / ${gr.length}人</div>`:'';
-  return`<${tag} class="game-card"${href}><span class="game-emoji">${escHtml(g.emoji)}</span><div class="game-name">${escHtml(g.name)}</div><div class="game-coins">🪙 ${c} ALT</div>${myRankTag}${hasUrl?'<div class="game-link-hint">▶ タップでプレイ</div>':'<div class="game-link-hint">準備中...</div>'}</${tag}>`;
+  return`<${tag} class="game-card" data-gid="${g.id}"${href}><span class="game-emoji">${escHtml(g.emoji)}</span><div class="game-name">${escHtml(g.name)}</div><div class="game-coins">🪙 ${c} ALT</div>${myRankTag}${hasUrl?'<div class="game-link-hint">▶ タップでプレイ</div>':'<div class="game-link-hint">準備中...</div>'}</${tag}>`;
 }
 
 function renderPortalHistory(){
@@ -704,6 +783,7 @@ function renderAdmin(){
     <button class="admin-tab ${state.adminTab==='badges'?'active':''}" data-tab="badges">🏅 景品交換</button>
     <button class="admin-tab ${state.adminTab==='games'?'active':''}" data-tab="games">🎮 ゲーム</button>
     <button class="admin-tab ${state.adminTab==='rankings'?'active':''}" data-tab="rankings">🏆 ランキング</button>
+    <button class="admin-tab ${state.adminTab==='usage'?'active':''}" data-tab="usage">🕹️ 利用状況</button>
     <button class="admin-tab ${state.adminTab==='summary'?'active':''}" data-tab="summary">📊 一覧</button>
   </div>`;
   let content='';
@@ -713,6 +793,7 @@ function renderAdmin(){
   else if(state.adminTab==='badges')content=renderAdminBadges();
   else if(state.adminTab==='games')content=renderAdminGames();
   else if(state.adminTab==='rankings')content=renderAdminRankings();
+  else if(state.adminTab==='usage')content=renderAdminGameUsage();
   else content=renderAdminSummary();
   return`<div class="admin-panel">
     <div class="header">
@@ -911,6 +992,68 @@ function renderAdminLoginLog(){
     </table></div>`;
 }
 
+// ═══ ゲーム利用状況 ═══
+function renderAdminGameUsage(){
+  const gameStats=gamePlayTracker.getGameStats();
+  const playerStats=gamePlayTracker.getPlayerStats();
+  const maxPlays=gameStats.length?Math.max(...gameStats.map(g=>g.plays)):1;
+
+  // ゲーム別サマリー
+  const gameRows=gameStats.length?gameStats.map(gs=>{
+    const g=state.games.find(g=>g.id===gs.gameId);
+    const emoji=g?g.emoji:'❓';
+    const pct=Math.round(gs.plays/maxPlays*100);
+    return`<div class="usage-bar-row">
+      <div class="usage-bar-label">${escHtml(emoji)} ${escHtml(gs.gameName)}</div>
+      <div class="usage-bar-track"><div class="usage-bar-fill" style="width:${pct}%"></div></div>
+      <div class="usage-bar-val">${gs.plays}回 / ${gs.uniquePlayers}人<br>${gamePlayTracker.formatDuration(gs.totalDuration)}</div>
+    </div>`;
+  }).join(''):'<div class="no-data">まだプレイ記録がありません</div>';
+
+  // 生徒別カード
+  const playerCards=playerStats.length?playerStats.map(ps=>{
+    const cls=getPlayerClass(ps.user);
+    const clsTag=cls?`<span style="font-size:.65rem;color:var(--text-dim);background:rgba(0,0,0,0.04);padding:1px 8px;border-radius:10px">${escHtml(cls)}</span>`:'';
+    const gameList=Object.values(ps.games).sort((a,b)=>b.plays-a.plays);
+    const maxG=gameList.length?Math.max(...gameList.map(g=>g.plays)):1;
+    const bars=gameList.map(g=>{
+      const gg=state.games.find(sg=>sg.id===g.gameId);
+      const emoji=gg?gg.emoji:'❓';
+      const pct=Math.round(g.plays/maxG*100);
+      return`<div class="usage-bar-row">
+        <div class="usage-bar-label" style="min-width:70px;font-size:.75rem">${escHtml(emoji)} ${escHtml(g.gameName)}</div>
+        <div class="usage-bar-track"><div class="usage-bar-fill" style="width:${pct}%"></div></div>
+        <div class="usage-bar-val">${g.plays}回 ${gamePlayTracker.formatDuration(g.duration)}</div>
+      </div>`;
+    }).join('');
+    return`<div class="usage-card">
+      <h4><div class="user-avatar" style="width:24px;height:24px;font-size:.7rem">${escHtml(ps.user.charAt(0))}</div>${escHtml(ps.user)} ${clsTag}
+        <span style="margin-left:auto;font-family:'Orbitron';font-size:.7rem;color:var(--accent-cyan)">${ps.totalPlays}回 / ${gamePlayTracker.formatDuration(ps.totalDuration)}</span>
+      </h4>
+      <div class="usage-game-bars">${bars}</div>
+    </div>`;
+  }).join(''):'<div class="no-data">まだプレイ記録がありません。<br>生徒がゲームをプレイすると記録されます。</div>';
+
+  // 直近プレイログ
+  const recentPlays=gamePlayTracker.sessions.slice(0,30);
+  const recentRows=recentPlays.length?recentPlays.map(s=>{
+    const g=state.games.find(g=>g.id===s.gameId);
+    const emoji=g?g.emoji:'❓';
+    return`<tr><td>${escHtml(s.user)}</td><td>${escHtml(emoji)} ${escHtml(s.gameName)}</td><td class="duration-badge">${gamePlayTracker.formatDuration(s.duration)}</td><td style="font-size:.75rem;color:var(--text-dim)">${escHtml(s.date)}</td></tr>`;
+  }).join(''):'<tr><td colspan="4" class="no-data">まだ記録がありません</td></tr>';
+
+  return`
+    <div class="section-title">🎮 ゲーム別プレイ回数・時間</div>
+    <div class="usage-game-bars" style="background:var(--bg-card);border:1.5px solid rgba(0,0,0,0.06);border-radius:14px;padding:16px;margin-bottom:20px">${gameRows}</div>
+    <div class="section-title">👤 生徒別ゲーム利用状況</div>
+    ${playerCards}
+    <div class="section-title" style="margin-top:20px">📋 直近のプレイログ</div>
+    <div class="tbl-wrap"><table>
+      <tr><th>名前</th><th>ゲーム</th><th>プレイ時間</th><th>日時</th></tr>
+      ${recentRows}
+    </table></div>`;
+}
+
 // ═══ アクティビティダッシュボード ═══
 function renderAdminActivity(){
   // 統計カード
@@ -1045,6 +1188,15 @@ function bindEvents(){
   const lo=document.getElementById('logoutBtn');if(lo)lo.onclick=()=>{if(state.user&&state.user!=='__guest__')loginTracker.endSession(state.user);state.user=null;state.loginClass=null;state.screen='login';SESSION.clear();render()};
 
   document.querySelectorAll('.cat-btn').forEach(b=>{b.onclick=()=>{state.selectedCategory=b.dataset.cat;render()}});
+  // ゲームプレイ記録
+  document.querySelectorAll('.game-card[data-gid]').forEach(card=>{
+    card.addEventListener('click',()=>{
+      if(state.user&&state.user!=='__guest__'){
+        const gid=parseInt(card.dataset.gid);const g=state.games.find(g=>g.id===gid);
+        if(g&&g.url&&g.url.trim()) gamePlayTracker.startPlay(state.user, gid, g.name);
+      }
+    });
+  });
   document.querySelectorAll('.admin-tab').forEach(t=>{t.onclick=()=>{state.adminTab=t.dataset.tab;render()}});
   // ★ ポータルタブ
   document.querySelectorAll('.portal-tab').forEach(t=>{t.onclick=()=>{state.portalTab=t.dataset.ptab;render()}});
