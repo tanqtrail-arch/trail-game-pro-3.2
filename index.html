@@ -1327,10 +1327,9 @@ function bindEvents(){
     const name=document.getElementById('newPlayerName').value.trim();
     const className=document.getElementById('newPlayerClass').value;
     if(!name||!className){showToast('⚠️ なまえとクラスを入力');return}
-    if(playerExists(name)){showToast('⚠️ すでに登録されています');return}
     const nameErr = validateName(name);
     if(nameErr){showToast('⚠️ '+nameErr);return}
-    if(name.length > VALIDATION.MAX_NAME_LENGTH){showToast('⚠️ 名前が長すぎます');return}
+    if(playerExists(name)){showToast('⚠️ すでに登録されています');return}
     state.players.push({name,className});
     activityLog.add('player', name, `新規登録（${className}）`);
     showToast(`✅ ${name}（${className}）を追加`);render();
@@ -1358,13 +1357,14 @@ function bindEvents(){
     if(urlErr){showToast('⚠️ '+urlErr);return}
     const emoji=document.getElementById('newGameEmoji').value.trim()||'🎮';
     const category=document.getElementById('newGameCat').value;
-    state.games.push({id:Date.now(),name,emoji,url,category});
+    const newGameId=Date.now();
+    state.games.push({id:newGameId,name,emoji,url,category});
     activityLog.add('game', name, `新しいゲーム追加（${category}）`);
     showToast(`✅ ${emoji} ${name}を追加しました`);render();
     const res=await apiPost({action:'addGame',name,emoji,url,category});
     if(res&&res.id){
       // APIから返ったIDでローカルを更新
-      const g=state.games.find(g=>g.name===name&&g.id===Date.now);
+      const g=state.games.find(g=>g.id===newGameId);
       if(g)g.id=res.id;
     }
   };
