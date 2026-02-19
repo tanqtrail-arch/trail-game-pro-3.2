@@ -218,6 +218,14 @@ body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:
 .stat-orange .stat-value{color:var(--accent-orange)}
 .alert-card{background:rgba(224,80,112,0.05);border:1.5px solid rgba(224,80,112,0.2);border-radius:12px;padding:12px 16px;margin-bottom:12px;font-size:.8rem;color:var(--accent-pink)}
 
+/* Login Log */
+.online-list{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.online-chip{display:flex;align-items:center;gap:6px;padding:6px 14px;background:rgba(44,181,98,0.08);border:1.5px solid rgba(44,181,98,0.25);border-radius:30px;font-size:.8rem;color:var(--accent-green)}
+.online-chip .online-dot{width:8px;height:8px;border-radius:50%;background:var(--accent-green);animation:pulse-dot 1.5s ease-in-out infinite}
+@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.4}}
+.online-chip .online-dur{font-family:'Orbitron',sans-serif;font-size:.65rem;color:var(--text-dim);margin-left:4px}
+.duration-badge{font-family:'Orbitron',sans-serif;font-size:.75rem;color:var(--accent-purple)}
+
 /* Desktop enhancements */
 @media(min-width:600px){
   .app{padding:20px}
@@ -326,6 +334,46 @@ const activityLog = {
   }
 };
 
+// ═══ ログイン履歴トラッカー ═══
+const loginTracker = {
+  KEY: 'trail_gp3_loginlog',
+  sessions: [],
+  load(){
+    try{const d=JSON.parse(localStorage.getItem(this.KEY));if(d&&Array.isArray(d))this.sessions=d}catch(e){}
+  },
+  save(){
+    try{localStorage.setItem(this.KEY,JSON.stringify(this.sessions.slice(0,500)))}catch(e){}
+  },
+  startSession(user, className){
+    const now=new Date();
+    const time=`${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
+    this.sessions.unshift({user, className, loginTime:time, loginTs:Date.now(), logoutTime:null, logoutTs:null});
+    if(this.sessions.length>500) this.sessions.length=500;
+    this.save();
+    apiPost({action:'logLogin', user, className, loginTime:time}).catch(()=>{});
+  },
+  endSession(user){
+    const s=this.sessions.find(s=>s.user===user&&!s.logoutTs);
+    if(s){
+      const now=new Date();
+      s.logoutTime=`${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
+      s.logoutTs=Date.now();
+      this.save();
+      apiPost({action:'logLogout', user, logoutTime:s.logoutTime, duration:this.formatDuration(s.loginTs,s.logoutTs)}).catch(()=>{});
+    }
+  },
+  getActive(){ return this.sessions.filter(s=>!s.logoutTs) },
+  getRecent(n){ return this.sessions.slice(0, n||100) },
+  formatDuration(loginTs, logoutTs){
+    const ms=(logoutTs||Date.now())-loginTs;
+    const mins=Math.floor(ms/60000);
+    if(mins<1) return '1分未満';
+    const h=Math.floor(mins/60);const m=mins%60;
+    return h>0?`${h}時間${m}分`:`${m}分`;
+  }
+};
+loginTracker.load();
+
 let state = {
   screen:'login', user:null, loginClass:null, adminTab:'coins', selectedCategory:'すべて',
   portalTab:'home', selectedRankGame:null, // ★ 追加
@@ -379,6 +427,13 @@ async function loadData(){
         if(d.badges)state.badges=d.badges;
         if(d.games&&d.games.length)state.games=d.games;
         if(d.rankings)state.rankings=d.rankings; // ★ 追加
+        // GASからログイン履歴をマージ（GAS側対応後に有効）
+        if(d.loginLog&&Array.isArray(d.loginLog)){
+          const localTs=new Set(loginTracker.sessions.map(s=>s.loginTs));
+          d.loginLog.forEach(s=>{if(!localTs.has(s.loginTs))loginTracker.sessions.push(s)});
+          loginTracker.sessions.sort((a,b)=>b.loginTs-a.loginTs);
+          loginTracker.save();
+        }
       }
     }
   }catch(e){console.error('loadData error:',e)}
@@ -644,6 +699,7 @@ function renderAdminLogin(){
 function renderAdmin(){
   const tabs=`<div class="admin-tabs">
     <button class="admin-tab ${state.adminTab==='activity'?'active':''}" data-tab="activity">📡 監視</button>
+    <button class="admin-tab ${state.adminTab==='loginlog'?'active':''}" data-tab="loginlog">🚪 入退室</button>
     <button class="admin-tab ${state.adminTab==='coins'?'active':''}" data-tab="coins">💰 ALT付与</button>
     <button class="admin-tab ${state.adminTab==='badges'?'active':''}" data-tab="badges">🏅 景品交換</button>
     <button class="admin-tab ${state.adminTab==='games'?'active':''}" data-tab="games">🎮 ゲーム</button>
@@ -652,6 +708,7 @@ function renderAdmin(){
   </div>`;
   let content='';
   if(state.adminTab==='activity')content=renderAdminActivity();
+  else if(state.adminTab==='loginlog')content=renderAdminLoginLog();
   else if(state.adminTab==='coins')content=renderAdminCoins();
   else if(state.adminTab==='badges')content=renderAdminBadges();
   else if(state.adminTab==='games')content=renderAdminGames();
@@ -830,6 +887,30 @@ function renderAdminSummary(){
     </div>`;
 }
 
+// ═══ 入退室ログ ═══
+function renderAdminLoginLog(){
+  const active=loginTracker.getActive();
+  const onlineHtml=active.length?active.map(s=>
+    `<div class="online-chip"><span class="online-dot"></span>${escHtml(s.user)}<span style="font-size:.65rem;color:var(--text-dim)">${escHtml(s.className)}</span><span class="online-dur">${loginTracker.formatDuration(s.loginTs,null)}</span></div>`
+  ).join(''):'<div style="color:var(--text-dim);font-size:.85rem">現在オンラインのユーザーはいません</div>';
+
+  const recent=loginTracker.getRecent(100);
+  const rows=recent.length?recent.map(s=>{
+    const dur=s.logoutTs?loginTracker.formatDuration(s.loginTs,s.logoutTs):`<span style="color:var(--accent-green)">滞在中 (${loginTracker.formatDuration(s.loginTs,null)})</span>`;
+    const logoutStr=s.logoutTime?escHtml(s.logoutTime):'—';
+    return`<tr><td>${escHtml(s.user)}</td><td><span style="font-size:.75rem;color:var(--text-dim)">${escHtml(s.className)}</span></td><td style="font-size:.8rem">${escHtml(s.loginTime)}</td><td style="font-size:.8rem">${logoutStr}</td><td class="duration-badge">${dur}</td></tr>`;
+  }).join(''):`<tr><td colspan="5" class="no-data">まだログイン記録がありません</td></tr>`;
+
+  return`
+    <div class="section-title">🟢 現在オンライン（${active.length}名）</div>
+    <div class="online-list">${onlineHtml}</div>
+    <div class="section-title">📋 入退室ログ</div>
+    <div class="tbl-wrap"><table>
+      <tr><th>名前</th><th>クラス</th><th>入室</th><th>退室</th><th>滞在時間</th></tr>
+      ${rows}
+    </table></div>`;
+}
+
 // ═══ アクティビティダッシュボード ═══
 function renderAdminActivity(){
   // 統計カード
@@ -918,6 +999,7 @@ function bindEvents(){
         state.user=match.name;state.screen='portal';
         SESSION.save('portal', match.name, state.loginClass);
         activityLog.add('player', match.name, `ログイン（${escHtml(state.loginClass)}）`);
+        loginTracker.startSession(match.name, state.loginClass);
         render();
       }else if(playerExists(name)){
         // Same name exists in different class
@@ -960,7 +1042,7 @@ function bindEvents(){
     };
     api.onkeydown=(e)=>{if(e.key==='Enter')apb.click()};api.focus();
   }
-  const lo=document.getElementById('logoutBtn');if(lo)lo.onclick=()=>{state.user=null;state.loginClass=null;state.screen='login';SESSION.clear();render()};
+  const lo=document.getElementById('logoutBtn');if(lo)lo.onclick=()=>{if(state.user&&state.user!=='__guest__')loginTracker.endSession(state.user);state.user=null;state.loginClass=null;state.screen='login';SESSION.clear();render()};
 
   document.querySelectorAll('.cat-btn').forEach(b=>{b.onclick=()=>{state.selectedCategory=b.dataset.cat;render()}});
   document.querySelectorAll('.admin-tab').forEach(t=>{t.onclick=()=>{state.adminTab=t.dataset.tab;render()}});
