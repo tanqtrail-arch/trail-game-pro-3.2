@@ -1,0 +1,29 @@
+version: "3.8"
+
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - JWT_SECRET=${JWT_SECRET:-change-me-in-production}
+      - DATABASE_PATH=/app/data/trail-game.db
+      - SUPER_ADMIN_EMAIL=${SUPER_ADMIN_EMAIL:-admin@trail-game.com}
+      - SUPER_ADMIN_PASSWORD=${SUPER_ADMIN_PASSWORD:-trail2024}
+      - RATE_LIMIT_WINDOW_MS=900000
+      - RATE_LIMIT_MAX_REQUESTS=200
+      - SESSION_EXPIRY_HOURS=24
+      - STUDENT_SESSION_EXPIRY_HOURS=2
+    volumes:
+      - trail-data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  trail-data:
