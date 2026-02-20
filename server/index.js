@@ -56,6 +56,8 @@ app.use('/api/t', rankingRoutes);
 app.use('/api/t', analyticsRoutes);
 app.use('/api/t', tenantRoutes);
 app.get('/api/plans', tenantRoutes);
+const superAdminRoutes = require('./routes/superAdmin');
+app.use('/', superAdminRoutes);
 
 // ═══ Health Check ═══
 app.get('/api/health', (req, res) => {
