@@ -10,11 +10,16 @@
     "seed": "node migrations/seed.js",
     "test": "node --test server/**/*.test.js"
   },
-  "keywords": ["education", "gamification", "saas", "multi-tenant"],
+  "keywords": [
+    "education",
+    "gamification",
+    "saas",
+    "multi-tenant"
+  ],
   "license": "MIT",
   "dependencies": {
-    "better-sqlite3": "^11.7.0",
     "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^11.7.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
@@ -22,5 +27,8 @@
     "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.2",
     "uuid": "^11.0.5"
+  },
+  "devDependencies": {
+    "sass": "^1.97.3"
   }
 }
