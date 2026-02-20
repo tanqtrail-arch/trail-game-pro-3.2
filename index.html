@@ -250,7 +250,6 @@ body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:
 <div class="app" id="app"></div>
 
 <script>
-const ADMIN_PASS = 'trail2024';
 const CATEGORIES = ['算数','地理','歴史','理科','国語','その他'];
 
 // ★★★ GASデプロイURLをここに貼る ★★★
@@ -295,7 +294,28 @@ function isSafeUrl(url){
   return trimmed.startsWith('https://') || trimmed.startsWith('http://');
 }
 
-// ═══ セキュリティ: 管理者ログインレート制限 ═══
+// ═══ セキュリティ: 管理者トークン管理 ═══
+const ADMIN_TOKEN = {
+  KEY: 'trail_gp3_admin_token',
+  get(){
+    try {
+      const d=JSON.parse(sessionStorage.getItem(this.KEY));
+      if(d&&d.token&&Date.now()<d.expiresAt) return d.token;
+      this.clear();
+    } catch(e){}
+    return null;
+  },
+  set(token, expiresIn){
+    try {
+      sessionStorage.setItem(this.KEY, JSON.stringify({token, expiresAt:Date.now()+(expiresIn||3600000)}));
+    } catch(e){}
+  },
+  clear(){
+    try { sessionStorage.removeItem(this.KEY); } catch(e){}
+  }
+};
+
+// ═══ セキュリティ: 管理者ログインレート制限（クライアント側の補助。サーバー側でも制限される） ═══
 const LOGIN_SECURITY = {
   maxAttempts: 5,
   lockoutDuration: 60000, // 60秒
@@ -513,7 +533,25 @@ async function apiPost(body){
   if(!GAS_URL){return null}
   const res=await fetch(GAS_URL,{method:'POST',body:JSON.stringify(body)});
   if(!res.ok) throw new Error('API error: '+res.status);
-  return res.json();
+  const data=await res.json();
+  // サーバー側認証エラー時はトークンを破棄して再ログイン要求
+  if(data&&data.error==='AUTH_REQUIRED'){
+    ADMIN_TOKEN.clear();
+    showToast('🔒 セッション切れです。再ログインしてください');
+    state.screen='admin-login';render();
+    return null;
+  }
+  return data;
+}
+// 管理者API: トークンを自動付与してPOST
+async function adminApiPost(body){
+  const token=ADMIN_TOKEN.get();
+  if(!token){
+    showToast('🔒 再ログインが必要です');
+    state.screen='admin-login';render();
+    return null;
+  }
+  return apiPost({...body, token});
 }
 
 // ═══ Analytics API ═══
@@ -1268,33 +1306,52 @@ function bindEvents(){
   const bl=document.getElementById('backToLogin');if(bl)bl.onclick=()=>{state.screen='login';render()};
   const apb=document.getElementById('adminPassBtn');const api=document.getElementById('adminPassInput');
   if(apb){
-    apb.onclick=()=>{
+    apb.onclick=async()=>{
       if(LOGIN_SECURITY.isLocked()){showToast('🔒 ロックアウト中です');render();return}
-      if(api.value===ADMIN_PASS){
-        LOGIN_SECURITY.reset();
-        state.screen='admin';
-        SESSION.save('admin', null, null);
-        activityLog.add('admin','管理者','ログイン成功');
-        render();
-      } else {
-        LOGIN_SECURITY.recordFailure();
-        activityLog.add('security','管理者ログイン','パスワード不一致（試行'+LOGIN_SECURITY.attempts+'回目）');
-        if(LOGIN_SECURITY.isLocked()){
-          showToast('🔒 ロックアウトされました（60秒間）');
-          // ロックアウト中のカウントダウン更新
-          const lockTimer=setInterval(()=>{
-            if(!LOGIN_SECURITY.isLocked()){clearInterval(lockTimer);render();return}
-            render();
-          },1000);
+      const pw=api.value;
+      if(!pw){showToast('⚠️ パスワードを入力してください');return}
+      apb.disabled=true;apb.textContent='認証中...';
+      try{
+        const res=await apiPost({action:'adminLogin',password:pw});
+        if(res&&res.ok&&res.token){
+          LOGIN_SECURITY.reset();
+          ADMIN_TOKEN.set(res.token, res.expiresIn);
+          state.screen='admin';
+          SESSION.save('admin', null, null);
+          activityLog.add('admin','管理者','ログイン成功（サーバー認証）');
+          render();
         } else {
-          showToast('❌ パスワードが違います');
+          LOGIN_SECURITY.recordFailure();
+          const msg=(res&&res.message)?res.message:'パスワードが違います';
+          activityLog.add('security','管理者ログイン','パスワード不一致（試行'+LOGIN_SECURITY.attempts+'回目）');
+          if(res&&res.error==='RATE_LIMITED'){
+            LOGIN_SECURITY.lockedUntil=Date.now()+(res.waitSeconds||60)*1000;
+            showToast('🔒 サーバー側でロックされました');
+          } else if(LOGIN_SECURITY.isLocked()){
+            showToast('🔒 ロックアウトされました（60秒間）');
+            const lockTimer=setInterval(()=>{
+              if(!LOGIN_SECURITY.isLocked()){clearInterval(lockTimer);render();return}
+              render();
+            },1000);
+          } else {
+            showToast('❌ '+msg);
+          }
+          render();
         }
+      }catch(e){
+        showToast('⚠️ サーバーに接続できません');
         render();
       }
     };
     api.onkeydown=(e)=>{if(e.key==='Enter')apb.click()};api.focus();
   }
-  const lo=document.getElementById('logoutBtn');if(lo)lo.onclick=()=>{if(state.user&&state.user!=='__guest__')loginTracker.endSession(state.user);state.user=null;state.loginClass=null;state.screen='login';SESSION.clear();render()};
+  const lo=document.getElementById('logoutBtn');if(lo)lo.onclick=()=>{
+    if(state.user&&state.user!=='__guest__')loginTracker.endSession(state.user);
+    // 管理者トークン破棄（サーバー側も無効化）
+    const adminToken=ADMIN_TOKEN.get();
+    if(adminToken){apiPost({action:'adminLogout',token:adminToken}).catch(()=>{});ADMIN_TOKEN.clear()}
+    state.user=null;state.loginClass=null;state.screen='login';SESSION.clear();render();
+  };
 
   document.querySelectorAll('.cat-btn').forEach(b=>{b.onclick=()=>{state.selectedCategory=b.dataset.cat;render()}});
   // ゲームプレイ記録
@@ -1326,7 +1383,7 @@ function bindEvents(){
     activityLog.add('coin', player, `${gameName} で ${amount} ALT獲得`);
     showToast(`🪙 ${player}に${amount}ALT付与！`);render();
     // API送信
-    await apiPost({action:'addCoin',player,gameId,gameName,amount});
+    await adminApiPost({action:'addCoin',player,gameId,gameName,amount});
   };
 
   // Add player
@@ -1341,7 +1398,7 @@ function bindEvents(){
     state.players.push({name,className});
     activityLog.add('player', name, `新規登録（${className}）`);
     showToast(`✅ ${name}（${className}）を追加`);render();
-    const res=await apiPost({action:'addPlayer',name,className});
+    const res=await adminApiPost({action:'addPlayer',name,className});
     if(res&&res.error)showToast('⚠️ '+res.error);
   };
 
@@ -1352,7 +1409,7 @@ function bindEvents(){
     state.badges[player]=(state.badges[player]||0)+1;
     activityLog.add('badge', player, `バッジ付与（計${state.badges[player]}個）`);
     showToast(`🏅 ${player}にバッジ付与！（計${state.badges[player]}個）`);render();
-    await apiPost({action:'addBadge',player});
+    await adminApiPost({action:'addBadge',player});
   };
 
   // Add game
@@ -1369,7 +1426,7 @@ function bindEvents(){
     state.games.push({id:newGameId,name,emoji,url,category});
     activityLog.add('game', name, `新しいゲーム追加（${category}）`);
     showToast(`✅ ${emoji} ${name}を追加しました`);render();
-    const res=await apiPost({action:'addGame',name,emoji,url,category});
+    const res=await adminApiPost({action:'addGame',name,emoji,url,category});
     if(res&&res.id){
       // APIから返ったIDでローカルを更新
       const g=state.games.find(g=>g.id===newGameId);
@@ -1381,7 +1438,7 @@ function bindEvents(){
   document.querySelectorAll('.delete-btn[data-gameid]').forEach(b=>{
     b.onclick=async()=>{const gid=parseInt(b.dataset.gameid);if(!confirm('このゲームを削除しますか？'))return;
       state.games=state.games.filter(g=>g.id!==gid);showToast('🗑️ 削除しました');render();
-      await apiPost({action:'deleteGame',gameId:gid});
+      await adminApiPost({action:'deleteGame',gameId:gid});
     };
   });
 
@@ -1392,7 +1449,7 @@ function bindEvents(){
       if(!confirm(`「${player}」の記録を削除しますか？`))return;
       state.rankings=state.rankings.filter(r=>!(r.gameId===gid&&r.player===player));
       showToast(`🗑️ ${player}の記録を削除`);render();
-      await apiPost({action:'deleteRankingEntry',gameId:gid,player});
+      await adminApiPost({action:'deleteRankingEntry',gameId:gid,player});
     };
   });
 
@@ -1406,7 +1463,7 @@ function bindEvents(){
       const g=state.games.find(g=>g.id===gid);
       if(g)g.url=url;
       showToast('✅ URL保存しました');render();
-      await apiPost({action:'updateGameUrl',gameId:gid,url});
+      await adminApiPost({action:'updateGameUrl',gameId:gid,url});
     };
   });
 
@@ -1418,7 +1475,7 @@ function bindEvents(){
     if(clsErr){showToast('⚠️ '+clsErr);return}
     if(state.classes.includes(name)){showToast('⚠️ すでにあります');return}
     state.classes.push(name);showToast(`🏫 ${name}を追加`);render();
-    await apiPost({action:'addClass',className:name});
+    await adminApiPost({action:'addClass',className:name});
   };
 
   // Delete class
@@ -1427,7 +1484,7 @@ function bindEvents(){
       const count=state.players.filter(p=>p.className===cls).length;
       if(!confirm(`「${cls}」を削除しますか？${count>0?`\n（${count}名の生徒がこのクラスに所属しています）`:''}`))return;
       state.classes=state.classes.filter(c=>c!==cls);showToast('🗑️ 削除');render();
-      await apiPost({action:'deleteClass',className:cls});
+      await adminApiPost({action:'deleteClass',className:cls});
     };
   });
 
