@@ -365,6 +365,76 @@
     color: var(--text);
   }
 
+  /* ===== F3: 複数月アコーディオン ===== */
+  .comment-latest {
+    /* 最新月：通常カード（teacher-card スタイルを継承） */
+  }
+
+  .comment-history {
+    margin-top: 10px;
+  }
+
+  .comment-history-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    background: rgba(245, 166, 35, 0.08);
+    border: 1.5px solid #FFE082;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #9E6B00;
+    user-select: none;
+    transition: background 0.2s;
+  }
+  .comment-history-toggle:hover {
+    background: rgba(245, 166, 35, 0.14);
+  }
+  .comment-history-toggle .toggle-arrow {
+    font-size: 0.75rem;
+    transition: transform 0.25s ease;
+    display: inline-block;
+  }
+  .comment-history-toggle.open .toggle-arrow {
+    transform: rotate(180deg);
+  }
+
+  .comment-history-body {
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 8px;
+    overflow: hidden;
+  }
+  .comment-history-body.open {
+    display: flex;
+    animation: slideDown 0.25s ease;
+  }
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .comment-history-item {
+    background: #FFFDE7;
+    border: 1px solid #FFE082;
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+  }
+  .comment-history-item .month-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+  .comment-history-item .comment-body {
+    font-size: 0.9rem;
+    line-height: 1.75;
+    color: var(--text);
+  }
+
   /* ===== Home hints ===== */
   .hint-card {
     background: var(--primary-light);
@@ -417,6 +487,7 @@
     .hero { color-adjust: exact; -webkit-print-color-adjust: exact; }
     .badge-chip { border: 1px solid #ccc; }
     .footer { display: none; }
+    .comment-history-body { display: flex !important; }
   }
 </style>
 </head>
@@ -497,18 +568,98 @@
     </div>
   </div>
 
-  <!-- ④ 先生からの一言 -->
+  <!-- ④ 先生からの一言（F3: 複数月アコーディオン） -->
   <div class="section" id="teacherSection" style="display:none">
     <div class="section-title"><span class="emoji">✉️</span> 先生からの一言</div>
-    <div class="card teacher-card">
+
+    <!-- 最新月: 常に表示 -->
+    <div class="card teacher-card" id="teacherLatest">
       <div class="icon-row">
         <span class="emoji">👩‍🏫</span>
-        <span class="label">TRAIL の先生より</span>
+        <span class="label" id="teacherLatestMonth">TRAIL の先生より</span>
       </div>
       <div class="comment-text" id="teacherComment"></div>
     </div>
+
+    <!-- 過去月アコーディオン（2件以上あるとき表示） -->
+    <div class="comment-history" id="commentHistory" style="display:none">
+      <button class="comment-history-toggle" id="historyToggle" aria-expanded="false">
+        <span>📂 過去のコメントを見る</span>
+        <span class="toggle-arrow">▼</span>
+      </button>
+      <div class="comment-history-body" id="historyBody">
+        <!-- filled by JS -->
+      </div>
+    </div>
+  </div>
+<!-- ============================================================
+  F4: parent.html の <!-- ④.5 AI分析コメント --> セクションを
+  以下のHTMLで丸ごと置き換えてください
+  ============================================================ -->
+
+<!-- ④.5 AI先生の分析（F4: 朝/夜定時 + 手動） -->
+<div class="section" id="aiSection">
+  <div class="section-title"><span class="emoji">🤖</span> AI先生の分析</div>
+
+  <!-- 朝のコメント（6:00配信） -->
+  <div id="aiMorningCard" style="display:none; margin-bottom:12px">
+    <div class="card" style="background:linear-gradient(135deg,#FFF8E1,#FFFDE7);border:1.5px solid #FFE082">
+      <div style="font-size:0.75rem;font-weight:700;color:#9E6B00;margin-bottom:6px">🌅 朝の提案（6:00更新）</div>
+      <div style="font-weight:700;color:#E65100;font-size:1rem;margin-bottom:6px" id="aiMorningHighlight"></div>
+      <div style="font-size:0.88rem;color:var(--text);line-height:1.6" id="aiMorningComment"></div>
+    </div>
   </div>
 
+  <!-- 夜のコメント（19:00配信） -->
+  <div id="aiEveningCard" style="display:none; margin-bottom:12px">
+    <div class="card" style="background:linear-gradient(135deg,#EDE7F6,#F3E5F5);border:1.5px solid #CE93D8">
+      <div style="font-size:0.75rem;font-weight:700;color:#6A1B9A;margin-bottom:6px">🌙 夜のまとめ（19:00更新）</div>
+      <div style="font-weight:700;color:#4A148C;font-size:1rem;margin-bottom:6px" id="aiEveningHighlight"></div>
+      <div style="font-size:0.88rem;color:var(--text);line-height:1.6" id="aiEveningComment"></div>
+    </div>
+  </div>
+
+  <!-- 手動AI分析 -->
+  <div class="card" id="aiCard" style="background:linear-gradient(135deg,#f0f9ff,#e8f4f8);border:1.5px solid rgba(43,158,143,0.2)">
+    <div id="aiContent" style="display:none">
+      <div style="font-size:0.75rem;font-weight:700;color:var(--primary);margin-bottom:6px">🤖 AI分析（手動）</div>
+      <div style="font-weight:700;color:var(--primary);font-size:1.05rem;margin-bottom:8px" id="aiHighlight"></div>
+      <div style="color:var(--text-body);font-size:0.9rem;line-height:1.6" id="aiComment"></div>
+    </div>
+    <div id="aiPlaceholder" style="text-align:center;padding:10px 0">
+      <div style="color:var(--text-muted);font-size:0.85rem;margin-bottom:12px">AIがお子さんの学習データを分析して、<br>パーソナライズされたコメントを生成します</div>
+      <button id="generateAiBtn" style="background:linear-gradient(135deg,#2B9E8F,#3BB0A1);color:#fff;border:none;border-radius:24px;padding:12px 28px;font-family:inherit;font-size:0.9rem;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(43,158,143,0.25);transition:all 0.3s">
+        🤖 AI分析を実行
+      </button>
+    </div>
+    <div id="aiLoading" style="display:none;text-align:center;padding:16px 0">
+      <div style="font-size:1.5rem;animation:spin 1s linear infinite;display:inline-block">🔄</div>
+      <div style="color:var(--text-muted);font-size:0.85rem;margin-top:8px">AIが分析中...</div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
   <!-- ④.5 AI分析コメント -->
   <div class="section" id="aiSection">
     <div class="section-title"><span class="emoji">🤖</span> AI先生の分析</div>
@@ -566,6 +717,11 @@
     }
     const data = await res.json();
     render(data);
+
+    // F3: 生徒IDが取れたら複数月コメント履歴を非同期で取得
+    if (data.student && data.student.id) {
+      fetchTeacherComments(data.student.id);
+    }
   } catch (e) {
     console.error(e);
     showError('サーバーに接続できませんでした。インターネット接続をご確認ください。');
@@ -576,6 +732,75 @@ function showError(msg) {
   document.getElementById('loading').style.display = 'none';
   document.getElementById('error').style.display = 'flex';
   document.getElementById('error-msg').innerHTML = msg;
+}
+
+// ===== F3: 複数月コメント取得 & アコーディオン描画 =====
+async function fetchTeacherComments(studentId) {
+  try {
+    const res = await fetch(`/api/teacher-comments/${studentId}`);
+    if (!res.ok) return;
+    const data = await res.json();
+
+    // APIは配列 or { comments: [] } で返ってくる想定
+    const allComments = Array.isArray(data) ? data : (data.comments || []);
+    if (!allComments || allComments.length === 0) return;
+
+    // month 降順（新しい順）でソート
+    allComments.sort((a, b) => (b.month || '').localeCompare(a.month || ''));
+
+    const latest = allComments[0];
+    const past   = allComments.slice(1);
+
+    // 最新月を表示
+    document.getElementById('teacherSection').style.display = 'block';
+    document.getElementById('teacherLatestMonth').textContent =
+      formatMonth(latest.month) + ' の先生より';
+    document.getElementById('teacherComment').textContent = latest.comment;
+
+    // 過去月がある場合はアコーディオン表示
+    if (past.length > 0) {
+      const historyEl = document.getElementById('commentHistory');
+      const bodyEl    = document.getElementById('historyBody');
+      const toggleEl  = document.getElementById('historyToggle');
+
+      bodyEl.innerHTML = past.map(c => `
+        <div class="comment-history-item">
+          <div class="month-label">📅 ${formatMonth(c.month)}</div>
+          <div class="comment-body">${escHtml(c.comment)}</div>
+        </div>
+      `).join('');
+
+      historyEl.style.display = 'block';
+
+      // アコーディオン開閉
+      toggleEl.addEventListener('click', () => {
+        const isOpen = bodyEl.classList.toggle('open');
+        toggleEl.classList.toggle('open', isOpen);
+        toggleEl.setAttribute('aria-expanded', isOpen);
+        toggleEl.querySelector('span:first-child').textContent =
+          isOpen ? '📂 過去のコメントを閉じる' : '📂 過去のコメントを見る';
+      });
+    }
+  } catch (e) {
+    console.warn('teacher-comments fetch failed:', e);
+    // 取得失敗してもダッシュボード全体には影響しない
+  }
+}
+
+function formatMonth(monthStr) {
+  // 'YYYY-MM' → '2025年12月'
+  if (!monthStr) return '先月';
+  const [y, m] = monthStr.split('-');
+  if (!y || !m) return monthStr;
+  return `${y}年${parseInt(m)}月`;
+}
+
+function escHtml(s) {
+  return String(s || '')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
 }
 
 function render(d) {
@@ -719,7 +944,6 @@ function render(d) {
     // Game list
     const gameList = document.getElementById('gameList');
     gameList.innerHTML = d.byGame.map(g => {
-      const maxAcc = Math.max(...(g.accuracy_trend || [0]), 1);
       const sparkBars = (g.accuracy_trend || []).map(v =>
         `<div class="spark-bar" style="height:${Math.max((v / 100) * 24, 3)}px"></div>`
       ).join('');
@@ -742,11 +966,11 @@ function render(d) {
       '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:0.9rem">まだプレイ記録がありません</div>';
   }
 
-  // ===== Teacher Comment =====
-  const comment = d.teacherComment || (d.aiComment && d.aiComment.comment);
-  if (comment) {
+  // ===== Teacher Comment (初期表示: d.teacherComment フォールバック) =====
+  // ※ fetchTeacherComments() が成功すれば上書きされる
+  if (d.teacherComment) {
     document.getElementById('teacherSection').style.display = 'block';
-    document.getElementById('teacherComment').textContent = comment;
+    document.getElementById('teacherComment').textContent = d.teacherComment;
   }
 
   // ===== AI Comment (cached) =====

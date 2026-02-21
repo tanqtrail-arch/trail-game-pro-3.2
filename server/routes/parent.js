@@ -335,8 +335,19 @@ router.get('/parent/:token', (req, res) => {
         highlight: aiCache.highlight,
         comment: aiCache.comment,
         home_hints: aiCache.home_hints ? JSON.parse(aiCache.home_hints) : []
-      } : null
-    });
+} : null,
+      scheduledComments: (() => {
+        const today = new Date().toISOString().split('T')[0];
+        return db.prepare(
+          `SELECT type, highlight, comment, home_hints FROM ai_comments
+           WHERE student_id = ? AND tenant_id = ? AND date = ?
+           AND type IN ('morning', 'evening')
+           ORDER BY created_at DESC`
+        ).all(student_id, tenant_id, today).map(r => ({
+          ...r,
+          home_hints: r.home_hints ? JSON.parse(r.home_hints) : []
+        }));
+      })()    });
   } catch (err) {
     console.error('Parent dashboard error:', err);
     res.status(500).json({ error: err.message });
@@ -568,4 +579,210 @@ JSONのみ出力してください。マークダウンのバッククォート�
   }
 });
 
+// ============================================================
+// F4: 定時AI自動配信 — parent.js に追加するコード
+// 既存の module.exports = router; の直前に貼り付ける
+// ============================================================
+
+// ============================================================
+// cronエンドポイント共通: 生徒データ収集 & AI呼び出し
+// ============================================================
+async function generateScheduledComment(tenantId, studentId, type, ANTHROPIC_API_KEY) {
+  const now = new Date();
+  const today = now.toISOString().split('T')[0];
+
+  // 既存キャッシュ確認（同日・同typeなら再生成しない）
+  const cached = db.prepare(
+    'SELECT * FROM ai_comments WHERE student_id = ? AND tenant_id = ? AND date = ? AND type = ?'
+  ).get(studentId, tenantId, today, type);
+  if (cached) return { skipped: true };
+
+  // 生徒情報
+  const student = db.prepare('SELECT * FROM students WHERE id = ?').get(studentId);
+  if (!student) return { error: 'student not found' };
+
+  // 今月統計
+  const thisMonthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+  const monthlyStats = db.prepare(`
+    SELECT COUNT(*) as total_plays,
+      COALESCE(SUM(duration_seconds), 0) as total_seconds,
+      ROUND(AVG(CASE WHEN total_count > 0 THEN correct_count * 100.0 / total_count END), 1) as avg_accuracy
+    FROM play_sessions WHERE student_id = ? AND tenant_id = ? AND started_at >= ?
+  `).get(studentId, tenantId, thisMonthStart);
+
+  // 今日のデータ（夜用）
+  const todayStats = db.prepare(`
+    SELECT COUNT(*) as plays,
+      COALESCE(SUM(duration_seconds), 0) as seconds,
+      ROUND(AVG(CASE WHEN total_count > 0 THEN correct_count * 100.0 / total_count END), 1) as accuracy
+    FROM play_sessions WHERE student_id = ? AND tenant_id = ? AND date(started_at) = ?
+  `).get(studentId, tenantId, today);
+
+  // ゲーム別
+  const byGame = db.prepare(`
+    SELECT g.name, g.emoji, COUNT(*) as plays,
+      ROUND(AVG(CASE WHEN ps.total_count > 0 THEN ps.correct_count * 100.0 / ps.total_count END), 1) as avg_accuracy
+    FROM play_sessions ps JOIN games g ON ps.game_id = g.id
+    WHERE ps.student_id = ? AND ps.tenant_id = ? AND ps.started_at >= ?
+    GROUP BY g.id ORDER BY plays DESC LIMIT 5
+  `).all(studentId, tenantId, thisMonthStart);
+
+  const gameInfo = byGame.length > 0
+    ? byGame.map(g => `${g.emoji}${g.name}: ${g.plays}回プレイ, 正答率${g.avg_accuracy || '-'}%`).join(', ')
+    : 'まだゲームのプレイ記録がありません';
+
+  const totalMin = Math.round((monthlyStats.total_seconds || 0) / 60);
+  const todayMin = Math.round((todayStats.seconds || 0) / 60);
+
+  // プロンプト分岐
+  let prompt;
+  if (type === 'morning') {
+    prompt = `あなたは探究教室TRAILの先生AIです。以下の生徒の最近のプレイデータから、今日おすすめの学習内容を保護者向けに提案してください。
+
+【生徒情報】
+名前: ${student.name}
+今月のプレイ回数: ${monthlyStats.total_plays || 0}回
+今月の学習時間: ${totalMin}分
+平均正答率: ${monthlyStats.avg_accuracy || '-'}%
+今月プレイしたゲーム: ${gameInfo}
+
+以下のJSON形式のみで回答してください。日本語で、保護者が読んで嬉しくなる内容にしてください:
+{
+  "type": "morning",
+  "highlight": "🌅 今日のおすすめ（15文字以内）",
+  "comment": "今日の学習提案（80文字以内。具体的なゲーム名を使い、お子さんの頑張りを伸ばす提案）",
+  "home_hints": ["今日家でできること（30文字以内）", "もう一つのヒント（30文字以内）"]
+}
+
+JSONのみ出力してください。マークダウンのバッククォートは不要です。`;
+  } else {
+    prompt = `あなたは探究教室TRAILの先生AIです。以下の生徒の今日のプレイデータから、1日の振り返りと明日への提案を保護者向けに作ってください。
+
+【生徒情報】
+名前: ${student.name}
+今日のプレイ回数: ${todayStats.plays || 0}回
+今日の学習時間: ${todayMin}分
+今日の正答率: ${todayStats.accuracy || '-'}%
+今月プレイしたゲーム: ${gameInfo}
+
+以下のJSON形式のみで回答してください。日本語で、保護者が読んで嬉しくなる内容にしてください:
+{
+  "type": "evening",
+  "highlight": "🌙 今日のふりかえり（15文字以内）",
+  "comment": "今日の振り返り＋明日への一言（80文字以内。今日の頑張りを具体的に褒め、明日への期待を込める）",
+  "home_hints": ["今夜おうちでできること（30文字以内）", "明日に向けた一言（30文字以内）"]
+}
+
+JSONのみ出力してください。マークダウンのバッククォートは不要です。`;
+  }
+
+  // Anthropic API呼び出し
+  const apiRes = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': ANTHROPIC_API_KEY,
+      'anthropic-version': '2023-06-01'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 500,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+
+  if (!apiRes.ok) {
+    const errText = await apiRes.text();
+    throw new Error(`Anthropic API error: ${apiRes.status} ${errText}`);
+  }
+
+  const apiData = await apiRes.json();
+  const rawText = (apiData.content || []).map(c => c.text || '').join('');
+
+  let aiResult;
+  try {
+    const cleaned = rawText.replace(/```json|```/g, '').trim();
+    aiResult = JSON.parse(cleaned);
+  } catch (parseErr) {
+    // フォールバック
+    aiResult = {
+      type,
+      highlight: type === 'morning' ? '🌅 今日も頑張ろう！' : '🌙 よく頑張りました！',
+      comment: `${student.name}さん、${type === 'morning' ? '今日も楽しく学びましょう！' : '今日もよく頑張りました！'}`,
+      home_hints: ['「今日TRAILで何やったの？」と聞いてみてください', 'ゲームの話を一緒に楽しんでください']
+    };
+  }
+
+  // DB保存（type カラム付き）
+  db.prepare(
+    'INSERT INTO ai_comments (tenant_id, student_id, date, type, highlight, comment, home_hints) VALUES (?, ?, ?, ?, ?, ?, ?)'
+  ).run(tenantId, studentId, today, type, aiResult.highlight, aiResult.comment, JSON.stringify(aiResult.home_hints || []));
+
+  return { ok: true, studentId, name: student.name };
+}
+
+// ============================================================
+// POST /api/cron/morning-ai?secret=CRON_SECRET
+// ============================================================
+router.post('/cron/morning-ai', async (req, res) => {
+  const CRON_SECRET = process.env.CRON_SECRET;
+  if (!CRON_SECRET || req.query.secret !== CRON_SECRET) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
+  if (!ANTHROPIC_API_KEY) {
+    return res.status(500).json({ error: 'ANTHROPIC_API_KEY not configured' });
+  }
+
+  // アクティブ全生徒を取得
+  const students = db.prepare(
+    'SELECT s.id, s.tenant_id FROM students s JOIN tenants t ON s.tenant_id = t.id WHERE t.is_active = 1 OR t.is_active IS NULL'
+  ).all();
+
+  const results = [];
+  for (const s of students) {
+    try {
+      const r = await generateScheduledComment(s.tenant_id, s.id, 'morning', ANTHROPIC_API_KEY);
+      results.push({ studentId: s.id, ...r });
+    } catch (e) {
+      results.push({ studentId: s.id, error: e.message });
+    }
+  }
+
+  console.log(`[CRON] morning-ai: ${students.length}人処理`, results.filter(r => r.ok).length + '件生成');
+  res.json({ type: 'morning', total: students.length, results });
+});
+
+// ============================================================
+// POST /api/cron/evening-ai?secret=CRON_SECRET
+// ============================================================
+router.post('/cron/evening-ai', async (req, res) => {
+  const CRON_SECRET = process.env.CRON_SECRET;
+  if (!CRON_SECRET || req.query.secret !== CRON_SECRET) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
+  if (!ANTHROPIC_API_KEY) {
+    return res.status(500).json({ error: 'ANTHROPIC_API_KEY not configured' });
+  }
+
+  const students = db.prepare(
+    'SELECT s.id, s.tenant_id FROM students s JOIN tenants t ON s.tenant_id = t.id WHERE t.is_active = 1 OR t.is_active IS NULL'
+  ).all();
+
+  const results = [];
+  for (const s of students) {
+    try {
+      const r = await generateScheduledComment(s.tenant_id, s.id, 'evening', ANTHROPIC_API_KEY);
+      results.push({ studentId: s.id, ...r });
+    } catch (e) {
+      results.push({ studentId: s.id, error: e.message });
+    }
+  }
+
+  console.log(`[CRON] evening-ai: ${students.length}人処理`, results.filter(r => r.ok).length + '件生成');
+  res.json({ type: 'evening', total: students.length, results });
+});
 module.exports = router;
