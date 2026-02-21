@@ -208,8 +208,8 @@ function login() {
       if (r.ok) {
         document.getElementById('loginArea').style.display = 'none';
         document.getElementById('mainArea').style.display = 'block';
-       loadTenants(); loadGames();loadTenants(); loadGames(); initDashboard();
-      } else {
+loadTenants(); loadGames(); initDashboard();     
+ } else {
         document.getElementById('loginError').textContent = '認証失敗。メールとパスワードを確認してください。';
       }
     });
@@ -334,7 +334,7 @@ function deleteGame(id, tenantId, name) {
     headers: { 'x-super-admin': authHeader, 'Content-Type': 'application/json' },
     body: JSON.stringify({ tenantId })
   }).then(() => { alert('削除しました'); loadGames(); });
-}}
+}
 </script>
 <script>
 // ===== ダッシュボード =====
