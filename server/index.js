@@ -204,8 +204,7 @@ try {
 db.exec(`
   CREATE INDEX IF NOT EXISTS idx_ai_type
   ON ai_comments(tenant_id, student_id, date, type)
-`););
-
+`);
 // 保護者ダッシュボード用インデックス
 db.exec(`
   CREATE INDEX IF NOT EXISTS idx_pt_token ON parent_tokens(token);
