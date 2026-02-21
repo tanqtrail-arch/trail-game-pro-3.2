@@ -715,8 +715,8 @@ JSONのみ出力してください。マークダウンのバッククォート�
 
   // DB保存（type カラム付き）
   db.prepare(
-'INSERT OR REPLACE INTO ai_comments (tenant_id, student_id, date, type, highlight, comment, home_hints) VAL  ).run(tenantId, studentId, today, type, aiResult.highlight, aiResult.comment, JSON.stringify(aiResult.home_hints || []));
-).run(tenantId, studentId, today, type, aiResult.highlight, aiResult.comment, JSON.stringify(aiResult.home_hints || []));
+'INSERT OR REPLACE INTO ai_comments (tenant_id, student_id, date, type, highlight, comment, home_hints) VALUES (?, ?, ?, ?, ?, ?, ?)'
+  ).run(tenantId, studentId, today, type, aiResult.highlight, aiResult.comment, JSON.stringify(aiResult.home_hints || []));
   return { ok: true, studentId, name: student.name };
 }
 
