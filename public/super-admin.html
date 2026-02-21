@@ -368,8 +368,7 @@ function switchDashTab(tab) {
 // テナント選択肢を埋める
 async function populateTenantSelects() {
   try {
-    const res = await fetch(API + '/api/super/tenants', { headers: superHeaders() });
-    const tenants = await res.json();
+const res = await fetch(API + '/api/super/tenants', { headers: { 'x-super-admin': authHeader } });    const tenants = await res.json();
     ['dashTenantSelect', 'dashGameTenantSelect', 'exportTenant'].forEach(id => {
       const sel = document.getElementById(id);
       if (!sel) return;
