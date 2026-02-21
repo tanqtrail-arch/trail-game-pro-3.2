@@ -174,7 +174,8 @@ const gamePlayTracker={KEY:'trail_saas_gameplay',sessions:[],currentPlay:null,lo
 gamePlayTracker.load();
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&gamePlayTracker.currentPlay)gamePlayTracker.endPlay()});
 window.addEventListener('beforeunload',()=>gamePlayTracker.endPlay());
-let S={screen:'landing',tenant:null,user:null,token:null,games:[],classes:[],students:[],coinLogs:[],badges:[],rankings:[],adminTab:'activity',portalTab:'home',selectedCategory:'すべて',selectedRankGame:null,loginClass:null,loading:false,dashboard:null,loginLogs:[],gameplay:null};
+// ★ PATCH 1: parentTokens:null を追加
+let S={screen:'landing',tenant:null,user:null,token:null,games:[],classes:[],students:[],coinLogs:[],badges:[],rankings:[],adminTab:'activity',portalTab:'home',selectedCategory:'すべて',selectedRankGame:null,loginClass:null,loading:false,dashboard:null,loginLogs:[],gameplay:null,parentTokens:null};
 (function restore(){const d=AUTH.load();if(!d)return;S.token=d.token;S.tenant=d.tenant;S.user=d.user;S.screen=d.screen||'landing'})();
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
 function createStars(){const c=document.getElementById('stars');for(let i=0;i<50;i++){const s=document.createElement('div');s.className='star';s.style.left=Math.random()*100+'%';s.style.top=Math.random()*100+'%';s.style.animationDelay=Math.random()*3+'s';s.style.animationDuration=(2+Math.random()*3)+'s';s.style.width=s.style.height=(1+Math.random()*2)+'px';c.appendChild(s)}}
@@ -182,6 +183,8 @@ async function loadTenantData(){if(!S.tenant)return;const slug=S.tenant.slug;S.l
 async function loadDashboard(){if(!S.tenant)return;try{S.dashboard=await apiGet('/t/'+S.tenant.slug+'/analytics/dashboard')}catch(e){}}
 async function loadLoginLogs(){if(!S.tenant)return;try{const r=await apiGet('/t/'+S.tenant.slug+'/analytics/logins');S.loginLogs=r.logs||[]}catch(e){}}
 async function loadGameplay(){if(!S.tenant)return;try{S.gameplay=await apiGet('/t/'+S.tenant.slug+'/analytics/gameplay')}catch(e){}}
+// ★ PATCH 4: loadParentTokens 追加
+async function loadParentTokens(){if(!S.tenant)return;try{const tokens=await apiGet('/parent-tokens?tenant_id='+encodeURIComponent(S.tenant.id));S.parentTokens=Array.isArray(tokens)?tokens:[]}catch(e){S.parentTokens=[]}render()}
 function getStudentCoins(name){return S.coinLogs.filter(l=>l.student_name===name).reduce((s,l)=>s+l.amount,0)}
 function getStudentGameCoins(name,gid){return S.coinLogs.filter(l=>l.student_name===name&&l.game_id===gid).reduce((s,l)=>s+l.amount,0)}
 function getStudentBadges(name){const b=S.badges.find(b=>b.student_name===name);return b?b.badge_count:0}
@@ -231,7 +234,21 @@ function renderAdminSummary(){
       </div>
       <div style="margin-top:10px;font-size:.7rem;color:var(--text-dim)">テンプレート（タップで入力）：</div>
       <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px">${tplBtns}</div>
-    </div>`;
+    </div>
+    ${renderTokenList()}`;
+}
+
+// ★ PATCH 2: renderTokenList 関数
+function renderTokenList(){
+  if(S.parentTokens===null){loadParentTokens();return`<div style="margin-top:20px;padding:16px;background:var(--bg-card);border:1.5px solid rgba(0,0,0,0.06);border-radius:14px"><div style="font-family:'Orbitron',sans-serif;font-size:.7rem;color:var(--accent-cyan);margin-bottom:8px">📩 発行済み保護者リンク</div><div style="color:var(--text-dim);font-size:.8rem;text-align:center;padding:12px">読み込み中...</div></div>`}
+  const tokens=S.parentTokens;
+  const rows=tokens.length?tokens.map(t=>{
+    const url=location.origin+'/parent.html?token='+t.token;
+    const created=t.created_at?new Date(t.created_at).toLocaleDateString('ja-JP'):'—';
+    const expires=t.expires_at?new Date(t.expires_at).toLocaleDateString('ja-JP'):'無期限';
+    return`<div style="display:grid;grid-template-columns:1fr auto auto auto;gap:6px;align-items:center;padding:8px 10px;background:rgba(0,0,0,0.02);border-radius:8px;margin-bottom:6px;font-size:.8rem"><div><span style="font-weight:700;color:var(--text-primary)">${esc(t.student_name||'ID:'+t.student_id)}</span><span style="font-size:.65rem;color:var(--text-dim);margin-left:6px">${created}発行 / ${expires}</span></div><button data-copy-token="${esc(url)}" style="background:rgba(0,144,217,0.08);color:var(--accent-cyan);border:1px solid rgba(0,144,217,0.2);border-radius:4px;padding:3px 8px;font-size:.65rem;cursor:pointer">📋</button><a href="${esc(url)}" target="_blank" style="background:rgba(44,181,98,0.08);color:var(--accent-green);border:1px solid rgba(44,181,98,0.2);border-radius:4px;padding:3px 8px;font-size:.65rem;text-decoration:none">👁</a><button data-revoke-token="${t.id}" data-sname="${esc(t.student_name||'')}" style="background:rgba(224,80,112,0.06);color:var(--accent-pink);border:1px solid rgba(224,80,112,0.2);border-radius:4px;padding:3px 8px;font-size:.65rem;cursor:pointer">🗑</button></div>`;
+  }).join(''):`<div style="color:var(--text-dim);font-size:.8rem;text-align:center;padding:12px">発行済みリンクはありません</div>`;
+  return`<div style="margin-top:20px;padding:16px;background:var(--bg-card);border:1.5px solid rgba(0,0,0,0.06);border-radius:14px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><div style="font-family:'Orbitron',sans-serif;font-size:.7rem;color:var(--accent-cyan)">📩 発行済み保護者リンク（${tokens.length}件）</div><button id="refreshTokensBtn" style="background:none;color:var(--text-dim);border:1px solid rgba(0,0,0,0.08);border-radius:6px;padding:3px 10px;font-size:.65rem;cursor:pointer">🔄 更新</button></div>${rows}</div>`;
 }
 
 function renderAdminLoginLog(){if(!S.loginLogs.length){loadLoginLogs().then(()=>render());return'<div class="no-data">読み込み中...</div>'}const active=S.loginLogs.filter(l=>!l.logout_at);const onlineHtml=active.length?active.map(s=>{const dur=formatDurationFromDate(s.login_at);return`<div class="online-chip"><span class="online-dot"></span>${esc(s.student_name)}<span style="font-size:.65rem;color:var(--text-dim)">${esc(s.class_name)}</span><span class="duration-badge">${dur}</span></div>`}).join(''):'<div style="color:var(--text-dim);font-size:.85rem">現在オンラインのユーザーはいません</div>';const rows=S.loginLogs.slice(0,100).map(s=>{const dur=s.duration_seconds?formatSeconds(s.duration_seconds):(s.logout_at?'—':`<span style="color:var(--accent-green)">滞在中</span>`);return`<tr><td>${esc(s.student_name)}</td><td><span style="font-size:.75rem;color:var(--text-dim)">${esc(s.class_name)}</span></td><td style="font-size:.8rem">${esc(s.login_at||'')}</td><td style="font-size:.8rem">${s.logout_at?esc(s.logout_at):'—'}</td><td class="duration-badge">${dur}</td></tr>`}).join('');return`<div class="section-title">🟢 現在オンライン（${active.length}名）</div><div class="online-list">${onlineHtml}</div><div class="section-title">📋 入退室ログ</div><div class="tbl-wrap"><table><tr><th>名前</th><th>クラス</th><th>入室</th><th>退室</th><th>滞在時間</th></tr>${rows||'<tr><td colspan="5" class="no-data">まだログイン記録がありません</td></tr>'}</table></div>`}
@@ -256,7 +273,8 @@ function bindEvents(){
   document.querySelectorAll('.cat-btn:not(.comment-tpl)').forEach(b=>{b.onclick=()=>{S.selectedCategory=b.dataset.cat;render()}});
   document.querySelectorAll('.game-rank-tab').forEach(t=>{t.onclick=()=>{S.selectedRankGame=parseInt(t.dataset.rgid);render()}});
   document.querySelectorAll('.game-card[href]').forEach(a=>{a.addEventListener('click',()=>{const gid=a.dataset.gid;const g=S.games.find(g=>String(g.id)===gid);if(g&&S.user)gamePlayTracker.startPlay(S.user.name,g.id,g.name)})});
-  document.querySelectorAll('.admin-tab').forEach(t=>{t.onclick=()=>{S.adminTab=t.dataset.tab;S.dashboard=null;render()}});
+  // ★ PATCH 5: summary以外のタブ切り替え時にparentTokensをリセット
+  document.querySelectorAll('.admin-tab').forEach(t=>{t.onclick=()=>{S.adminTab=t.dataset.tab;S.dashboard=null;if(t.dataset.tab!=='summary')S.parentTokens=null;render()}});
   on('refreshBtn','click',()=>{S.dashboard=null;loadTenantData()});
   on('addCoinBtn','click',async()=>{const sid=val('coinStudent'),gid=val('coinGame'),amt=parseInt(val('coinAmount'));if(!sid||!amt||amt<1)return;try{await apiPost('/t/'+S.tenant.slug+'/coins',{studentId:parseInt(sid),gameId:parseInt(gid),amount:amt});toast('🪙 ALT付与しました！');await loadTenantData()}catch(e){toast(e.message)}});
   on('addStudentBtn','click',async()=>{const name=val('newStudentName'),cls=val('newStudentClass');if(!name||!cls){toast('名前とクラスを入力');return}try{await apiPost('/t/'+S.tenant.slug+'/students',{name,className:cls});toast('✅ '+name+'を追加');await loadTenantData()}catch(e){toast(e.message)}});
@@ -283,6 +301,11 @@ function bindEvents(){
   document.querySelectorAll('.comment-tpl').forEach(b=>{b.onclick=()=>{
     const inp=document.getElementById('commentText');if(inp)inp.value=b.dataset.tpl;
   }});
+
+  // ★ PATCH 3: F2 トークン一覧イベントハンドラ
+  on('refreshTokensBtn','click',()=>{S.parentTokens=null;render()});
+  document.querySelectorAll('[data-copy-token]').forEach(b=>{b.onclick=async()=>{const url=b.dataset.copyToken;if(navigator.clipboard){await navigator.clipboard.writeText(url);toast('📋 URLをコピーしました')}else{prompt('URLをコピー:',url)}}});
+  document.querySelectorAll('[data-revoke-token]').forEach(b=>{b.onclick=async()=>{const id=b.dataset.revokeToken;const sname=b.dataset.sname||'この生徒';if(!confirm(sname+'の保護者リンクを無効化しますか？'))return;try{await apiDel('/parent-tokens/'+id);toast('🗑 '+sname+'の保護者リンクを無効化しました');S.parentTokens=null;render()}catch(e){toast('エラー: '+e.message)}}});
 
   // ★ NEW: 先生コメント保存
   on('saveCommentBtn','click',async()=>{
