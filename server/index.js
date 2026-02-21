@@ -143,7 +143,6 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_ps_tenant ON play_sessions(tenant_id);
   CREATE INDEX IF NOT EXISTS idx_ps_started ON play_sessions(started_at);
 `);
-  `);
   console.log('  Migrations: OK');
 
   // Seed demo tenant if no tenants exist
