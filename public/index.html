@@ -486,7 +486,9 @@ function renderPortal(){
 
 function renderPortalHome(){
   const cards=S.games.slice().reverse().map(g=>{
-    const hasUrl=g.url&&g.url.trim();const tag=hasUrl?'a':'div';const href=hasUrl?` href="${esc(g.url)}" target="_blank" rel="noopener"`:'';
+    const hasUrl=g.url&&g.url.trim();const tag=hasUrl?'a':'div';
+    const playerParam=S.user&&S.user.name?'?player='+encodeURIComponent(S.user.name):'';
+    const href=hasUrl?` href="${esc(g.url)}${playerParam}" target="_blank" rel="noopener"`:'';
     return`<${tag} class="game-card" data-gid="${g.id}"${href}><span class="game-emoji">${esc(g.emoji)}</span><div class="game-name">${esc(g.name)}</div>${g.category?`<span class="game-category-badge">${esc(g.category)}</span>`:''}<div class="game-link-hint">${hasUrl?'▶ タップでプレイ':'準備中...'}</div></${tag}>`;
   }).join('');
   return`<div class="section-title">🆕 NEW GAMES</div><div class="game-grid">${cards||'<div class="no-data">ゲームがまだありません</div>'}</div>`;
@@ -539,7 +541,9 @@ function renderPortalGames(){
   }).join('');
   const filtered=S.selectedCategory==='すべて'?S.games:S.games.filter(g=>g.category===S.selectedCategory);
   const cards=filtered.map(g=>{
-    const hasUrl=g.url&&g.url.trim();const tag=hasUrl?'a':'div';const href=hasUrl?` href="${esc(g.url)}" target="_blank" rel="noopener"`:'';
+    const hasUrl=g.url&&g.url.trim();const tag=hasUrl?'a':'div';
+    const playerParam=S.user&&S.user.name?'?player='+encodeURIComponent(S.user.name):'';
+    const href=hasUrl?` href="${esc(g.url)}${playerParam}" target="_blank" rel="noopener"`:'';
     return`<${tag} class="game-card" data-gid="${g.id}"${href}><span class="game-emoji">${esc(g.emoji)}</span><div class="game-name">${esc(g.name)}</div><div class="game-link-hint">${hasUrl?'▶ タップでプレイ':'準備中...'}</div></${tag}>`;
   }).join('');
   return`<div class="category-filter">${catBtns}</div><div class="game-grid">${cards}</div>`;
