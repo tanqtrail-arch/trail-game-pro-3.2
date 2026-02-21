@@ -86,4 +86,18 @@ router.get('/api/super/games', superAdminAuth, (req, res) => {
   `).all();
   res.json(games);
 });
+// ゲーム更新
+router.patch('/api/super/games/:id', superAdminAuth, (req, res) => {
+  const { name, emoji, category, url, tenantId } = req.body;
+  db.prepare("UPDATE games SET name=?, emoji=?, category=?, url=?, updated_at=datetime('now') WHERE id=? AND tenant_id=?")
+    .run(name, emoji, category, url || null, req.params.id, tenantId);
+  res.json({ success: true });
+});
+
+// ゲーム削除
+router.delete('/api/super/games/:id', superAdminAuth, (req, res) => {
+  const { tenantId } = req.body;
+  db.prepare('DELETE FROM games WHERE id=? AND tenant_id=?').run(req.params.id, tenantId);
+  res.json({ success: true });
+});
 module.exports = router;

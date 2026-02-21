@@ -67,8 +67,7 @@
   <h2>🎮 登録済みゲーム一覧</h2>
   <button onclick="loadGames()">🔄 更新</button>
   <table id="gameTable" style="margin-top:10px;">
-    <thead><tr><th>ゲーム名</th><th>絵文字</th><th>カテゴリ</th><th>URL</th><th>教室名</th></tr></thead>
-    <tbody id="gameBody"></tbody>
+<thead><tr><th>ゲーム名</th><th>絵文字</th><th>カテゴリ</th><th>URL</th><th>教室名</th><th>操作</th></tr></thead>    <tbody id="gameBody"></tbody>
   </table>
 </div>
 <script>
@@ -176,15 +175,40 @@ function loadGames() {
       games.forEach(g => {
         tbody.innerHTML += `
           <tr>
-            <td>${g.name}</td>
-            <td>${g.emoji}</td>
-            <td>${g.category || '-'}</td>
-            <td>${g.url ? `<a href="${g.url}" target="_blank" style="color:#00d4ff;">リンク</a>` : '-'}</td>
+            <td><input value="${g.name}" id="gname_${g.id}" style="width:120px;padding:4px;background:#0f3460;color:#fff;border:1px solid #444;border-radius:4px;"></td>
+            <td><input value="${g.emoji}" id="gemoji_${g.id}" style="width:50px;padding:4px;background:#0f3460;color:#fff;border:1px solid #444;border-radius:4px;"></td>
+            <td><input value="${g.category||''}" id="gcat_${g.id}" style="width:80px;padding:4px;background:#0f3460;color:#fff;border:1px solid #444;border-radius:4px;"></td>
+            <td><input value="${g.url||''}" id="gurl_${g.id}" style="width:150px;padding:4px;background:#0f3460;color:#fff;border:1px solid #444;border-radius:4px;"></td>
             <td>${g.tenant_name}</td>
+            <td>
+              <button onclick="updateGame('${g.id}','${g.tenant_id}')">保存</button>
+              <button class="danger" onclick="deleteGame('${g.id}','${g.tenant_id}','${g.name}')">削除</button>
+            </td>
           </tr>`;
       });
     });
 }
+
+function updateGame(id, tenantId) {
+  const name = document.getElementById('gname_' + id).value;
+  const emoji = document.getElementById('gemoji_' + id).value;
+  const category = document.getElementById('gcat_' + id).value;
+  const url = document.getElementById('gurl_' + id).value;
+  fetch('/api/super/games/' + id, {
+    method: 'PATCH',
+    headers: { 'x-super-admin': authHeader, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, emoji, category, url, tenantId })
+  }).then(() => { alert('更新しました！'); loadGames(); });
+}
+
+function deleteGame(id, tenantId, name) {
+  if (!confirm(`「${name}」を削除しますか？`)) return;
+  fetch('/api/super/games/' + id, {
+    method: 'DELETE',
+    headers: { 'x-super-admin': authHeader, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ tenantId })
+  }).then(() => { alert('削除しました'); loadGames(); });
+}}
 </script>
 </body>
 </html>
