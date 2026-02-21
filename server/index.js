@@ -194,7 +194,8 @@ db.exec(`
     FOREIGN KEY (tenant_id) REFERENCES tenants(id),
     FOREIGN KEY (student_id) REFERENCES students(id),
     UNIQUE(tenant_id, student_id, date)
-  )
+)
+`);
 // F4: type カラム追加（朝/夜/手動を区別）
 try {
   db.exec(`ALTER TABLE ai_comments ADD COLUMN type TEXT DEFAULT 'on_demand'`);
