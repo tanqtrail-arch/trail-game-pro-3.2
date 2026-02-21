@@ -33,7 +33,14 @@
 
 <div id="mainArea" style="display:none;">
   <h1>🏫 TRAIL スーパー管理者</h1>
-
+<div class="section">
+    <h2>🎮 全教室に一括ゲーム登録</h2>
+    <input type="text" id="gameEmoji" placeholder="絵文字（例：🎯）" style="width:80px;">
+    <input type="text" id="gameName" placeholder="ゲーム名">
+    <input type="text" id="gameUrl" placeholder="URL（任意）">
+    <input type="text" id="gameCategory" placeholder="カテゴリ（例：算数）">
+    <button onclick="broadcastGame()">📢 全教室に登録</button>
+  </div>
   <div class="section">
     <h2>➕ 新しい教室を作成</h2>
     <input type="text" id="newName" placeholder="教室名">
@@ -43,7 +50,7 @@
     <select id="newPlan" style="width:100%;padding:10px;margin:8px 0;border-radius:6px;border:1px solid #444;background:#0f3460;color:#fff;">
       <option value="free">Free</option>
       <option value="pro">Pro</option>
-    </select>
+はい    </select>
     <button onclick="createTenant()">作成</button>
   </div>
 
@@ -135,6 +142,22 @@ function createTenant() {
     body: JSON.stringify({ name, slug, adminEmail, adminPassword, plan })
   }).then(() => { alert('作成しました！'); loadTenants(); });
 }
+function broadcastGame() {
+  const emoji = document.getElementById('gameEmoji').value;
+  const name = document.getElementById('gameName').value;
+  const url = document.getElementById('gameUrl').value;
+  const category = document.getElementById('gameCategory').value;
+  if (!emoji || !name) { alert('絵文字とゲーム名は必須です'); return; }
+  fetch('/api/super/games/broadcast', {
+    method: 'POST',
+    headers: { 'x-super-admin': authHeader, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ emoji, name, url, category })
+  }).then(r => r.json()).then(d => {
+    alert(`✅ ${d.count}教室に登録しました！`);
+    document.getElementById('gameEmoji').value = '';
+    document.getElementById('gameName').value = '';
+    document.getElementById('gameUrl').value = '';
+    document.getElementById('ga
 </script>
 </body>
 </html>

@@ -64,4 +64,17 @@ router.post('/api/super/tenants', superAdminAuth, (req, res) => {
   res.json({ success: true, tenantId });
 });
 
+// 全教室に一括ゲーム登録
+router.post('/api/super/games/broadcast', superAdminAuth, (req, res) => {
+  const { name, emoji, url, category } = req.body;
+  if (!name || !emoji) return res.status(400).json({ error: '名前と絵文字は必須です' });
+  const tenants = db.prepare('SELECT id FROM tenants').all();
+  db.transaction(() => {
+    for (const tenant of tenants) {
+      db.prepare(`INSERT INTO games (tenant_id, name, emoji, url, category) VALUES (?, ?, ?, ?, ?)`)
+        .run(tenant.id, name, emoji, url || null, category || 'その他');
+    }
+  })();
+  res.json({ success: true, count: tenants.length });
+});
 module.exports = router;
