@@ -47,7 +47,7 @@ const rankingRoutes = require('./routes/rankings');
 const analyticsRoutes = require('./routes/analytics');
 const tenantRoutes = require('./routes/tenants');
 const externalRoutes = require('./routes/external'); // ← 追加
-
+const playSessionsRoutes = require('./routes/playSessions');
 app.use('/api/auth', authRoutes);
 app.use('/api/t', gameRoutes);
 app.use('/api/t', studentRoutes);
@@ -61,6 +61,7 @@ app.use('/api/external', externalRoutes); // ← 追加
 app.get('/api/plans', tenantRoutes);
 const superAdminRoutes = require('./routes/superAdmin');
 app.use('/', superAdminRoutes);
+app.use('/api/play-sessions', playSessionsRoutes);
 
 // ═══ Health Check ═══
 app.get('/api/health', (req, res) => {
@@ -113,6 +114,35 @@ app.use((err, req, res, _next) => {
     CREATE TABLE IF NOT EXISTS activity_logs (id INTEGER PRIMARY KEY AUTOINCREMENT, tenant_id TEXT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE, type TEXT NOT NULL, actor TEXT, detail TEXT, created_at TEXT NOT NULL DEFAULT (datetime('now')));
     CREATE INDEX IF NOT EXISTS idx_activity_logs_tenant ON activity_logs(tenant_id);
     CREATE INDEX IF NOT EXISTS idx_activity_logs_created ON activity_logs(created_at);
+    // ============================
+// play_sessions テーブル（学習ログ）
+// ============================
+db.exec(`
+  CREATE TABLE IF NOT EXISTS play_sessions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    tenant_id INTEGER NOT NULL,
+    student_id INTEGER NOT NULL,
+    game_id INTEGER NOT NULL,
+    started_at TEXT NOT NULL DEFAULT (datetime('now')),
+    ended_at TEXT,
+    duration_seconds INTEGER,
+    score INTEGER,
+    correct_count INTEGER,
+    total_count INTEGER,
+    metadata TEXT,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id),
+    FOREIGN KEY (student_id) REFERENCES students(id),
+    FOREIGN KEY (game_id) REFERENCES games(id)
+  )
+`);
+
+// パフォーマンス用インデックス
+db.exec(`
+  CREATE INDEX IF NOT EXISTS idx_ps_student ON play_sessions(student_id);
+  CREATE INDEX IF NOT EXISTS idx_ps_game ON play_sessions(game_id);
+  CREATE INDEX IF NOT EXISTS idx_ps_tenant ON play_sessions(tenant_id);
+  CREATE INDEX IF NOT EXISTS idx_ps_started ON play_sessions(started_at);
+`);
   `);
   console.log('  Migrations: OK');
 
