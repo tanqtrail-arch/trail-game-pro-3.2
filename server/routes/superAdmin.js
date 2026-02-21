@@ -77,4 +77,13 @@ router.post('/api/super/games/broadcast', superAdminAuth, (req, res) => {
   })();
   res.json({ success: true, count: tenants.length });
 });
+// 全教室のゲーム一覧
+router.get('/api/super/games', superAdminAuth, (req, res) => {
+  const games = db.prepare(`
+    SELECT g.*, t.name as tenant_name, t.slug as tenant_slug
+    FROM games g JOIN tenants t ON g.tenant_id = t.id
+    ORDER BY g.name, t.name
+  `).all();
+  res.json(games);
+});
 module.exports = router;

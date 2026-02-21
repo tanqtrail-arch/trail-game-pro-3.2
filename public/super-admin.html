@@ -63,7 +63,14 @@
     </table>
   </div>
 </div>
-
+<div class="section">
+  <h2>🎮 登録済みゲーム一覧</h2>
+  <button onclick="loadGames()">🔄 更新</button>
+  <table id="gameTable" style="margin-top:10px;">
+    <thead><tr><th>ゲーム名</th><th>絵文字</th><th>カテゴリ</th><th>URL</th><th>教室名</th></tr></thead>
+    <tbody id="gameBody"></tbody>
+  </table>
+</div>
 <script>
 let authHeader = '';
 
@@ -76,7 +83,7 @@ function login() {
       if (r.ok) {
         document.getElementById('loginArea').style.display = 'none';
         document.getElementById('mainArea').style.display = 'block';
-        loadTenants();
+       loadTenants(); loadGames();
       } else {
         document.getElementById('loginError').textContent = '認証失敗。メールとパスワードを確認してください。';
       }
@@ -159,6 +166,24 @@ function broadcastGame() {
     document.getElementById('gameUrl').value = '';
   document.getElementById('gameCategory').value = '';
   });
+}
+function loadGames() {
+  fetch('/api/super/games', { headers: { 'x-super-admin': authHeader } })
+    .then(r => r.json())
+    .then(games => {
+      const tbody = document.getElementById('gameBody');
+      tbody.innerHTML = '';
+      games.forEach(g => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${g.name}</td>
+            <td>${g.emoji}</td>
+            <td>${g.category || '-'}</td>
+            <td>${g.url ? `<a href="${g.url}" target="_blank" style="color:#00d4ff;">リンク</a>` : '-'}</td>
+            <td>${g.tenant_name}</td>
+          </tr>`;
+      });
+    });
 }
 </script>
 </body>
