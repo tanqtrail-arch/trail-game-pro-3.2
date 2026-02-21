@@ -737,8 +737,7 @@ router.post('/cron/morning-ai', async (req, res) => {
 
   // アクティブ全生徒を取得
   const students = db.prepare(
-    'SELECT s.id, s.tenant_id FROM students s JOIN tenants t ON s.tenant_id = t.id WHERE t.is_active = 1 OR t.is_active IS NULL'
-  ).all();
+'SELECT s.id, s.tenant_id FROM students s INNER JOIN tenants t ON s.tenant_id = t.id'  ).all();
 
   const results = [];
   for (const s of students) {
@@ -769,8 +768,7 @@ router.post('/cron/evening-ai', async (req, res) => {
   }
 
   const students = db.prepare(
-    'SELECT s.id, s.tenant_id FROM students s JOIN tenants t ON s.tenant_id = t.id WHERE t.is_active = 1 OR t.is_active IS NULL'
-  ).all();
+'SELECT s.id, s.tenant_id FROM students s INNER JOIN tenants t ON s.tenant_id = t.id'  ).all();
 
   const results = [];
   for (const s of students) {
