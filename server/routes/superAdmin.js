@@ -1,5 +1,4 @@
-完璧です！「Enter file contents here」の部分をクリックして、以下のコードを全部貼り付けてください：
-javascript/**
+/**
  * Super Admin Routes - 全教室管理
  */
 const express = require('express');
