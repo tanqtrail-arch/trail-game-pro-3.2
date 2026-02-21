@@ -757,12 +757,13 @@ function render(d) {
   // ===== AI Generate Button =====
   document.getElementById('generateAiBtn').addEventListener('click', async function() {
     const btn = this;
+    const tk = new URLSearchParams(location.search).get('token');
     btn.disabled = true;
     document.getElementById('aiPlaceholder').style.display = 'none';
     document.getElementById('aiLoading').style.display = 'block';
 
     try {
-      const aiRes = await fetch(`/api/parent/${token}/ai-comment`, { method: 'POST' });
+      const aiRes = await fetch(`/api/parent/${tk}/ai-comment`, { method: 'POST' });
       if (!aiRes.ok) {
         const err = await aiRes.json();
         throw new Error(err.error || 'AI生成に失敗しました');
