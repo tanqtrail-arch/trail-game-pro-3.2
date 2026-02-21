@@ -48,6 +48,7 @@ const analyticsRoutes = require('./routes/analytics');
 const tenantRoutes = require('./routes/tenants');
 const externalRoutes = require('./routes/external'); // ← 追加
 const playSessionsRoutes = require('./routes/playSessions');
+const parentRoutes = require('./routes/parent');       // ★ NEW: 保護者ダッシュボード
 app.use('/api/auth', authRoutes);
 app.use('/api/t', gameRoutes);
 app.use('/api/t', studentRoutes);
@@ -62,6 +63,7 @@ app.get('/api/plans', tenantRoutes);
 const superAdminRoutes = require('./routes/superAdmin');
 app.use('/', superAdminRoutes);
 app.use('/api/play-sessions', playSessionsRoutes);
+app.use('/api', parentRoutes);                         // ★ NEW: 保護者ダッシュボード
 
 // ═══ Health Check ═══
 app.get('/api/health', (req, res) => {
@@ -144,6 +146,66 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_ps_tenant ON play_sessions(tenant_id);
   CREATE INDEX IF NOT EXISTS idx_ps_started ON play_sessions(started_at);
 `);
+
+// ★ NEW ============================
+// 保護者ダッシュボード用テーブル
+// ==================================
+
+// 保護者閲覧トークン
+db.exec(`
+  CREATE TABLE IF NOT EXISTS parent_tokens (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    tenant_id TEXT NOT NULL,
+    student_id INTEGER NOT NULL,
+    token TEXT NOT NULL UNIQUE,
+    created_at TEXT DEFAULT (datetime('now')),
+    expires_at TEXT,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id),
+    FOREIGN KEY (student_id) REFERENCES students(id)
+  )
+`);
+
+// 先生からのコメント
+db.exec(`
+  CREATE TABLE IF NOT EXISTS teacher_comments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    tenant_id TEXT NOT NULL,
+    student_id INTEGER NOT NULL,
+    comment TEXT NOT NULL,
+    month TEXT NOT NULL,
+    created_at TEXT DEFAULT (datetime('now')),
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id),
+    FOREIGN KEY (student_id) REFERENCES students(id)
+  )
+`);
+
+// AI生成コメントのキャッシュ（1日1回）
+db.exec(`
+  CREATE TABLE IF NOT EXISTS ai_comments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    tenant_id TEXT NOT NULL,
+    student_id INTEGER NOT NULL,
+    date TEXT NOT NULL,
+    highlight TEXT,
+    comment TEXT,
+    badges TEXT,
+    home_hints TEXT,
+    generated_at TEXT DEFAULT (datetime('now')),
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id),
+    FOREIGN KEY (student_id) REFERENCES students(id),
+    UNIQUE(tenant_id, student_id, date)
+  )
+`);
+
+// 保護者ダッシュボード用インデックス
+db.exec(`
+  CREATE INDEX IF NOT EXISTS idx_pt_token ON parent_tokens(token);
+  CREATE INDEX IF NOT EXISTS idx_pt_student ON parent_tokens(student_id);
+  CREATE INDEX IF NOT EXISTS idx_tc_student ON teacher_comments(student_id, month);
+  CREATE INDEX IF NOT EXISTS idx_ai_student_date ON ai_comments(student_id, date);
+`);
+// ★ END NEW ========================
+
   console.log('  Migrations: OK');
 
   // Seed demo tenant if no tenants exist
