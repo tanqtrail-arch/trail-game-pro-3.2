@@ -1,5 +1,4 @@
-完璧です！「Enter file contents here」の部分をクリックして、以下のコードを全部貼り付けてください：
-javascript/**
+/**
  * Super Admin Routes - 全教室管理
  */
 const express = require('express');
@@ -14,27 +13,35 @@ function superAdminAuth(req, res, next) {
   const password = process.env.SUPER_ADMIN_PASSWORD;
   const auth = req.headers['x-super-admin'];
   if (!auth) return res.status(401).json({ error: '認証が必要です' });
-  const [e, p] = Buffer.from(auth, 'base64').toString().split(':');
+  const decoded = Buffer.from(auth, 'base64').toString();
+  const colonIndex = decoded.indexOf(':');
+  const e = decoded.substring(0, colonIndex);
+  const p = decoded.substring(colonIndex + 1);
   if (e !== email || p !== password) return res.status(403).json({ error: '認証失敗' });
   next();
 }
 
 // 全教室一覧
 router.get('/api/super/tenants', superAdminAuth, (req, res) => {
-  const tenants = db.prepare(`
-    SELECT t.*, 
-      (SELECT COUNT(*) FROM students WHERE tenant_id = t.id) as student_count,
-      (SELECT COUNT(*) FROM games WHERE tenant_id = t.id) as game_count,
-      (SELECT email FROM admin_users WHERE tenant_id = t.id LIMIT 1) as admin_email
-    FROM tenants t ORDER BY t.created_at DESC
-  `).all();
-  res.json(tenants);
+  try {
+    const tenants = db.prepare(`
+      SELECT t.*, 
+        (SELECT COUNT(*) FROM students WHERE tenant_id = t.id) as student_count,
+        (SELECT COUNT(*) FROM games WHERE tenant_id = t.id) as game_count,
+        (SELECT email FROM admin_users WHERE tenant_id = t.id LIMIT 1) as admin_email
+      FROM tenants t ORDER BY t.created_at DESC
+    `).all();
+    res.json(tenants);
+  } catch (err) {
+    console.error('GET /super/tenants error:', err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // 教室名・スラッグ更新
 router.patch('/api/super/tenants/:id', superAdminAuth, (req, res) => {
   const { name, slug, plan } = req.body;
-  db.prepare('UPDATE tenants SET name=?, slug=?, plan=?, updated_at=datetime("now") WHERE id=?')
+  db.prepare("UPDATE tenants SET name=?, slug=?, plan=?, updated_at=datetime('now') WHERE id=?")
     .run(name, slug, plan, req.params.id);
   res.json({ success: true });
 });
