@@ -46,6 +46,7 @@ const badgeRoutes = require('./routes/badges');
 const rankingRoutes = require('./routes/rankings');
 const analyticsRoutes = require('./routes/analytics');
 const tenantRoutes = require('./routes/tenants');
+const externalRoutes = require('./routes/external'); // ← 追加
 
 app.use('/api/auth', authRoutes);
 app.use('/api/t', gameRoutes);
@@ -56,6 +57,7 @@ app.use('/api/t', badgeRoutes);
 app.use('/api/t', rankingRoutes);
 app.use('/api/t', analyticsRoutes);
 app.use('/api/t', tenantRoutes);
+app.use('/api/external', externalRoutes); // ← 追加
 app.get('/api/plans', tenantRoutes);
 const superAdminRoutes = require('./routes/superAdmin');
 app.use('/', superAdminRoutes);
