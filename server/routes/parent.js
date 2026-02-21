@@ -414,4 +414,158 @@ function generateHomeHints(games) {
   return [...new Set(hints)].slice(0, 3);
 }
 
+// ============================================================
+// AI自動コメント生成（Sonnet API）
+// POST /api/parent/:token/ai-comment
+// ============================================================
+router.post('/parent/:token/ai-comment', async (req, res) => {
+  try {
+    const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
+    if (!ANTHROPIC_API_KEY) {
+      return res.status(500).json({ error: 'ANTHROPIC_API_KEY not configured' });
+    }
+
+    // トークン認証
+    const tokenRow = db.prepare(
+      "SELECT * FROM parent_tokens WHERE token = ? AND (expires_at IS NULL OR expires_at > datetime('now'))"
+    ).get(req.params.token);
+    if (!tokenRow) {
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+
+    const { tenant_id, student_id } = tokenRow;
+    const now = new Date();
+    const today = now.toISOString().split('T')[0];
+
+    // キャッシュ確認（1日1回）
+    const cached = db.prepare(
+      'SELECT * FROM ai_comments WHERE student_id = ? AND tenant_id = ? AND date = ?'
+    ).get(student_id, tenant_id, today);
+    if (cached) {
+      return res.json({
+        highlight: cached.highlight,
+        comment: cached.comment,
+        home_hints: cached.home_hints ? JSON.parse(cached.home_hints) : [],
+        cached: true
+      });
+    }
+
+    // 生徒情報取得
+    const student = db.prepare('SELECT * FROM students WHERE id = ?').get(student_id);
+    if (!student) return res.status(404).json({ error: 'Student not found' });
+
+    // 今月の統計
+    const thisMonthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+    const monthlyStats = db.prepare(`
+      SELECT COUNT(*) as total_plays,
+        COALESCE(SUM(duration_seconds), 0) as total_seconds,
+        ROUND(AVG(CASE WHEN total_count > 0 THEN correct_count * 100.0 / total_count END), 1) as avg_accuracy
+      FROM play_sessions WHERE student_id = ? AND tenant_id = ? AND started_at >= ?
+    `).get(student_id, tenant_id, thisMonthStart);
+
+    // ゲーム別データ
+    const byGame = db.prepare(`
+      SELECT g.name, g.emoji, COUNT(*) as plays,
+        COALESCE(SUM(ps.duration_seconds), 0) as seconds,
+        ROUND(AVG(CASE WHEN ps.total_count > 0 THEN ps.correct_count * 100.0 / ps.total_count END), 1) as avg_accuracy
+      FROM play_sessions ps JOIN games g ON ps.game_id = g.id
+      WHERE ps.student_id = ? AND ps.tenant_id = ? AND ps.started_at >= ?
+      GROUP BY g.id ORDER BY seconds DESC LIMIT 5
+    `).all(student_id, tenant_id, thisMonthStart);
+
+    // バッジ情報
+    const badgeCount = db.prepare(
+      'SELECT COUNT(*) as c FROM badges WHERE student_id = ? AND tenant_id = ?'
+    ).get(student_id, tenant_id);
+
+    // ALT（コイン）合計
+    const coinTotal = db.prepare(
+      'SELECT COALESCE(SUM(amount), 0) as total FROM coin_logs WHERE student_id = ?'
+    ).get(student_id);
+
+    // プロンプト構築
+    const gameInfo = byGame.length > 0
+      ? byGame.map(g => `${g.emoji}${g.name}: ${g.plays}回プレイ, 正答率${g.avg_accuracy || '—'}%`).join('\n')
+      : 'まだゲームのプレイ記録がありません';
+
+    const totalMin = Math.round((monthlyStats.total_seconds || 0) / 60);
+
+    const prompt = `あなたは探究教室TRAILの先生AIです。以下の生徒データから、保護者向けの温かく具体的なコメントを生成してください。
+
+【生徒情報】
+名前: ${student.name}
+今月のプレイ回数: ${monthlyStats.total_plays || 0}回
+今月の学習時間: ${totalMin}分
+平均正答率: ${monthlyStats.avg_accuracy || '—'}%
+獲得ALT（ポイント）: ${coinTotal.total || 0}
+バッジ数: ${badgeCount.c || 0}
+
+【今月プレイしたゲーム】
+${gameInfo}
+
+以下のJSON形式で回答してください。日本語で、保護者が読んで嬉しくなる内容にしてください:
+{
+  "highlight": "今月のハイライト（15文字以内、例: 地理マスターに成長中！）",
+  "comment": "保護者向けコメント（80文字以内。具体的なゲーム名や数字を使い、お子さんの頑張りを褒める内容。データがない場合は「これから一緒に成長していきましょう」的な温かいメッセージ）",
+  "home_hints": ["おうちでできるヒント1（30文字以内）", "おうちでできるヒント2（30文字以内）"]
+}
+
+JSONのみ出力してください。マークダウンのバッククォートは不要です。`;
+
+    // Anthropic API呼び出し
+    const apiRes = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 500,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    if (!apiRes.ok) {
+      const errText = await apiRes.text();
+      console.error('Anthropic API error:', apiRes.status, errText);
+      return res.status(502).json({ error: 'AI API error: ' + apiRes.status });
+    }
+
+    const apiData = await apiRes.json();
+    const rawText = (apiData.content || []).map(c => c.text || '').join('');
+
+    // JSON解析
+    let aiResult;
+    try {
+      const cleaned = rawText.replace(/```json|```/g, '').trim();
+      aiResult = JSON.parse(cleaned);
+    } catch (parseErr) {
+      console.error('AI response parse error:', rawText);
+      aiResult = {
+        highlight: '探究の旅が始まっています！',
+        comment: `${student.name}さんはTRAILで新しいことに挑戦中です。これからの成長が楽しみですね！`,
+        home_hints: ['「今日TRAILで何やったの？」と聞いてみてください', 'ゲームの話を一緒に楽しんでください']
+      };
+    }
+
+    // キャッシュ保存
+    db.prepare(
+      'INSERT INTO ai_comments (tenant_id, student_id, date, highlight, comment, home_hints) VALUES (?, ?, ?, ?, ?, ?)'
+    ).run(tenant_id, student_id, today, aiResult.highlight, aiResult.comment, JSON.stringify(aiResult.home_hints || []));
+
+    res.json({
+      highlight: aiResult.highlight,
+      comment: aiResult.comment,
+      home_hints: aiResult.home_hints || [],
+      cached: false
+    });
+
+  } catch (err) {
+    console.error('AI comment generation error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;
