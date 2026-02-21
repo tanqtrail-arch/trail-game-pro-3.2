@@ -195,7 +195,16 @@ db.exec(`
     FOREIGN KEY (student_id) REFERENCES students(id),
     UNIQUE(tenant_id, student_id, date)
   )
-`);
+// F4: type カラム追加（朝/夜/手動を区別）
+try {
+  db.exec(`ALTER TABLE ai_comments ADD COLUMN type TEXT DEFAULT 'on_demand'`);
+} catch (e) { /* 既に存在する場合は無視 */ }
+
+// F4: UNIQUE制約を date+type の組み合わせに対応するインデックスを追加
+db.exec(`
+  CREATE INDEX IF NOT EXISTS idx_ai_type
+  ON ai_comments(tenant_id, student_id, date, type)
+`););
 
 // 保護者ダッシュボード用インデックス
 db.exec(`
