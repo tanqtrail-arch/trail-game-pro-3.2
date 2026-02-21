@@ -114,6 +114,7 @@ app.use((err, req, res, _next) => {
     CREATE TABLE IF NOT EXISTS activity_logs (id INTEGER PRIMARY KEY AUTOINCREMENT, tenant_id TEXT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE, type TEXT NOT NULL, actor TEXT, detail TEXT, created_at TEXT NOT NULL DEFAULT (datetime('now')));
     CREATE INDEX IF NOT EXISTS idx_activity_logs_tenant ON activity_logs(tenant_id);
     CREATE INDEX IF NOT EXISTS idx_activity_logs_created ON activity_logs(created_at);
+    `);
     // ============================
 // play_sessions テーブル（学習ログ）
 // ============================
