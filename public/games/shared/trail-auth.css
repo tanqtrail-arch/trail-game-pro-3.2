@@ -1,0 +1,148 @@
+/**
+ * TrailAuth CSS - PIN入力UI
+ * TRAIL Game Pro 3.2 / Task 0-9
+ */
+
+/* ─── オーバーレイ ─── */
+#trail-auth-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 10, 20, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  font-family: 'Helvetica Neue', Arial, 'Hiragino Sans', sans-serif;
+  animation: ta-fadein 0.2s ease;
+}
+
+@keyframes ta-fadein {
+  from { opacity: 0; transform: scale(0.97); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* ─── モーダル ─── */
+.ta-modal {
+  background: #1a1a2e;
+  border: 1px solid rgba(255, 165, 0, 0.3);
+  border-radius: 20px;
+  padding: 36px 32px 28px;
+  width: min(360px, 92vw);
+  text-align: center;
+  box-shadow: 0 0 40px rgba(255, 140, 0, 0.15);
+}
+
+/* ─── ロゴ ─── */
+.ta-logo {
+  font-size: 28px;
+  font-weight: 900;
+  color: #ff9500;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+
+/* ─── タイトル ─── */
+.ta-title {
+  font-size: 16px;
+  color: #e0e0e0;
+  margin: 0 0 24px;
+  font-weight: 500;
+}
+
+/* ─── PINドット ─── */
+.ta-dots {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.ta-dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid #555;
+  background: transparent;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.ta-dot--filled {
+  background: #ff9500;
+  border-color: #ff9500;
+  box-shadow: 0 0 8px rgba(255, 149, 0, 0.6);
+}
+
+/* ─── シェイクアニメーション ─── */
+@keyframes ta-shake {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-8px); }
+  40%       { transform: translateX(8px); }
+  60%       { transform: translateX(-6px); }
+  80%       { transform: translateX(6px); }
+}
+
+.ta-shake {
+  animation: ta-shake 0.4s ease;
+}
+
+/* ─── エラーメッセージ ─── */
+.ta-error {
+  color: #ff4d4d;
+  font-size: 13px;
+  min-height: 20px;
+  margin: 4px 0 16px;
+}
+
+/* ─── キーパッド ─── */
+.ta-keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+/* ─── キー ─── */
+.ta-key {
+  background: #252540;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  color: #fff;
+  font-size: 22px;
+  font-weight: 600;
+  height: 60px;
+  cursor: pointer;
+  transition: background 0.1s, transform 0.1s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ta-key:active:not(:disabled) {
+  background: #ff9500;
+  transform: scale(0.94);
+}
+
+.ta-key:disabled {
+  cursor: default;
+  opacity: 0;
+}
+
+.ta-key--del {
+  color: #ff9500;
+  font-size: 20px;
+}
+
+.ta-key--empty {
+  visibility: hidden;
+}
+
+/* ─── ヒント ─── */
+.ta-hint {
+  color: #666;
+  font-size: 12px;
+  margin: 0;
+}
+
+/* ─── スマホ最適化 ─── */
+@media (max-width: 360px) {
+  .ta-modal { padding: 28px 20px 20px; }
+  .ta-key   { height: 52px; font-size: 20px; }
+}
