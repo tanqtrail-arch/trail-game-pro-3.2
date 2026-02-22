@@ -9,6 +9,7 @@ const bcrypt = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid');
 const db = require('../db');
 const { signToken } = require('../middleware/auth');
+const jwt = require('jsonwebtoken');
 
 const router = Router();
 
