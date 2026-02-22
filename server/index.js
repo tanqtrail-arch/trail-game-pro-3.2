@@ -65,6 +65,11 @@ app.use('/', superAdminRoutes);
 app.use('/api/play-sessions', playSessionsRoutes);
 const streaksRoutes = require('./routes/streaks');
 app.use('/api/streaks', streaksRoutes);
+const questionsRoutes = require('./routes/questions');
+app.use('/api/questions', questionsRoutes);
+const gameSavesRoutes = require('./routes/gameSaves');
+app.use('/api/game-saves', gameSavesRoutes);
+
 app.use('/api', parentRoutes);                         // ★ NEW: 保護者ダッシュボード
 
 // ═══ Health Check ═══
