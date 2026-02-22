@@ -618,18 +618,53 @@ async function generateScheduledComment(tenantId, studentId, type, ANTHROPIC_API
     FROM play_sessions WHERE student_id = ? AND tenant_id = ? AND date(started_at) = ?
   `).get(studentId, tenantId, today);
 
-  // ゲーム別
+  // ゲーム別（全件取得 — 強み・弱点抽出用）
   const byGame = db.prepare(`
     SELECT g.name, g.emoji, COUNT(*) as plays,
       ROUND(AVG(CASE WHEN ps.total_count > 0 THEN ps.correct_count * 100.0 / ps.total_count END), 1) as avg_accuracy
     FROM play_sessions ps JOIN games g ON ps.game_id = g.id
     WHERE ps.student_id = ? AND ps.tenant_id = ? AND ps.started_at >= ?
-    GROUP BY g.id ORDER BY plays DESC LIMIT 5
+    GROUP BY g.id ORDER BY avg_accuracy ASC
   `).all(studentId, tenantId, thisMonthStart);
 
   const gameInfo = byGame.length > 0
     ? byGame.map(g => `${g.emoji}${g.name}: ${g.plays}回プレイ, 正答率${g.avg_accuracy || '-'}%`).join(', ')
     : 'まだゲームのプレイ記録がありません';
+
+  // 正答率ワースト3（弱点）・トップ3（強み）
+  const gamesWithAccuracy = byGame.filter(g => g.avg_accuracy != null);
+  const weakest3 = gamesWithAccuracy.slice(0, 3);
+  const strongest3 = [...gamesWithAccuracy].sort((a, b) => b.avg_accuracy - a.avg_accuracy).slice(0, 3);
+
+  const weakestInfo = weakest3.length > 0
+    ? weakest3.map(g => `${g.emoji}${g.name}（正答率${g.avg_accuracy}%）`).join('、')
+    : 'データ不足';
+  const strongestInfo = strongest3.length > 0
+    ? strongest3.map(g => `${g.emoji}${g.name}（正答率${g.avg_accuracy}%）`).join('、')
+    : 'データ不足';
+
+  // 先月比の学習時間増減（%）
+  const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+  const lmStart = `${lastMonthStart.getFullYear()}-${String(lastMonthStart.getMonth() + 1).padStart(2, '0')}-01`;
+  const lmEnd = `${lastMonthEnd.getFullYear()}-${String(lastMonthEnd.getMonth() + 1).padStart(2, '0')}-${String(lastMonthEnd.getDate()).padStart(2, '0')}`;
+  const prevMonthStats = db.prepare(`
+    SELECT COALESCE(SUM(duration_seconds), 0) as total_seconds
+    FROM play_sessions WHERE student_id = ? AND tenant_id = ? AND started_at >= ? AND started_at <= ?
+  `).get(studentId, tenantId, lmStart, lmEnd);
+
+  const studyTimeGrowth = prevMonthStats.total_seconds > 0
+    ? Math.round((monthlyStats.total_seconds - prevMonthStats.total_seconds) / prevMonthStats.total_seconds * 100)
+    : null;
+  const studyTimeGrowthText = studyTimeGrowth !== null
+    ? `先月比 ${studyTimeGrowth >= 0 ? '+' : ''}${studyTimeGrowth}%`
+    : '先月データなし（今月が初月）';
+
+  // 現在のストリーク日数
+  const streakRow = db.prepare(
+    'SELECT current_streak FROM students WHERE id = ?'
+  ).get(studentId);
+  const currentStreak = (streakRow && streakRow.current_streak) || 0;
 
   const totalMin = Math.round((monthlyStats.total_seconds || 0) / 60);
   const todayMin = Math.round((todayStats.seconds || 0) / 60);
@@ -644,14 +679,24 @@ async function generateScheduledComment(tenantId, studentId, type, ANTHROPIC_API
 今月のプレイ回数: ${monthlyStats.total_plays || 0}回
 今月の学習時間: ${totalMin}分
 平均正答率: ${monthlyStats.avg_accuracy || '-'}%
-今月プレイしたゲーム: ${gameInfo}
+学習時間の推移: ${studyTimeGrowthText}
+現在の連続学習ストリーク: ${currentStreak}日
+
+【今月プレイしたゲーム】
+${gameInfo}
+
+【弱点ゲーム ワースト3（正答率が低い順）】
+${weakestInfo}
+
+【得意ゲーム トップ3（正答率が高い順）】
+${strongestInfo}
 
 以下のJSON形式のみで回答してください。日本語で、保護者が読んで嬉しくなる内容にしてください:
 {
   "type": "morning",
   "highlight": "🌅 今日のおすすめ（15文字以内）",
-  "comment": "今日の学習提案（80文字以内。具体的なゲーム名を使い、お子さんの頑張りを伸ばす提案）",
-  "home_hints": ["今日家でできること（30文字以内）", "もう一つのヒント（30文字以内）"]
+  "comment": "今日の学習提案（100文字以内。弱点ゲームを具体的に名指しして優先的に取り組む提案をしつつ、得意ゲームで自信をつける流れを提案。ストリークが続いていれば褒める）",
+  "home_hints": ["弱点ゲームに関連する家庭での遊びの提案（40文字以内。例: 「○○が苦手なら、△△で遊んでみて」）", "もう一つの家遊びヒント（40文字以内）"]
 }
 
 JSONのみ出力してください。マークダウンのバッククォートは不要です。`;
@@ -663,14 +708,24 @@ JSONのみ出力してください。マークダウンのバッククォート�
 今日のプレイ回数: ${todayStats.plays || 0}回
 今日の学習時間: ${todayMin}分
 今日の正答率: ${todayStats.accuracy || '-'}%
-今月プレイしたゲーム: ${gameInfo}
+学習時間の推移: ${studyTimeGrowthText}
+現在の連続学習ストリーク: ${currentStreak}日
+
+【今月プレイしたゲーム】
+${gameInfo}
+
+【弱点ゲーム ワースト3（正答率が低い順）】
+${weakestInfo}
+
+【得意ゲーム トップ3（正答率が高い順）】
+${strongestInfo}
 
 以下のJSON形式のみで回答してください。日本語で、保護者が読んで嬉しくなる内容にしてください:
 {
   "type": "evening",
   "highlight": "🌙 今日のふりかえり（15文字以内）",
-  "comment": "今日の振り返り＋明日への一言（80文字以内。今日の頑張りを具体的に褒め、明日への期待を込める）",
-  "home_hints": ["今夜おうちでできること（30文字以内）", "明日に向けた一言（30文字以内）"]
+  "comment": "今日の振り返り＋明日への一言（100文字以内。弱点ゲームを名指しして「明日はここに挑戦してみよう」と提案。ストリーク継続中なら具体的な日数で褒める。得意分野の伸びも認める）",
+  "home_hints": ["弱点分野に関連する今夜の家遊び提案（40文字以内。例: 「地理が苦手なら家族で地図しりとり」）", "明日に向けた一言・遊び提案（40文字以内）"]
 }
 
 JSONのみ出力してください。マークダウンのバッククォートは不要です。`;
