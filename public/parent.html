@@ -41,14 +41,10 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  /* ===== Loading & Error states ===== */
   .loading-screen {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    gap: 20px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    min-height: 100vh; gap: 20px;
   }
   .loading-screen .logo { font-size: 2rem; font-weight: 900; color: var(--primary); }
   .loading-dots { display: flex; gap: 6px; }
@@ -65,46 +61,22 @@
   }
 
   .error-screen {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    gap: 16px;
-    padding: 24px;
-    text-align: center;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    min-height: 100vh; gap: 16px; padding: 24px; text-align: center;
   }
   .error-screen .icon { font-size: 3rem; }
   .error-screen h2 { font-size: 1.3rem; color: var(--text); }
   .error-screen p { color: var(--text-light); font-size: 0.9rem; }
 
-  /* ===== Main container ===== */
   .dashboard { display: none; max-width: 480px; margin: 0 auto; padding: 0 16px 40px; }
   .dashboard.visible { display: block; }
 
-  /* ===== Header ===== */
-  .header {
-    text-align: center;
-    padding: 32px 0 16px;
-  }
-  .header .brand {
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: var(--primary);
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    margin-bottom: 2px;
-  }
-  .header .subtitle {
-    font-size: 0.8rem;
-    color: var(--text-light);
-  }
+  .header { text-align: center; padding: 32px 0 16px; }
+  .header .brand { font-size: 0.75rem; font-weight: 700; color: var(--primary); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 2px; }
+  .header .subtitle { font-size: 0.8rem; color: var(--text-light); }
 
-  /* ===== Section titles ===== */
-  .section {
-    margin-top: 28px;
-    animation: fadeUp 0.5s ease both;
-  }
+  .section { margin-top: 28px; animation: fadeUp 0.5s ease both; }
   .section:nth-child(2) { animation-delay: 0.05s; }
   .section:nth-child(3) { animation-delay: 0.1s; }
   .section:nth-child(4) { animation-delay: 0.15s; }
@@ -117,406 +89,225 @@
   }
 
   .section-title {
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: var(--text-light);
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
+    font-size: 0.85rem; font-weight: 700; color: var(--text-light);
+    margin-bottom: 12px; display: flex; align-items: center; gap: 6px;
   }
   .section-title .emoji { font-size: 1.1rem; }
 
-  /* ===== Hero card ===== */
+  /* ===== Hero ===== */
   .hero {
     background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-    border-radius: var(--radius);
-    padding: 28px 24px;
-    color: white;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
+    border-radius: var(--radius); padding: 28px 24px;
+    color: white; text-align: center; position: relative; overflow: hidden;
   }
   .hero::before {
-    content: '';
-    position: absolute;
-    top: -40px; right: -40px;
-    width: 120px; height: 120px;
-    background: rgba(255,255,255,0.08);
-    border-radius: 50%;
+    content: ''; position: absolute; top: -40px; right: -40px;
+    width: 120px; height: 120px; background: rgba(255,255,255,0.08); border-radius: 50%;
   }
   .hero::after {
-    content: '';
-    position: absolute;
-    bottom: -20px; left: -20px;
-    width: 80px; height: 80px;
-    background: rgba(255,255,255,0.05);
-    border-radius: 50%;
+    content: ''; position: absolute; bottom: -20px; left: -20px;
+    width: 80px; height: 80px; background: rgba(255,255,255,0.05); border-radius: 50%;
   }
-
-  .hero .student-name {
-    font-size: 1.5rem;
-    font-weight: 900;
-    margin-bottom: 4px;
-    position: relative;
-  }
-  .hero .days-label {
-    font-size: 0.85rem;
-    opacity: 0.85;
-    margin-bottom: 16px;
-    position: relative;
-  }
+  .hero .student-name { font-size: 1.5rem; font-weight: 900; margin-bottom: 4px; position: relative; }
+  .hero .days-label { font-size: 0.85rem; opacity: 0.85; margin-bottom: 16px; position: relative; }
   .hero .highlight-msg {
-    background: rgba(255,255,255,0.15);
-    border-radius: var(--radius-sm);
-    padding: 10px 16px;
-    font-size: 0.9rem;
-    font-weight: 700;
-    margin-bottom: 20px;
-    position: relative;
-    backdrop-filter: blur(4px);
+    background: rgba(255,255,255,0.15); border-radius: var(--radius-sm);
+    padding: 10px 16px; font-size: 0.9rem; font-weight: 700;
+    margin-bottom: 20px; position: relative; backdrop-filter: blur(4px);
   }
-
-  .stat-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 8px;
-    position: relative;
-  }
-  .stat-item {
-    background: rgba(255,255,255,0.15);
-    border-radius: var(--radius-sm);
-    padding: 12px 8px;
-    backdrop-filter: blur(4px);
-  }
-  .stat-item .val {
-    font-size: 1.6rem;
-    font-weight: 900;
-    line-height: 1.2;
-  }
-  .stat-item .unit {
-    font-size: 0.7rem;
-    opacity: 0.8;
-  }
-  .stat-item .label {
-    font-size: 0.65rem;
-    opacity: 0.7;
-    margin-top: 2px;
-  }
-
-  /* ===== Badge row ===== */
-  .badge-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 16px;
-    justify-content: center;
-    position: relative;
-  }
+  .stat-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; position: relative; }
+  .stat-item { background: rgba(255,255,255,0.15); border-radius: var(--radius-sm); padding: 12px 8px; backdrop-filter: blur(4px); }
+  .stat-item .val { font-size: 1.6rem; font-weight: 900; line-height: 1.2; }
+  .stat-item .unit { font-size: 0.7rem; opacity: 0.8; }
+  .stat-item .label { font-size: 0.65rem; opacity: 0.7; margin-top: 2px; }
+  .badge-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; justify-content: center; position: relative; }
   .badge-chip {
-    background: var(--accent-light);
-    border: 1.5px solid var(--accent);
-    border-radius: 100px;
-    padding: 6px 14px;
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: #9E6B00;
-    white-space: nowrap;
+    background: var(--accent-light); border: 1.5px solid var(--accent);
+    border-radius: 100px; padding: 6px 14px; font-size: 0.8rem; font-weight: 700;
+    color: #9E6B00; white-space: nowrap;
     animation: popIn 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55) both;
   }
   .badge-chip:nth-child(2) { animation-delay: 0.08s; }
   .badge-chip:nth-child(3) { animation-delay: 0.16s; }
-  .badge-chip:nth-child(4) { animation-delay: 0.24s; }
-  .badge-chip:nth-child(5) { animation-delay: 0.32s; }
+  .no-badge { font-size: 0.8rem; color: rgba(255,255,255,0.6); padding: 8px 0; position: relative; }
 
-  @keyframes spin { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }
   @keyframes popIn {
     from { transform: scale(0); opacity: 0; }
     to { transform: scale(1); opacity: 1; }
   }
 
-  .no-badge {
-    font-size: 0.8rem;
-    color: rgba(255,255,255,0.6);
-    padding: 8px 0;
-    position: relative;
-  }
-
   /* ===== Cards ===== */
   .card {
-    background: var(--bg-card);
-    border-radius: var(--radius);
-    padding: 20px;
-    box-shadow: var(--shadow);
-    border: 1px solid var(--border);
+    background: var(--bg-card); border-radius: var(--radius); padding: 20px;
+    box-shadow: var(--shadow); border: 1px solid var(--border);
   }
   .card + .card { margin-top: 12px; }
 
-  /* ===== Chart container ===== */
-  .chart-wrap {
-    position: relative;
-    width: 100%;
-    height: 200px;
+  /* ===== ★ ALTコイン セクション ===== */
+  .alt-card {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    border: 1px solid rgba(255, 149, 0, 0.3);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: 0 4px 20px rgba(255, 149, 0, 0.1);
   }
+  .alt-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .alt-label { font-size: 0.78rem; font-weight: 700; color: rgba(255,149,0,0.8); letter-spacing: 2px; }
+  .alt-balance {
+    font-size: 2.8rem; font-weight: 900; color: #ff9500;
+    text-align: center; line-height: 1;
+    text-shadow: 0 0 20px rgba(255,149,0,0.4);
+  }
+  .alt-balance-unit { font-size: 1rem; opacity: 0.7; margin-left: 4px; }
+  .alt-awards { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+  .alt-award-item {
+    display: flex; justify-content: space-between; align-items: center;
+    background: rgba(255,149,0,0.08); border-radius: 8px;
+    padding: 6px 12px; font-size: 0.8rem;
+  }
+  .alt-award-label { color: rgba(255,255,255,0.7); }
+  .alt-award-amount { color: #ff9500; font-weight: 700; }
+  .alt-no-data { text-align: center; color: rgba(255,255,255,0.3); font-size: 0.85rem; padding: 8px 0; }
+
+  /* ===== ★ ストリーク セクション ===== */
+  .streak-card {
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    border: 1px solid rgba(100, 200, 255, 0.2);
+    border-radius: var(--radius); padding: 20px;
+    box-shadow: 0 4px 20px rgba(100,200,255,0.08);
+  }
+  .streak-top { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+  .streak-flame { font-size: 2.5rem; animation: flicker 1.5s infinite alternate; }
+  @keyframes flicker {
+    from { transform: scale(1) rotate(-2deg); }
+    to   { transform: scale(1.05) rotate(2deg); }
+  }
+  .streak-numbers { flex: 1; }
+  .streak-current { font-size: 2rem; font-weight: 900; color: #fff; line-height: 1; }
+  .streak-current span { font-size: 1rem; opacity: 0.6; margin-left: 4px; }
+  .streak-max { font-size: 0.78rem; color: rgba(255,255,255,0.4); margin-top: 2px; }
+  .streak-alive { 
+    font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 20px;
+    background: rgba(76, 175, 80, 0.2); color: #81C784; border: 1px solid rgba(76,175,80,0.3);
+  }
+  .streak-dead { 
+    background: rgba(229,115,115,0.2); color: #E57373; border-color: rgba(229,115,115,0.3);
+  }
+  /* 7日間カレンダー */
+  .streak-calendar { display: flex; justify-content: space-between; gap: 4px; }
+  .streak-day { flex: 1; text-align: center; }
+  .streak-day-dot {
+    width: 32px; height: 32px; border-radius: 50%; margin: 0 auto 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+  }
+  .streak-day-dot.played { background: rgba(255,149,0,0.3); border: 2px solid #ff9500; }
+  .streak-day-dot.not-played { background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); }
+  .streak-day-label { font-size: 0.6rem; color: rgba(255,255,255,0.3); }
+  .streak-monthly {
+    margin-top: 14px; display: flex; justify-content: center; gap: 20px;
+  }
+  .streak-monthly-item { text-align: center; }
+  .streak-monthly-val { font-size: 1.4rem; font-weight: 900; color: #fff; }
+  .streak-monthly-label { font-size: 0.65rem; color: rgba(255,255,255,0.4); }
+
+  /* ===== Chart ===== */
+  .chart-wrap { position: relative; width: 100%; height: 200px; }
   .chart-wrap canvas { width: 100% !important; height: 100% !important; }
-  .chart-label {
-    font-size: 0.75rem;
-    color: var(--text-light);
-    text-align: center;
-    margin-top: 8px;
-  }
+  .chart-label { font-size: 0.75rem; color: var(--text-light); text-align: center; margin-top: 8px; }
 
   /* ===== Game list ===== */
-  .game-item {
-    padding: 16px 0;
-    border-bottom: 1px solid var(--border);
-  }
+  .game-item { padding: 16px 0; border-bottom: 1px solid var(--border); }
   .game-item:last-child { border-bottom: none; }
-  .game-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 6px;
-  }
-  .game-name {
-    font-weight: 700;
-    font-size: 0.95rem;
-  }
-  .game-plays {
-    font-size: 0.75rem;
-    color: var(--text-light);
-    background: var(--primary-light);
-    padding: 2px 10px;
-    border-radius: 100px;
-  }
-  .game-comment {
-    font-size: 0.82rem;
-    color: var(--text-light);
-    line-height: 1.5;
-  }
-  .sparkline-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 8px;
-  }
-  .sparkline-label {
-    font-size: 0.7rem;
-    color: var(--text-muted);
-    white-space: nowrap;
-  }
-  .sparkline-bars {
-    display: flex;
-    align-items: flex-end;
-    gap: 3px;
-    height: 24px;
-  }
-  .spark-bar {
-    width: 14px;
-    background: var(--primary);
-    border-radius: 3px 3px 0 0;
-    min-height: 3px;
-    transition: height 0.3s ease;
-    opacity: 0.6;
-  }
+  .game-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .game-name { font-weight: 700; font-size: 0.95rem; }
+  .game-plays { font-size: 0.75rem; color: var(--text-light); background: var(--primary-light); padding: 2px 10px; border-radius: 100px; }
+  .game-comment { font-size: 0.82rem; color: var(--text-light); line-height: 1.5; }
+  .sparkline-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+  .sparkline-label { font-size: 0.7rem; color: var(--text-muted); white-space: nowrap; }
+  .sparkline-bars { display: flex; align-items: flex-end; gap: 3px; height: 24px; }
+  .spark-bar { width: 14px; background: var(--primary); border-radius: 3px 3px 0 0; min-height: 3px; opacity: 0.6; }
   .spark-bar:last-child { opacity: 1; }
 
-  /* ===== Donut chart ===== */
-  .donut-wrap {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
+  /* ===== Donut ===== */
+  .donut-wrap { display: flex; align-items: center; gap: 16px; }
   .donut-chart { width: 120px; height: 120px; flex-shrink: 0; }
   .donut-legend { flex: 1; }
-  .legend-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.8rem;
-    margin-bottom: 6px;
-  }
-  .legend-dot {
-    width: 10px; height: 10px;
-    border-radius: 3px;
-    flex-shrink: 0;
-  }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; margin-bottom: 6px; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
 
   /* ===== Teacher comment ===== */
-  .teacher-card {
-    background: linear-gradient(135deg, #FFF8E1 0%, #FFFDE7 100%);
-    border: 1.5px solid #FFE082;
-  }
-  .teacher-card .icon-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 10px;
-  }
+  .teacher-card { background: linear-gradient(135deg, #FFF8E1 0%, #FFFDE7 100%); border: 1.5px solid #FFE082; }
+  .teacher-card .icon-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
   .teacher-card .icon-row .emoji { font-size: 1.3rem; }
-  .teacher-card .icon-row .label {
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: #9E6B00;
-  }
-  .teacher-card .comment-text {
-    font-size: 0.95rem;
-    line-height: 1.8;
-    color: var(--text);
-  }
-
-  /* ===== F3: 複数月アコーディオン ===== */
-  .comment-latest {
-    /* 最新月：通常カード（teacher-card スタイルを継承） */
-  }
-
-  .comment-history {
-    margin-top: 10px;
-  }
-
+  .teacher-card .icon-row .label { font-size: 0.8rem; font-weight: 700; color: #9E6B00; }
+  .teacher-card .comment-text { font-size: 0.95rem; line-height: 1.8; color: var(--text); }
+  .comment-history { margin-top: 10px; }
   .comment-history-toggle {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 16px;
-    background: rgba(245, 166, 35, 0.08);
-    border: 1.5px solid #FFE082;
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    font-size: 0.82rem;
-    font-weight: 700;
-    color: #9E6B00;
-    user-select: none;
-    transition: background 0.2s;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 16px; background: rgba(245, 166, 35, 0.08);
+    border: 1.5px solid #FFE082; border-radius: var(--radius-sm);
+    cursor: pointer; font-size: 0.82rem; font-weight: 700; color: #9E6B00;
+    user-select: none; transition: background 0.2s;
   }
-  .comment-history-toggle:hover {
-    background: rgba(245, 166, 35, 0.14);
-  }
-  .comment-history-toggle .toggle-arrow {
-    font-size: 0.75rem;
-    transition: transform 0.25s ease;
-    display: inline-block;
-  }
-  .comment-history-toggle.open .toggle-arrow {
-    transform: rotate(180deg);
-  }
-
-  .comment-history-body {
-    display: none;
-    flex-direction: column;
-    gap: 8px;
-    margin-top: 8px;
-    overflow: hidden;
-  }
-  .comment-history-body.open {
-    display: flex;
-    animation: slideDown 0.25s ease;
-  }
+  .comment-history-toggle:hover { background: rgba(245, 166, 35, 0.14); }
+  .comment-history-toggle .toggle-arrow { font-size: 0.75rem; transition: transform 0.25s ease; display: inline-block; }
+  .comment-history-toggle.open .toggle-arrow { transform: rotate(180deg); }
+  .comment-history-body { display: none; flex-direction: column; gap: 8px; margin-top: 8px; }
+  .comment-history-body.open { display: flex; animation: slideDown 0.25s ease; }
   @keyframes slideDown {
     from { opacity: 0; transform: translateY(-8px); }
     to   { opacity: 1; transform: translateY(0); }
   }
+  .comment-history-item { background: #FFFDE7; border: 1px solid #FFE082; border-radius: var(--radius-sm); padding: 14px 16px; }
+  .comment-history-item .month-label { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; }
+  .comment-history-item .comment-body { font-size: 0.9rem; line-height: 1.75; color: var(--text); }
 
-  .comment-history-item {
-    background: #FFFDE7;
-    border: 1px solid #FFE082;
-    border-radius: var(--radius-sm);
-    padding: 14px 16px;
-  }
-  .comment-history-item .month-label {
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: var(--text-muted);
-    margin-bottom: 6px;
-  }
-  .comment-history-item .comment-body {
-    font-size: 0.9rem;
-    line-height: 1.75;
-    color: var(--text);
-  }
-
-  /* ===== Home hints ===== */
-  .hint-card {
-    background: var(--primary-light);
-    border: 1.5px solid #B2DFDB;
-  }
-  .hint-item {
-    padding: 10px 0;
-    font-size: 0.88rem;
-    line-height: 1.6;
-    border-bottom: 1px dashed #B2DFDB;
-    display: flex;
-    gap: 10px;
-  }
+  /* ===== Hints ===== */
+  .hint-card { background: var(--primary-light); border: 1.5px solid #B2DFDB; }
+  .hint-item { padding: 10px 0; font-size: 0.88rem; line-height: 1.6; border-bottom: 1px dashed #B2DFDB; display: flex; gap: 10px; }
   .hint-item:last-child { border-bottom: none; }
-  .hint-bullet {
-    color: var(--primary);
-    font-size: 1.1rem;
-    flex-shrink: 0;
-    line-height: 1.6;
-  }
+  .hint-bullet { color: var(--primary); font-size: 1.1rem; flex-shrink: 0; line-height: 1.6; }
 
   /* ===== Footer ===== */
-  .footer {
-    text-align: center;
-    padding: 32px 0 16px;
-    font-size: 0.7rem;
-    color: var(--text-muted);
-  }
+  .footer { text-align: center; padding: 32px 0 16px; font-size: 0.7rem; color: var(--text-muted); }
   .footer a { color: var(--primary); text-decoration: none; }
 
-  /* ===== Growth indicator ===== */
-  .growth {
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
-    font-size: 0.8rem;
-    font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 6px;
-  }
-  .growth.up { color: var(--growth-up); background: rgba(43,158,143,0.12); }
-  .growth.down { color: var(--growth-down); background: rgba(229,115,115,0.12); }
-  .growth.flat { color: var(--text-muted); background: rgba(0,0,0,0.05); }
+  @keyframes spin { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }
 
-  /* ===== Print ===== */
   @media print {
     body { background: white; }
     .dashboard { max-width: 100%; padding: 0; }
-    .card { box-shadow: none; border: 1px solid #ddd; break-inside: avoid; }
-    .hero { color-adjust: exact; -webkit-print-color-adjust: exact; }
-    .badge-chip { border: 1px solid #ccc; }
+    .card, .alt-card, .streak-card { box-shadow: none; break-inside: avoid; }
     .footer { display: none; }
-    .comment-history-body { display: flex !important; }
   }
 </style>
 </head>
 <body>
 
-<!-- Loading -->
 <div id="loading" class="loading-screen">
   <div class="logo">TRAIL</div>
   <div class="loading-dots"><span></span><span></span><span></span></div>
-  <div style="font-size:0.85rem; color:var(--text-light)">データを読み込んでいます...</div>
+  <div style="font-size:0.85rem;color:var(--text-light)">データを読み込んでいます...</div>
 </div>
 
-<!-- Error -->
 <div id="error" class="error-screen" style="display:none">
   <div class="icon">😢</div>
   <h2>ページを表示できません</h2>
   <p id="error-msg">リンクの有効期限が切れている可能性があります。<br>教室の先生に新しいリンクを発行してもらってください。</p>
 </div>
 
-<!-- Dashboard -->
 <div id="dashboard" class="dashboard">
 
-  <!-- Header -->
   <div class="header">
     <div class="brand">TRAIL</div>
     <div class="subtitle">おやこダッシュボード</div>
   </div>
 
-  <!-- ① Hero: 今月のハイライト -->
+  <!-- ① Hero -->
   <div class="section">
     <div class="hero">
       <div class="student-name" id="studentName">-</div>
@@ -545,7 +336,48 @@
     </div>
   </div>
 
-  <!-- ② 学習の見える化グラフ -->
+  <!-- ★ ALTコイン残高 (0-14追加) -->
+  <div class="section" id="altSection" style="display:none">
+    <div class="section-title"><span class="emoji">🪙</span> ALTコイン</div>
+    <div class="alt-card">
+      <div class="alt-header">
+        <span class="alt-label">BALANCE</span>
+        <span id="altAlive" style="font-size:0.75rem;color:rgba(255,149,0,0.6)">今月の合計</span>
+      </div>
+      <div class="alt-balance">
+        <span id="altBalance">0</span><span class="alt-balance-unit">ALT</span>
+      </div>
+      <div class="alt-awards" id="altAwards">
+        <div class="alt-no-data">まだ獲得履歴がありません</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ★ ストリーク (0-14追加) -->
+  <div class="section" id="streakSection" style="display:none">
+    <div class="section-title"><span class="emoji">🔥</span> 連続プレイ</div>
+    <div class="streak-card">
+      <div class="streak-top">
+        <div class="streak-flame">🔥</div>
+        <div class="streak-numbers">
+          <div class="streak-current" id="streakCurrent">0<span>日連続</span></div>
+          <div class="streak-max" id="streakMax">最長記録: 0日</div>
+        </div>
+        <div class="streak-alive" id="streakAlive">継続中</div>
+      </div>
+      <!-- 7日間カレンダー -->
+      <div class="streak-calendar" id="streakCalendar"></div>
+      <!-- 今月の統計 -->
+      <div class="streak-monthly">
+        <div class="streak-monthly-item">
+          <div class="streak-monthly-val" id="streakMonthlyPlays">-</div>
+          <div class="streak-monthly-label">今月のプレイ数</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ② 学習グラフ -->
   <div class="section">
     <div class="section-title"><span class="emoji">📊</span> 学習のようす</div>
     <div class="card">
@@ -563,16 +395,12 @@
         <div class="donut-legend" id="donutLegend"></div>
       </div>
     </div>
-    <div class="card" id="gameList" style="margin-top:12px">
-      <!-- filled by JS -->
-    </div>
+    <div class="card" id="gameList" style="margin-top:12px"></div>
   </div>
 
-  <!-- ④ 先生からの一言（F3: 複数月アコーディオン） -->
+  <!-- ④ 先生からの一言 -->
   <div class="section" id="teacherSection" style="display:none">
     <div class="section-title"><span class="emoji">✉️</span> 先生からの一言</div>
-
-    <!-- 最新月: 常に表示 -->
     <div class="card teacher-card" id="teacherLatest">
       <div class="icon-row">
         <span class="emoji">👩‍🏫</span>
@@ -580,93 +408,40 @@
       </div>
       <div class="comment-text" id="teacherComment"></div>
     </div>
-
-    <!-- 過去月アコーディオン（2件以上あるとき表示） -->
     <div class="comment-history" id="commentHistory" style="display:none">
       <button class="comment-history-toggle" id="historyToggle" aria-expanded="false">
         <span>📂 過去のコメントを見る</span>
         <span class="toggle-arrow">▼</span>
       </button>
-      <div class="comment-history-body" id="historyBody">
-        <!-- filled by JS -->
-      </div>
-    </div>
-  </div>
-<!-- ============================================================
-  F4: parent.html の <!-- ④.5 AI分析コメント --> セクションを
-  以下のHTMLで丸ごと置き換えてください
-  ============================================================ -->
-
-<!-- ④.5 AI先生の分析（F4: 朝/夜定時 + 手動） -->
-<div class="section" id="aiSection">
-  <div class="section-title"><span class="emoji">🤖</span> AI先生の分析</div>
-
-  <!-- 朝のコメント（6:00配信） -->
-  <div id="aiMorningCard" style="display:none; margin-bottom:12px">
-    <div class="card" style="background:linear-gradient(135deg,#FFF8E1,#FFFDE7);border:1.5px solid #FFE082">
-      <div style="font-size:0.75rem;font-weight:700;color:#9E6B00;margin-bottom:6px">🌅 朝の提案（6:00更新）</div>
-      <div style="font-weight:700;color:#E65100;font-size:1rem;margin-bottom:6px" id="aiMorningHighlight"></div>
-      <div style="font-size:0.88rem;color:var(--text);line-height:1.6" id="aiMorningComment"></div>
+      <div class="comment-history-body" id="historyBody"></div>
     </div>
   </div>
 
-  <!-- 夜のコメント（19:00配信） -->
-  <div id="aiEveningCard" style="display:none; margin-bottom:12px">
-    <div class="card" style="background:linear-gradient(135deg,#EDE7F6,#F3E5F5);border:1.5px solid #CE93D8">
-      <div style="font-size:0.75rem;font-weight:700;color:#6A1B9A;margin-bottom:6px">🌙 夜のまとめ（19:00更新）</div>
-      <div style="font-weight:700;color:#4A148C;font-size:1rem;margin-bottom:6px" id="aiEveningHighlight"></div>
-      <div style="font-size:0.88rem;color:var(--text);line-height:1.6" id="aiEveningComment"></div>
-    </div>
-  </div>
-
-  <!-- 手動AI分析 -->
-  <div class="card" id="aiCard" style="background:linear-gradient(135deg,#f0f9ff,#e8f4f8);border:1.5px solid rgba(43,158,143,0.2)">
-    <div id="aiContent" style="display:none">
-      <div style="font-size:0.75rem;font-weight:700;color:var(--primary);margin-bottom:6px">🤖 AI分析（手動）</div>
-      <div style="font-weight:700;color:var(--primary);font-size:1.05rem;margin-bottom:8px" id="aiHighlight"></div>
-      <div style="color:var(--text-body);font-size:0.9rem;line-height:1.6" id="aiComment"></div>
-    </div>
-    <div id="aiPlaceholder" style="text-align:center;padding:10px 0">
-      <div style="color:var(--text-muted);font-size:0.85rem;margin-bottom:12px">AIがお子さんの学習データを分析して、<br>パーソナライズされたコメントを生成します</div>
-      <button id="generateAiBtn" style="background:linear-gradient(135deg,#2B9E8F,#3BB0A1);color:#fff;border:none;border-radius:24px;padding:12px 28px;font-family:inherit;font-size:0.9rem;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(43,158,143,0.25);transition:all 0.3s">
-        🤖 AI分析を実行
-      </button>
-    </div>
-    <div id="aiLoading" style="display:none;text-align:center;padding:16px 0">
-      <div style="font-size:1.5rem;animation:spin 1s linear infinite;display:inline-block">🔄</div>
-      <div style="color:var(--text-muted);font-size:0.85rem;margin-top:8px">AIが分析中...</div>
-    </div>
-  </div>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-  <!-- ④.5 AI分析コメント -->
+  <!-- ④.5 AI分析 -->
   <div class="section" id="aiSection">
     <div class="section-title"><span class="emoji">🤖</span> AI先生の分析</div>
+
+    <div id="aiMorningCard" style="display:none;margin-bottom:12px">
+      <div class="card" style="background:linear-gradient(135deg,#FFF8E1,#FFFDE7);border:1.5px solid #FFE082">
+        <div style="font-size:0.75rem;font-weight:700;color:#9E6B00;margin-bottom:6px">🌅 朝の提案（6:00更新）</div>
+        <div style="font-weight:700;color:#E65100;font-size:1rem;margin-bottom:6px" id="aiMorningHighlight"></div>
+        <div style="font-size:0.88rem;color:var(--text);line-height:1.6" id="aiMorningComment"></div>
+      </div>
+    </div>
+
+    <div id="aiEveningCard" style="display:none;margin-bottom:12px">
+      <div class="card" style="background:linear-gradient(135deg,#EDE7F6,#F3E5F5);border:1.5px solid #CE93D8">
+        <div style="font-size:0.75rem;font-weight:700;color:#6A1B9A;margin-bottom:6px">🌙 夜のまとめ（19:00更新）</div>
+        <div style="font-weight:700;color:#4A148C;font-size:1rem;margin-bottom:6px" id="aiEveningHighlight"></div>
+        <div style="font-size:0.88rem;color:var(--text);line-height:1.6" id="aiEveningComment"></div>
+      </div>
+    </div>
+
     <div class="card" id="aiCard" style="background:linear-gradient(135deg,#f0f9ff,#e8f4f8);border:1.5px solid rgba(43,158,143,0.2)">
       <div id="aiContent" style="display:none">
+        <div style="font-size:0.75rem;font-weight:700;color:var(--primary);margin-bottom:6px">🤖 AI分析（手動）</div>
         <div style="font-weight:700;color:var(--primary);font-size:1.05rem;margin-bottom:8px" id="aiHighlight"></div>
-        <div style="color:var(--text-body);font-size:0.9rem;line-height:1.6" id="aiComment"></div>
+        <div style="color:var(--text);font-size:0.9rem;line-height:1.6" id="aiComment"></div>
       </div>
       <div id="aiPlaceholder" style="text-align:center;padding:10px 0">
         <div style="color:var(--text-muted);font-size:0.85rem;margin-bottom:12px">AIがお子さんの学習データを分析して、<br>パーソナライズされたコメントを生成します</div>
@@ -684,12 +459,9 @@
   <!-- ⑤ おうちでできること -->
   <div class="section" id="hintsSection" style="display:none">
     <div class="section-title"><span class="emoji">🏠</span> おうちでできること</div>
-    <div class="card hint-card" id="hintsList">
-      <!-- filled by JS -->
-    </div>
+    <div class="card hint-card" id="hintsList"></div>
   </div>
 
-  <!-- Footer -->
   <div class="footer">
     <a href="https://trail-game-pro-3-2.onrender.com">TRAIL Game Pro</a> — 探究教室TRAIL
   </div>
@@ -718,9 +490,10 @@
     const data = await res.json();
     render(data);
 
-    // F3: 生徒IDが取れたら複数月コメント履歴を非同期で取得
     if (data.student && data.student.id) {
       fetchTeacherComments(data.student.id);
+      // ★ ALT・ストリークを並行取得
+      fetchAltAndStreak(data.student.id, data.tenant_id);
     }
   } catch (e) {
     console.error(e);
@@ -734,30 +507,112 @@ function showError(msg) {
   document.getElementById('error-msg').innerHTML = msg;
 }
 
-// ===== F3: 複数月コメント取得 & アコーディオン描画 =====
+// ===== ★ ALT + ストリーク取得 (0-14追加) =====
+async function fetchAltAndStreak(studentId, tenantId) {
+  try {
+    // ストリーク
+    const sRes = await fetch(`/api/streaks/${studentId}?tenant_id=${tenantId}`);
+    if (sRes.ok) {
+      const sData = await sRes.json();
+      renderStreak(sData);
+    }
+  } catch (e) { console.warn('streak fetch failed:', e); }
+
+  try {
+    // ALT残高（coin_logs から集計）
+    const cRes = await fetch(`/api/t/${tenantId}/coins?student_id=${studentId}`);
+    if (cRes.ok) {
+      const cData = await cRes.json();
+      renderAlt(cData);
+    }
+  } catch (e) { console.warn('alt fetch failed:', e); }
+}
+
+function renderStreak(data) {
+  const streak = data.streak || data;
+  if (!streak) return;
+
+  document.getElementById('streakSection').style.display = 'block';
+
+  const current = streak.current_streak || 0;
+  const max     = streak.max_streak     || 0;
+  const alive   = streak.isAlive        || false;
+
+  document.getElementById('streakCurrent').innerHTML = `${current}<span>日連続</span>`;
+  document.getElementById('streakMax').textContent   = `最長記録: ${max}日`;
+
+  const aliveEl = document.getElementById('streakAlive');
+  if (alive) {
+    aliveEl.textContent = '継続中 ✅';
+    aliveEl.classList.remove('streak-dead');
+  } else {
+    aliveEl.textContent = current > 0 ? '途切れた...' : '未プレイ';
+    aliveEl.classList.add('streak-dead');
+  }
+
+  // 7日間カレンダー
+  const cal = document.getElementById('streakCalendar');
+  const days = data.calendar || [];
+  const dayNames = ['日','月','火','水','木','金','土'];
+
+  if (days.length > 0) {
+    cal.innerHTML = days.map(d => {
+      const date = new Date(d.date);
+      const dayName = dayNames[date.getDay()];
+      return `
+        <div class="streak-day">
+          <div class="streak-day-dot ${d.played ? 'played' : 'not-played'}">
+            ${d.played ? '🔥' : ''}
+          </div>
+          <div class="streak-day-label">${dayName}</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // 今月のプレイ数
+  if (data.monthly_plays !== undefined) {
+    document.getElementById('streakMonthlyPlays').textContent = data.monthly_plays;
+  }
+}
+
+function renderAlt(data) {
+  const balance = data.balance || data.total_alt || 0;
+  const logs    = data.logs    || data.recent    || [];
+
+  if (balance === 0 && logs.length === 0) return;
+  document.getElementById('altSection').style.display = 'block';
+  document.getElementById('altBalance').textContent = balance.toLocaleString();
+
+  if (logs.length > 0) {
+    const awardsEl = document.getElementById('altAwards');
+    // 直近5件を表示
+    awardsEl.innerHTML = logs.slice(0, 5).map(log => `
+      <div class="alt-award-item">
+        <span class="alt-award-label">${log.reason_label || log.reason || 'ボーナス'}</span>
+        <span class="alt-award-amount">+${log.amount} ALT</span>
+      </div>
+    `).join('');
+  }
+}
+
+// ===== F3: 複数月コメント =====
 async function fetchTeacherComments(studentId) {
   try {
     const res = await fetch(`/api/teacher-comments/${studentId}`);
     if (!res.ok) return;
     const data = await res.json();
-
-    // APIは配列 or { comments: [] } で返ってくる想定
     const allComments = Array.isArray(data) ? data : (data.comments || []);
     if (!allComments || allComments.length === 0) return;
 
-    // month 降順（新しい順）でソート
     allComments.sort((a, b) => (b.month || '').localeCompare(a.month || ''));
-
     const latest = allComments[0];
     const past   = allComments.slice(1);
 
-    // 最新月を表示
     document.getElementById('teacherSection').style.display = 'block';
-    document.getElementById('teacherLatestMonth').textContent =
-      formatMonth(latest.month) + ' の先生より';
+    document.getElementById('teacherLatestMonth').textContent = formatMonth(latest.month) + ' の先生より';
     document.getElementById('teacherComment').textContent = latest.comment;
 
-    // 過去月がある場合はアコーディオン表示
     if (past.length > 0) {
       const historyEl = document.getElementById('commentHistory');
       const bodyEl    = document.getElementById('historyBody');
@@ -771,8 +626,6 @@ async function fetchTeacherComments(studentId) {
       `).join('');
 
       historyEl.style.display = 'block';
-
-      // アコーディオン開閉
       toggleEl.addEventListener('click', () => {
         const isOpen = bodyEl.classList.toggle('open');
         toggleEl.classList.toggle('open', isOpen);
@@ -781,14 +634,10 @@ async function fetchTeacherComments(studentId) {
           isOpen ? '📂 過去のコメントを閉じる' : '📂 過去のコメントを見る';
       });
     }
-  } catch (e) {
-    console.warn('teacher-comments fetch failed:', e);
-    // 取得失敗してもダッシュボード全体には影響しない
-  }
+  } catch (e) { console.warn('teacher-comments fetch failed:', e); }
 }
 
 function formatMonth(monthStr) {
-  // 'YYYY-MM' → '2025年12月'
   if (!monthStr) return '先月';
   const [y, m] = monthStr.split('-');
   if (!y || !m) return monthStr;
@@ -796,19 +645,13 @@ function formatMonth(monthStr) {
 }
 
 function escHtml(s) {
-  return String(s || '')
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;');
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 function render(d) {
   document.getElementById('loading').style.display = 'none';
-  const dash = document.getElementById('dashboard');
-  dash.classList.add('visible');
+  document.getElementById('dashboard').classList.add('visible');
 
-  // ===== Hero =====
   const s = d.student;
   document.getElementById('studentName').textContent = s.name + ' さん';
   document.getElementById('daysLabel').textContent = `TRAILに参加して ${s.days_since_join} 日目！`;
@@ -819,30 +662,21 @@ function render(d) {
   document.getElementById('statPlays').textContent = m.total_plays;
   document.getElementById('statAccuracy').textContent = m.avg_accuracy != null ? m.avg_accuracy : '-';
 
-  // Highlight message
   let hlMsg = '今月もがんばっています！';
   if (m.growth_pct !== null) {
-    if (m.growth_pct > 0) {
-      hlMsg = `先月より学習時間が ${m.growth_pct}% アップ！🎉`;
-    } else if (m.growth_pct < 0) {
-      hlMsg = `先月より少しペースダウン。応援してあげてください 💪`;
-    } else {
-      hlMsg = `先月と同じペースで学習中 ✨`;
-    }
+    if (m.growth_pct > 0)      hlMsg = `先月より学習時間が ${m.growth_pct}% アップ！🎉`;
+    else if (m.growth_pct < 0) hlMsg = `先月より少しペースダウン。応援してあげてください 💪`;
+    else                        hlMsg = `先月と同じペースで学習中 ✨`;
   }
-  // AI生成ハイライトがあればそちらを優先
-  if (d.aiComment && d.aiComment.highlight) {
-    hlMsg = d.aiComment.highlight;
-  }
+  if (d.aiComment && d.aiComment.highlight) hlMsg = d.aiComment.highlight;
   document.getElementById('highlightMsg').textContent = hlMsg;
 
-  // Badges
   const badgeRow = document.getElementById('badgeRow');
   if (d.badges && d.badges.length > 0) {
     badgeRow.innerHTML = d.badges.map(b => `<span class="badge-chip">${b}</span>`).join('');
   }
 
-  // ===== Weekly Chart =====
+  // Weekly Chart
   if (d.weekly && d.weekly.length > 0) {
     const ctx = document.getElementById('weeklyChart').getContext('2d');
     new Chart(ctx, {
@@ -853,112 +687,58 @@ function render(d) {
           {
             label: '学習時間（分）',
             data: d.weekly.map(w => Math.round(w.seconds / 60)),
-            backgroundColor: 'rgba(43, 158, 143, 0.6)',
-            borderColor: 'rgba(43, 158, 143, 1)',
-            borderWidth: 1,
-            borderRadius: 6,
-            yAxisID: 'y',
-            order: 2
+            backgroundColor: 'rgba(43,158,143,0.6)',
+            borderColor: 'rgba(43,158,143,1)',
+            borderWidth: 1, borderRadius: 6, yAxisID: 'y', order: 2
           },
           {
             label: '正答率（%）',
             data: d.weekly.map(w => w.accuracy),
-            type: 'line',
-            borderColor: '#F5A623',
-            backgroundColor: 'rgba(245, 166, 35, 0.1)',
-            pointBackgroundColor: '#F5A623',
-            pointRadius: 4,
-            tension: 0.3,
-            fill: true,
-            yAxisID: 'y1',
-            order: 1
+            type: 'line', borderColor: '#F5A623',
+            backgroundColor: 'rgba(245,166,35,0.1)',
+            pointBackgroundColor: '#F5A623', pointRadius: 4,
+            tension: 0.3, fill: true, yAxisID: 'y1', order: 1
           }
         ]
       },
       options: {
-        responsive: true,
-        maintainAspectRatio: false,
+        responsive: true, maintainAspectRatio: false,
         interaction: { mode: 'index', intersect: false },
-        plugins: {
-          legend: {
-            position: 'bottom',
-            labels: { font: { family: 'Zen Maru Gothic', size: 11 }, boxWidth: 12, padding: 12 }
-          }
-        },
+        plugins: { legend: { position: 'bottom', labels: { font: { family: 'Zen Maru Gothic', size: 11 }, boxWidth: 12, padding: 12 } } },
         scales: {
-          x: {
-            ticks: { font: { family: 'Zen Maru Gothic', size: 10 }, maxRotation: 45 },
-            grid: { display: false }
-          },
-          y: {
-            position: 'left',
-            beginAtZero: true,
-            ticks: { font: { size: 10 } },
-            grid: { color: 'rgba(0,0,0,0.04)' },
-            title: { display: false }
-          },
-          y1: {
-            position: 'right',
-            min: 0, max: 100,
-            ticks: { font: { size: 10 }, callback: v => v + '%' },
-            grid: { display: false },
-            title: { display: false }
-          }
+          x: { ticks: { font: { family: 'Zen Maru Gothic', size: 10 }, maxRotation: 45 }, grid: { display: false } },
+          y: { position: 'left', beginAtZero: true, ticks: { font: { size: 10 } }, grid: { color: 'rgba(0,0,0,0.04)' } },
+          y1: { position: 'right', min: 0, max: 100, ticks: { font: { size: 10 }, callback: v => v + '%' }, grid: { display: false } }
         }
       }
     });
   }
 
-  // ===== Donut Chart & Game List =====
-  const colors = ['#2B9E8F', '#F5A623', '#E57373', '#7986CB', '#4DB6AC', '#FF8A65', '#A1887F', '#90A4AE'];
+  // Donut + Game list
+  const colors = ['#2B9E8F','#F5A623','#E57373','#7986CB','#4DB6AC','#FF8A65','#A1887F','#90A4AE'];
   if (d.byGame && d.byGame.length > 0) {
-    // Donut
     const dCtx = document.getElementById('donutChart').getContext('2d');
     new Chart(dCtx, {
       type: 'doughnut',
       data: {
         labels: d.byGame.map(g => g.name),
-        datasets: [{
-          data: d.byGame.map(g => Math.round(g.seconds / 60)),
-          backgroundColor: d.byGame.map((_, i) => colors[i % colors.length]),
-          borderWidth: 0
-        }]
+        datasets: [{ data: d.byGame.map(g => Math.round(g.seconds / 60)), backgroundColor: d.byGame.map((_,i) => colors[i % colors.length]), borderWidth: 0 }]
       },
-      options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        cutout: '65%',
-        plugins: { legend: { display: false } }
-      }
+      options: { responsive: true, maintainAspectRatio: true, cutout: '65%', plugins: { legend: { display: false } } }
     });
 
-    // Legend
-    const legend = document.getElementById('donutLegend');
-    legend.innerHTML = d.byGame.map((g, i) =>
-      `<div class="legend-item">
-        <span class="legend-dot" style="background:${colors[i % colors.length]}"></span>
-        <span>${g.name}（${Math.round(g.seconds / 60)}分）</span>
-      </div>`
+    document.getElementById('donutLegend').innerHTML = d.byGame.map((g,i) =>
+      `<div class="legend-item"><span class="legend-dot" style="background:${colors[i % colors.length]}"></span><span>${g.name}（${Math.round(g.seconds/60)}分）</span></div>`
     ).join('');
 
-    // Game list
-    const gameList = document.getElementById('gameList');
-    gameList.innerHTML = d.byGame.map(g => {
+    document.getElementById('gameList').innerHTML = d.byGame.map(g => {
       const sparkBars = (g.accuracy_trend || []).map(v =>
-        `<div class="spark-bar" style="height:${Math.max((v / 100) * 24, 3)}px"></div>`
+        `<div class="spark-bar" style="height:${Math.max((v/100)*24,3)}px"></div>`
       ).join('');
-
       return `<div class="game-item">
-        <div class="game-header">
-          <span class="game-name">${g.name}</span>
-          <span class="game-plays">${g.plays}回</span>
-        </div>
+        <div class="game-header"><span class="game-name">${g.name}</span><span class="game-plays">${g.plays}回</span></div>
         <div class="game-comment">${g.comment}</div>
-        ${g.accuracy_trend && g.accuracy_trend.length > 1 ? `
-        <div class="sparkline-row">
-          <span class="sparkline-label">正答率の推移</span>
-          <div class="sparkline-bars">${sparkBars}</div>
-        </div>` : ''}
+        ${g.accuracy_trend && g.accuracy_trend.length > 1 ? `<div class="sparkline-row"><span class="sparkline-label">正答率の推移</span><div class="sparkline-bars">${sparkBars}</div></div>` : ''}
       </div>`;
     }).join('');
   } else {
@@ -966,19 +746,27 @@ function render(d) {
       '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:0.9rem">まだプレイ記録がありません</div>';
   }
 
-  // ===== Teacher Comment (初期表示: d.teacherComment フォールバック) =====
-  // ※ fetchTeacherComments() が成功すれば上書きされる
   if (d.teacherComment) {
     document.getElementById('teacherSection').style.display = 'block';
     document.getElementById('teacherComment').textContent = d.teacherComment;
   }
 
-  // ===== AI Comment (cached) =====
-  if (d.aiComment && d.aiComment.comment) {
-    showAiResult(d.aiComment);
+  if (d.scheduledComments) {
+    const morning = d.scheduledComments.find(c => c.type === 'morning');
+    if (morning) {
+      document.getElementById('aiMorningCard').style.display = 'block';
+      document.getElementById('aiMorningHighlight').textContent = morning.highlight || '';
+      document.getElementById('aiMorningComment').textContent = morning.comment || '';
+    }
+    const evening = d.scheduledComments.find(c => c.type === 'evening');
+    if (evening) {
+      document.getElementById('aiEveningCard').style.display = 'block';
+      document.getElementById('aiEveningHighlight').textContent = evening.highlight || '';
+      document.getElementById('aiEveningComment').textContent = evening.comment || '';
+    }
   }
+  if (d.aiComment && d.aiComment.comment) showAiResult(d.aiComment);
 
-  // ===== AI Generate Button =====
   document.getElementById('generateAiBtn').addEventListener('click', async function() {
     const btn = this;
     const tk = new URLSearchParams(location.search).get('token');
@@ -988,19 +776,10 @@ function render(d) {
 
     try {
       const aiRes = await fetch(`/api/parent/${tk}/ai-comment`, { method: 'POST' });
-      if (!aiRes.ok) {
-        const err = await aiRes.json();
-        throw new Error(err.error || 'AI生成に失敗しました');
-      }
+      if (!aiRes.ok) { const err = await aiRes.json(); throw new Error(err.error || 'AI生成に失敗しました'); }
       const aiData = await aiRes.json();
       showAiResult(aiData);
-
-      // ハイライトも更新
-      if (aiData.highlight) {
-        document.getElementById('highlightMsg').textContent = aiData.highlight;
-      }
-
-      // おうちヒントも更新
+      if (aiData.highlight) document.getElementById('highlightMsg').textContent = aiData.highlight;
       if (aiData.home_hints && aiData.home_hints.length > 0) {
         document.getElementById('hintsSection').style.display = 'block';
         document.getElementById('hintsList').innerHTML = aiData.home_hints.map(h =>
@@ -1012,7 +791,6 @@ function render(d) {
       document.getElementById('aiPlaceholder').style.display = 'block';
       btn.disabled = false;
       btn.textContent = '⚠️ もう一度試す';
-      console.error('AI error:', e);
     }
   });
 
@@ -1024,18 +802,12 @@ function render(d) {
     document.getElementById('aiComment').textContent = ai.comment || '';
   }
 
-  // ===== Home Hints =====
   const hints = (d.aiComment && d.aiComment.home_hints && d.aiComment.home_hints.length > 0)
-    ? d.aiComment.home_hints
-    : d.homeHints;
-
+    ? d.aiComment.home_hints : d.homeHints;
   if (hints && hints.length > 0) {
     document.getElementById('hintsSection').style.display = 'block';
     document.getElementById('hintsList').innerHTML = hints.map(h =>
-      `<div class="hint-item">
-        <span class="hint-bullet">💡</span>
-        <span>${h}</span>
-      </div>`
+      `<div class="hint-item"><span class="hint-bullet">💡</span><span>${h}</span></div>`
     ).join('');
   }
 }
