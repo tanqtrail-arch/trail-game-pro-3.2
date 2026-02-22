@@ -214,7 +214,188 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_ai_student_date ON ai_comments(student_id, date);
 `);
 // ★ END NEW ========================
+// ============================================================
+// Phase 0: ゲームエコシステム基盤テーブル
+// server/index.js の「★ END NEW」コメントの直後、
+// console.log('  Migrations: OK'); の直前に挿入
+// ============================================================
 
+// ── 0-1a: play_sessions に ALT付与カラム追加 ──
+try {
+  db.exec(`ALTER TABLE play_sessions ADD COLUMN alt_awarded INTEGER DEFAULT 0`);
+} catch (e) { /* 既に存在する場合は無視 */ }
+try {
+  db.exec(`ALTER TABLE play_sessions ADD COLUMN alt_amount INTEGER DEFAULT 0`);
+} catch (e) { /* 既に存在する場合は無視 */ }
+
+// ── 0-1b: students に PIN認証カラム追加 ──
+try {
+  db.exec(`ALTER TABLE students ADD COLUMN pin TEXT`);
+} catch (e) { /* 既に存在する場合は無視 */ }
+
+// PIN のテナント内ユニークインデックス
+db.exec(`
+  CREATE UNIQUE INDEX IF NOT EXISTS idx_student_pin
+  ON students(tenant_id, pin)
+  WHERE pin IS NOT NULL
+`);
+
+// ── 0-1c: streaks テーブル（連続プレイ管理） ──
+db.exec(`
+  CREATE TABLE IF NOT EXISTS streaks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    student_id INTEGER NOT NULL,
+    tenant_id TEXT NOT NULL,
+    current_streak INTEGER DEFAULT 0,
+    max_streak INTEGER DEFAULT 0,
+    last_play_date TEXT,
+    updated_at TEXT DEFAULT (datetime('now')),
+    FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    UNIQUE(student_id, tenant_id)
+  )
+`);
+db.exec(`
+  CREATE INDEX IF NOT EXISTS idx_streaks_student ON streaks(student_id);
+  CREATE INDEX IF NOT EXISTS idx_streaks_tenant ON streaks(tenant_id);
+`);
+
+// ── 0-1d: alt_rules テーブル（ALT付与ルールのカスタマイズ用） ──
+db.exec(`
+  CREATE TABLE IF NOT EXISTS alt_rules (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    tenant_id TEXT NOT NULL,
+    rule_key TEXT NOT NULL,
+    alt_amount INTEGER NOT NULL,
+    is_active INTEGER DEFAULT 1,
+    created_at TEXT DEFAULT (datetime('now')),
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    UNIQUE(tenant_id, rule_key)
+  )
+`);
+db.exec(`
+  CREATE INDEX IF NOT EXISTS idx_alt_rules_tenant ON alt_rules(tenant_id);
+`);
+
+// ── 0-1e: questions テーブル（問題データベース・全ゲーム共通） ──
+db.exec(`
+  CREATE TABLE IF NOT EXISTS questions (
+    id TEXT PRIMARY KEY,
+    game_id TEXT NOT NULL,
+    category TEXT,
+    subject TEXT NOT NULL,
+    unit TEXT,
+    difficulty INTEGER DEFAULT 3,
+    grade_min INTEGER DEFAULT 4,
+    grade_max INTEGER DEFAULT 6,
+    question_data TEXT NOT NULL,
+    answer_data TEXT NOT NULL,
+    explanation TEXT,
+    tags TEXT,
+    is_active INTEGER DEFAULT 1,
+    created_at TEXT DEFAULT (datetime('now')),
+    updated_at TEXT DEFAULT (datetime('now'))
+  )
+`);
+db.exec(`
+  CREATE INDEX IF NOT EXISTS idx_questions_game ON questions(game_id);
+  CREATE INDEX IF NOT EXISTS idx_questions_subject ON questions(subject);
+  CREATE INDEX IF NOT EXISTS idx_questions_difficulty ON questions(difficulty);
+  CREATE INDEX IF NOT EXISTS idx_questions_active ON questions(is_active);
+`);
+
+// ── 0-1f: game_saves テーブル（ゲーム進捗のサーバー保存） ──
+db.exec(`
+  CREATE TABLE IF NOT EXISTS game_saves (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    student_id INTEGER NOT NULL,
+    game_id TEXT NOT NULL,
+    save_data TEXT NOT NULL,
+    save_type TEXT DEFAULT 'auto',
+    updated_at TEXT DEFAULT (datetime('now')),
+    FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
+    UNIQUE(student_id, game_id)
+  )
+`);
+db.exec(`
+  CREATE INDEX IF NOT EXISTS idx_saves_student ON game_saves(student_id);
+  CREATE INDEX IF NOT EXISTS idx_saves_game ON game_saves(game_id);
+`);
+
+// ── 0-1g: 既存生徒にPINを自動生成（未設定の生徒のみ） ──
+const studentsWithoutPin = db.prepare(
+  `SELECT id, tenant_id FROM students WHERE pin IS NULL`
+).all();
+
+if (studentsWithoutPin.length > 0) {
+  const updatePin = db.prepare(`UPDATE students SET pin = ? WHERE id = ?`);
+  const checkPin = db.prepare(
+    `SELECT COUNT(*) as c FROM students WHERE tenant_id = ? AND pin = ?`
+  );
+
+  const generateUniquePin = (tenantId) => {
+    let pin;
+    let attempts = 0;
+    do {
+      pin = String(Math.floor(1000 + Math.random() * 9000)); // 4桁: 1000-9999
+      const exists = checkPin.get(tenantId, pin).c;
+      if (exists === 0) return pin;
+      attempts++;
+    } while (attempts < 100);
+    // フォールバック: タイムスタンプベース
+    return String(Date.now()).slice(-4);
+  };
+
+  db.transaction(() => {
+    for (const s of studentsWithoutPin) {
+      const pin = generateUniquePin(s.tenant_id);
+      updatePin.run(pin, s.id);
+    }
+  })();
+  console.log(`  PIN generated for ${studentsWithoutPin.length} students`);
+}
+
+// ── 0-1h: alt_rules にデフォルトルールをシード ──
+const ruleCount = db.prepare('SELECT COUNT(*) as c FROM alt_rules').get().c;
+if (ruleCount === 0) {
+  // 全テナントにデフォルトルールを挿入
+  const tenants = db.prepare('SELECT id FROM tenants').all();
+  const insertRule = db.prepare(
+    'INSERT OR IGNORE INTO alt_rules (tenant_id, rule_key, alt_amount) VALUES (?, ?, ?)'
+  );
+
+  const defaultRules = [
+    ['play_complete', 5],
+    ['accuracy_80', 10],
+    ['perfect', 20],
+    ['time_10min', 5],
+    ['time_30min', 15],
+    ['highscore', 15],
+    ['new_game', 10],
+    ['streak_3', 30],
+    ['streak_7', 100],
+    ['streak_30', 500],
+    ['monthly_10', 50],
+    ['monthly_30', 150],
+    ['battle_win', 20],
+    ['battle_draw', 10],
+    ['battle_perfect', 30],
+  ];
+
+  db.transaction(() => {
+    for (const t of tenants) {
+      for (const [key, amount] of defaultRules) {
+        insertRule.run(t.id, key, amount);
+      }
+    }
+  })();
+  console.log(`  ALT rules seeded for ${tenants.length} tenant(s)`);
+}
+
+console.log('  Phase 0 migrations: OK');
+// ============================================================
+// END Phase 0 migrations
+// ============================================================
   console.log('  Migrations: OK');
 
   // Seed demo tenant if no tenants exist
