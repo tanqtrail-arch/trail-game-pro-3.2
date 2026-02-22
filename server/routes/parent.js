@@ -837,4 +837,23 @@ router.post('/cron/evening-ai', async (req, res) => {
   console.log(`[CRON] evening-ai: ${students.length}人処理`, results.filter(r => r.ok).length + '件生成');
   res.json({ type: 'evening', total: students.length, results });
 });
+
+// ============================================================
+// AIコメントキャッシュ削除（管理用）
+// DELETE /api/cron/ai-cache?secret=CRON_SECRET&date=2026-02-23&type=morning
+// ============================================================
+router.delete('/cron/ai-cache', (req, res) => {
+  const CRON_SECRET = process.env.CRON_SECRET;
+  if (!CRON_SECRET || req.query.secret !== CRON_SECRET) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  const { date, type } = req.query;
+  let sql = 'DELETE FROM ai_comments WHERE 1=1';
+  const params = [];
+  if (date) { sql += ' AND date = ?'; params.push(date); }
+  if (type) { sql += ' AND type = ?'; params.push(type); }
+  const result = db.prepare(sql).run(...params);
+  res.json({ deleted: result.changes });
+});
+
 module.exports = router;
