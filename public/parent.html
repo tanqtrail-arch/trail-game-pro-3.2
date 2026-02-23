@@ -2,195 +2,577 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>保護者ダッシュボード - TRAIL GAME PRO 3</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>TRAIL おやこダッシュボード</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--bg-light:#f0f2f5;--bg-card:#ffffff;--text-primary:#2d3748;--text-dim:#a0aec0;--accent-cyan:#0090d9;--accent-gold:#e8a020;--accent-green:#2cb562;--accent-purple:#7c5cbf;--accent-pink:#e05070;--accent-orange:#ff9800;--border-glow:rgba(0,229,255,0.15)}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg-light);color:var(--text-primary);min-height:100vh}
-.app{max-width:520px;margin:0 auto;padding:16px;min-height:100vh}
-.header{display:flex;align-items:center;justify-content:space-between;padding:12px 0;margin-bottom:20px;flex-wrap:wrap;gap:8px}
-.header-logo{font-family:'Orbitron',sans-serif;font-weight:900;font-size:1rem;background:linear-gradient(135deg,var(--accent-cyan),var(--accent-purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.header-sub{font-size:.7rem;color:var(--text-dim);font-weight:700}
-.logout-btn{padding:6px 12px;border:1.5px solid rgba(224,80,112,0.25);background:none;color:var(--accent-pink);border-radius:8px;font-size:.7rem;cursor:pointer;transition:all .3s;font-family:inherit}
-.logout-btn:hover{background:rgba(224,80,112,0.06)}
-.student-card{background:var(--bg-card);border-radius:16px;padding:20px;border:1.5px solid rgba(0,0,0,0.06);box-shadow:0 4px 20px rgba(0,0,0,0.04);margin-bottom:20px;text-align:center}
-.student-avatar{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--accent-cyan),var(--accent-purple));display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.5rem;font-weight:900;margin:0 auto 10px}
-.student-name{font-size:1.3rem;font-weight:900;margin-bottom:4px}
-.student-class{font-size:.8rem;color:var(--text-dim);background:rgba(0,0,0,0.04);display:inline-block;padding:2px 12px;border-radius:20px}
-.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
-.stat-card{background:var(--bg-card);border:1.5px solid rgba(0,0,0,0.06);border-radius:14px;padding:14px 10px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,0.03)}
-.stat-value{font-family:'Orbitron',sans-serif;font-size:1.3rem;font-weight:900;margin-bottom:2px}
-.stat-label{font-size:.65rem;color:var(--text-dim)}
-.stat-gold .stat-value{color:var(--accent-gold)}
-.stat-cyan .stat-value{color:var(--accent-cyan)}
-.stat-orange .stat-value{color:var(--accent-orange)}
-.section-title{font-family:'Orbitron',sans-serif;font-size:.7rem;letter-spacing:2px;color:var(--text-dim);margin-bottom:10px;margin-top:24px}
-.card{background:var(--bg-card);border:1.5px solid rgba(0,0,0,0.06);border-radius:14px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.03);margin-bottom:16px}
+:root{
+  --bg:#faf7f2;--bg-card:#ffffff;--bg-card-alt:#fef9ef;
+  --sage:#7a9e7e;--sage-light:#e8f0e9;--sage-dark:#5a7e5e;
+  --gold:#c8a04a;--gold-light:#fdf3d7;--gold-dark:#a07828;
+  --cream:#f5eed6;--cream-dark:#e8ddb8;
+  --brown:#6b5443;--brown-light:#8b7463;
+  --text:#3d3428;--text-dim:#8a7e6d;--text-light:#b0a594;
+  --accent:#d4896a;--accent-light:#fbe8df;
+  --border:rgba(107,84,67,0.1);
+  --shadow:0 2px 12px rgba(107,84,67,0.08);
+  --radius:14px;
+}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
+.app{max-width:480px;margin:0 auto;padding:16px 16px 80px;min-height:100vh}
+
+/* ── Skeleton ── */
+.skeleton{background:linear-gradient(90deg,#eee8dd 25%,#f5eed6 50%,#eee8dd 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px;min-height:20px}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.skeleton-block{height:120px;border-radius:var(--radius);margin-bottom:16px}
+.skeleton-line{height:16px;margin-bottom:10px;width:80%}
+.skeleton-line.short{width:50%}
+
+/* ── Header ── */
+.header{display:flex;align-items:center;gap:12px;padding:20px 0 16px}
+.header-icon{width:44px;height:44px;background:linear-gradient(135deg,var(--sage),var(--sage-dark));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;color:#fff;font-weight:900}
+.header-text h1{font-size:1rem;font-weight:900;color:var(--sage-dark);letter-spacing:.5px}
+.header-text p{font-size:.7rem;color:var(--text-dim);font-weight:500}
+
+/* ── Student Card ── */
+.student-card{background:linear-gradient(135deg,var(--sage),var(--sage-dark));border-radius:var(--radius);padding:24px 20px;color:#fff;margin-bottom:20px;position:relative;overflow:hidden}
+.student-card::after{content:'';position:absolute;top:-30px;right:-30px;width:100px;height:100px;background:rgba(255,255,255,0.08);border-radius:50%}
+.student-card::before{content:'';position:absolute;bottom:-20px;left:-20px;width:80px;height:80px;background:rgba(255,255,255,0.05);border-radius:50%}
+.student-row{display:flex;align-items:center;gap:14px;position:relative;z-index:1}
+.student-avatar{width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:1.6rem;font-weight:900;border:2px solid rgba(255,255,255,0.3)}
+.student-info h2{font-size:1.2rem;font-weight:900}
+.student-info .class-badge{display:inline-block;background:rgba(255,255,255,0.2);padding:2px 10px;border-radius:20px;font-size:.7rem;font-weight:500;margin-top:4px}
+.student-info .days-badge{display:inline-block;background:var(--gold);color:var(--text);padding:2px 10px;border-radius:20px;font-size:.65rem;font-weight:700;margin-left:6px}
+
+/* ── Section Title ── */
+.section-title{font-size:.75rem;font-weight:700;color:var(--text-dim);margin:24px 0 10px;display:flex;align-items:center;gap:6px}
+.section-title span{font-size:.95rem}
+
+/* ── Card ── */
+.card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:16px}
 .card-empty{padding:24px;text-align:center;color:var(--text-dim);font-size:.85rem}
-.list-item{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid rgba(0,0,0,0.04)}
-.list-item:last-child{border-bottom:none}
-.list-icon{font-size:1.2rem;flex-shrink:0;width:28px;text-align:center}
-.list-body{flex:1;min-width:0}
-.list-body-main{font-size:.85rem;font-weight:600}
-.list-body-sub{font-size:.7rem;color:var(--text-dim);margin-top:1px}
-.list-right{font-family:'Orbitron',sans-serif;font-weight:700;font-size:.8rem;flex-shrink:0;white-space:nowrap}
-.alt-plus{color:var(--accent-gold)}
-.comment-item{padding:14px 16px;border-bottom:1px solid rgba(0,0,0,0.04)}
-.comment-item:last-child{border-bottom:none}
-.comment-msg{font-size:.85rem;font-weight:600;margin-bottom:4px}
-.comment-meta{font-size:.7rem;color:var(--text-dim)}
-.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;color:var(--text-dim);font-size:.9rem}
-.error-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;padding:20px}
-.error-screen h2{font-family:'Orbitron',sans-serif;font-size:1rem;color:var(--accent-pink);margin-bottom:12px}
-.error-screen p{color:var(--text-dim);font-size:.85rem;margin-bottom:20px}
-.error-screen a{color:var(--accent-cyan);text-decoration:none;font-weight:700}
-@media(min-width:600px){.app{padding:24px}}
+
+/* ── Stats Tabs ── */
+.stats-tabs{display:flex;gap:0;background:var(--cream);border-radius:10px;padding:3px;margin-bottom:12px}
+.stats-tab{flex:1;text-align:center;padding:8px 0;font-size:.75rem;font-weight:700;border-radius:8px;cursor:pointer;color:var(--text-dim);transition:all .2s}
+.stats-tab.active{background:var(--bg-card);color:var(--sage-dark);box-shadow:0 1px 4px rgba(0,0,0,0.08)}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:16px 8px;text-align:center;box-shadow:var(--shadow)}
+.stat-value{font-size:1.5rem;font-weight:900;color:var(--sage-dark);margin-bottom:2px}
+.stat-label{font-size:.65rem;color:var(--text-dim);font-weight:500}
+.stat-value.gold{color:var(--gold-dark)}
+
+/* ── Monthly Summary ── */
+.monthly-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.monthly-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:14px;box-shadow:var(--shadow)}
+.monthly-card .mc-label{font-size:.65rem;color:var(--text-dim);font-weight:500;margin-bottom:6px}
+.monthly-card .mc-value{font-size:1.3rem;font-weight:900;color:var(--text)}
+.monthly-card .mc-sub{font-size:.65rem;color:var(--text-light);margin-top:4px}
+.rank-card{background:linear-gradient(135deg,var(--gold-light),var(--cream));border:1px solid var(--gold);border-radius:12px;padding:14px;text-align:center;box-shadow:var(--shadow)}
+.rank-card .rank-pos{font-size:1.6rem;font-weight:900;color:var(--gold-dark)}
+.rank-card .rank-label{font-size:.7rem;color:var(--brown);font-weight:700;margin-top:2px}
+
+/* ── Accordion ── */
+.accordion{}
+.accordion-item{border-bottom:1px solid var(--border)}
+.accordion-item:last-child{border-bottom:none}
+.accordion-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer;user-select:none}
+.accordion-header:hover{background:rgba(122,158,126,0.04)}
+.accordion-month{font-size:.8rem;font-weight:700;color:var(--sage-dark)}
+.accordion-badge{font-size:.6rem;background:var(--sage-light);color:var(--sage-dark);padding:2px 8px;border-radius:10px;font-weight:700}
+.accordion-badge.ai{background:var(--accent-light);color:var(--accent)}
+.accordion-arrow{font-size:.65rem;color:var(--text-dim);transition:transform .2s}
+.accordion-item.open .accordion-arrow{transform:rotate(180deg)}
+.accordion-body{max-height:0;overflow:hidden;transition:max-height .3s ease}
+.accordion-item.open .accordion-body{max-height:500px}
+.accordion-content{padding:0 16px 14px;font-size:.85rem;line-height:1.6;color:var(--text)}
+
+/* ── Calendar ── */
+.calendar-grid{padding:12px}
+.calendar-header{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;margin-bottom:6px}
+.calendar-header span{font-size:.6rem;color:var(--text-dim);font-weight:700}
+.calendar-days{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.calendar-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:.7rem;border-radius:6px;font-weight:500;color:var(--text-dim);position:relative}
+.calendar-day.empty{visibility:hidden}
+.calendar-day.has-activity{background:var(--sage-light);color:var(--sage-dark);font-weight:700}
+.calendar-day.activity-high{background:var(--sage);color:#fff}
+.calendar-day.activity-max{background:var(--sage-dark);color:#fff}
+.calendar-day.today{outline:2px solid var(--gold);outline-offset:-1px}
+
+/* ── Category Bars ── */
+.category-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border)}
+.category-item:last-child{border-bottom:none}
+.category-name{font-size:.8rem;font-weight:700;width:60px;flex-shrink:0}
+.category-bar-wrap{flex:1;background:var(--cream);border-radius:6px;height:20px;overflow:hidden;position:relative}
+.category-bar{height:100%;background:linear-gradient(90deg,var(--sage-light),var(--sage));border-radius:6px;transition:width .6s ease;min-width:2px}
+.category-pct{font-size:.7rem;font-weight:700;color:var(--text-dim);width:40px;text-align:right;flex-shrink:0}
+.category-best{display:inline-block;background:var(--gold-light);color:var(--gold-dark);font-size:.55rem;font-weight:700;padding:1px 6px;border-radius:8px;margin-left:4px}
+
+/* ── Rank Graph ── */
+.rank-graph{padding:16px;height:160px;position:relative}
+.rank-graph-inner{display:flex;align-items:flex-end;justify-content:space-around;height:100%;gap:8px}
+.rank-bar-wrap{display:flex;flex-direction:column;align-items:center;flex:1}
+.rank-bar{width:100%;max-width:36px;background:linear-gradient(to top,var(--sage),var(--sage-light));border-radius:8px 8px 0 0;transition:height .5s ease;position:relative}
+.rank-bar-value{position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:.7rem;font-weight:900;color:var(--sage-dark);white-space:nowrap}
+.rank-bar-month{font-size:.6rem;color:var(--text-dim);margin-top:6px;font-weight:500}
+
+/* ── Best Scores ── */
+.score-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px}
+.score-card{background:var(--bg-card-alt);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center}
+.score-emoji{font-size:1.6rem;margin-bottom:4px}
+.score-name{font-size:.7rem;color:var(--text-dim);font-weight:500;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.score-value{font-size:1.1rem;font-weight:900;color:var(--gold-dark)}
+.score-label{font-size:.6rem;color:var(--text-dim)}
+
+/* ── Goal ── */
+.goal-card{background:linear-gradient(135deg,var(--gold-light),var(--cream));border:1px solid var(--gold);border-radius:var(--radius);padding:20px;text-align:center;margin-bottom:16px}
+.goal-icon{font-size:2rem;margin-bottom:8px}
+.goal-text{font-size:.9rem;font-weight:700;color:var(--brown)}
+.goal-empty{color:var(--text-dim);font-size:.8rem}
+
+/* ── Recent Plays ── */
+.play-item{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border)}
+.play-item:last-child{border-bottom:none}
+.play-emoji{font-size:1.2rem;width:28px;text-align:center;flex-shrink:0}
+.play-body{flex:1;min-width:0}
+.play-name{font-size:.82rem;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.play-date{font-size:.65rem;color:var(--text-dim);margin-top:1px}
+.play-alt{font-size:.8rem;font-weight:900;color:var(--gold-dark);flex-shrink:0}
+
+/* ── Error/Auth screens ── */
+.auth-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80vh;text-align:center;padding:24px}
+.auth-icon{font-size:3rem;margin-bottom:16px}
+.auth-title{font-size:1.1rem;font-weight:900;color:var(--sage-dark);margin-bottom:8px}
+.auth-msg{font-size:.85rem;color:var(--text-dim);line-height:1.6;max-width:280px}
+
+/* ── Loading screen ── */
+.loading-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80vh}
+.loading-dots{display:flex;gap:6px;margin-bottom:16px}
+.loading-dots span{width:10px;height:10px;border-radius:50%;background:var(--sage);animation:bounce .6s alternate infinite}
+.loading-dots span:nth-child(2){animation-delay:.2s}
+.loading-dots span:nth-child(3){animation-delay:.4s}
+@keyframes bounce{to{opacity:.3;transform:translateY(-6px)}}
+.loading-text{font-size:.8rem;color:var(--text-dim);font-weight:500}
+
+/* ── Utility ── */
+.mb-10{margin-bottom:10px}
+.mb-16{margin-bottom:16px}
 </style>
 </head>
 <body>
 <div class="app" id="app">
-  <div class="loading" id="loadingScreen">読み込み中...</div>
+  <div class="loading-screen" id="loadingScreen">
+    <div class="loading-dots"><span></span><span></span><span></span></div>
+    <div class="loading-text">読み込み中...</div>
+  </div>
 </div>
+
 <script>
 (function(){
-  const AUTH_KEY='trail_saas_auth';
-  function loadAuth(){try{return JSON.parse(sessionStorage.getItem(AUTH_KEY))}catch(e){return null}}
-  function clearAuth(){try{sessionStorage.removeItem(AUTH_KEY)}catch(e){}}
+  const app = document.getElementById('app');
 
-  const auth=loadAuth();
-  if(!auth||!auth.token||(auth.user&&auth.user.role!=='parent')){
-    showError('保護者としてログインしてください','ログイン画面へ','/');
+  // ── XSS対策 ──
+  function esc(s){ return s == null ? '' : String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  // ── URLからtoken取得 ──
+  const params = new URLSearchParams(location.search);
+  const token = params.get('token');
+
+  if (!token) {
+    showAuth('link', 'リンクが必要です', '先生から保護者用リンクをもらってください。\nLINEやメールで届いたURLをタップしてアクセスできます。');
     return;
   }
 
-  const token=auth.token;
-  const app=document.getElementById('app');
+  // ── Step 1: トークン検証 ──
+  fetch('/api/parent-verify?token=' + encodeURIComponent(token))
+    .then(r => {
+      if (!r.ok) throw new Error('invalid');
+      return r.json();
+    })
+    .then(verifyData => {
+      // ── Step 2: ダッシュボードデータ取得 ──
+      return fetch('/api/parent-dashboard?token=' + encodeURIComponent(token))
+        .then(r => {
+          if (!r.ok) throw new Error('dashboard_error');
+          return r.json();
+        })
+        .then(dashData => {
+          renderDashboard(verifyData, dashData);
+        });
+    })
+    .catch(err => {
+      if (err.message === 'dashboard_error') {
+        showAuth('error', 'データの取得に失敗しました', 'しばらくしてからもう一度お試しください。');
+      } else {
+        showAuth('expired', 'リンクが無効です', 'このリンクは無効または期限切れです。\n先生に新しいリンクを発行してもらってください。');
+      }
+    });
 
-  fetch('/api/parent/dashboard',{headers:{'Authorization':'Bearer '+token}})
-    .then(r=>{if(!r.ok)throw new Error('unauthorized');return r.json()})
-    .then(data=>renderDashboard(data))
-    .catch(()=>{showError('セッションが切れました。再度ログインしてください','ログイン画面へ','/')});
-
-  function esc(s){if(s==null)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
-
-  function formatDuration(sec){
-    if(!sec||sec<60)return'1分未満';
-    const h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60);
-    return h>0?h+'時間'+m+'分':m+'分';
+  // ── 認証/エラー画面 ──
+  function showAuth(type, title, msg) {
+    const icons = { link: '\uD83D\uDD17', expired: '\u23F3', error: '\u26A0\uFE0F' };
+    app.innerHTML = `
+      <div class="auth-screen">
+        <div class="auth-icon">${icons[type] || '\uD83D\uDD12'}</div>
+        <div class="auth-title">${esc(title)}</div>
+        <div class="auth-msg">${esc(msg).replace(/\n/g,'<br>')}</div>
+      </div>`;
   }
 
-  function formatDate(str){
-    if(!str)return'';
-    try{
-      const d=new Date(str+'Z');
-      return(d.getMonth()+1)+'/'+d.getDate()+' '+d.getHours()+':'+String(d.getMinutes()).padStart(2,'0');
-    }catch(e){return str}
+  // ── 日付フォーマット ──
+  function fmtDate(str) {
+    if (!str) return '';
+    try {
+      const d = new Date(str.includes('T') || str.includes('Z') ? str : str + 'T00:00:00');
+      return (d.getMonth()+1) + '/' + d.getDate();
+    } catch(e) { return str; }
   }
 
-  function renderDashboard(d){
-    const s=d.student;
-    const initial=s.name?s.name.charAt(0):'?';
+  function fmtMonth(str) {
+    if (!str) return '';
+    const parts = str.split('-');
+    if (parts.length >= 2) return parseInt(parts[0]) + '年' + parseInt(parts[1]) + '月';
+    return str;
+  }
 
-    // コメントセクション
-    let commentsHtml='';
-    if(d.comments&&d.comments.length>0){
-      commentsHtml=d.comments.map(c=>`
-        <div class="comment-item">
-          <div class="comment-msg">${esc(c.message)}</div>
-          <div class="comment-meta">${c.teacher?esc(c.teacher)+' · ':''}${formatDate(c.created_at)}</div>
-        </div>`).join('');
-    }else{
-      commentsHtml='<div class="card-empty">まだコメントはありません</div>';
-    }
+  // ── メインレンダリング ──
+  function renderDashboard(verify, data) {
+    const s = verify.student;
+    const t = verify.tenant;
+    const initial = s.name ? s.name.charAt(0) : '?';
+    const totalDays = data.attendance ? data.attendance.total : 0;
 
-    // ALTコインログ
-    let coinHtml='';
-    if(d.coinLogs&&d.coinLogs.length>0){
-      coinHtml=d.coinLogs.map(l=>`
-        <div class="list-item">
-          <div class="list-icon">${esc(l.game_emoji||'🪙')}</div>
-          <div class="list-body">
-            <div class="list-body-main">${esc(l.game_name||'ボーナス')}</div>
-            <div class="list-body-sub">${formatDate(l.created_at)}${l.note?' · '+esc(l.note):''}</div>
-          </div>
-          <div class="list-right alt-plus">+${l.amount}</div>
-        </div>`).join('');
-    }else{
-      coinHtml='<div class="card-empty">まだALT記録がありません</div>';
-    }
+    let html = '';
 
-    // ゲームプレイ履歴
-    let playHtml='';
-    if(d.playLogs&&d.playLogs.length>0){
-      playHtml=d.playLogs.map(l=>`
-        <div class="list-item">
-          <div class="list-icon">${esc(l.game_emoji||'🎮')}</div>
-          <div class="list-body">
-            <div class="list-body-main">${esc(l.game_name)}</div>
-            <div class="list-body-sub">${formatDate(l.played_at)}</div>
-          </div>
-          <div class="list-right" style="color:var(--accent-purple);font-size:.7rem">${formatDuration(l.duration_seconds)}</div>
-        </div>`).join('');
-    }else{
-      playHtml='<div class="card-empty">まだプレイ記録がありません</div>';
-    }
-
-    app.innerHTML=`
+    // ① ヘッダー
+    html += `
       <div class="header">
-        <div>
-          <div class="header-logo">TRAIL GP3</div>
-          <div class="header-sub">保護者ダッシュボード</div>
+        <div class="header-icon">T</div>
+        <div class="header-text">
+          <h1>TRAIL おやこダッシュボード</h1>
+          <p>${esc(t.name)}</p>
         </div>
-        <button class="logout-btn" id="logoutBtn">ログアウト</button>
-      </div>
+      </div>`;
 
+    // 生徒カード
+    html += `
       <div class="student-card">
-        <div class="student-avatar">${esc(initial)}</div>
-        <div class="student-name">${esc(s.name)}</div>
-        <div class="student-class">${esc(s.className)}</div>
+        <div class="student-row">
+          <div class="student-avatar">${esc(initial)}</div>
+          <div class="student-info">
+            <h2>${esc(s.name)}</h2>
+            <div>
+              <span class="class-badge">${esc(s.className)}</span>
+              ${totalDays > 0 ? '<span class="days-badge">' + totalDays + '\u65E5\u53C2\u52A0</span>' : ''}
+            </div>
+          </div>
+        </div>
+      </div>`;
+
+    // ② 統計カード（タブ切り替え）
+    html += `
+      <div class="stats-tabs" id="statsTabs">
+        <div class="stats-tab active" data-tab="today">\u4ECA\u65E5</div>
+        <div class="stats-tab" data-tab="week">\u4ECA\u9031</div>
+        <div class="stats-tab" data-tab="total">\u7D2F\u8A08</div>
       </div>
+      <div class="stats-grid mb-16" id="statsGrid">
+        ${renderStats(data.stats ? data.stats.today : {alt:0,plays:0,minutes:0})}
+      </div>`;
 
-      <div class="stats-grid">
-        <div class="stat-card stat-gold">
-          <div class="stat-value">${d.monthlyCoins}</div>
-          <div class="stat-label">今月のALT</div>
+    // ③ 今月のALTと出席
+    const monthAlt = data.stats ? data.stats.total.alt : 0;
+    const thisMonth = data.attendance ? data.attendance.thisMonth : 0;
+    const lastMonth = data.attendance ? data.attendance.lastMonth : 0;
+    const rank = data.rank || {position:'-',total:0,label:''};
+
+    html += `
+      <div class="section-title"><span>\uD83C\uDFC6</span> \u4ECA\u6708\u306E\u6210\u7E3E</div>
+      <div class="monthly-grid mb-10">
+        <div class="monthly-card">
+          <div class="mc-label">\u4ECA\u6708\u306EALT\u5408\u8A08</div>
+          <div class="mc-value">${data.stats ? data.stats.total.alt : 0} <span style="font-size:.7rem;color:var(--text-dim)">ALT</span></div>
+          <div class="mc-sub">\u5148\u6708\u306E\u51FA\u5E2D: ${lastMonth}\u65E5</div>
         </div>
-        <div class="stat-card stat-cyan">
-          <div class="stat-value">${d.totalCoins}</div>
-          <div class="stat-label">累計ALT</div>
-        </div>
-        <div class="stat-card stat-orange">
-          <div class="stat-value">${d.badgeCount}</div>
-          <div class="stat-label">バッジ</div>
+        <div class="monthly-card">
+          <div class="mc-label">\u4ECA\u6708\u306E\u51FA\u5E2D</div>
+          <div class="mc-value">${thisMonth} <span style="font-size:.7rem;color:var(--text-dim)">\u65E5</span></div>
+          <div class="mc-sub">\u7D2F\u8A08: ${totalDays}\u65E5</div>
         </div>
       </div>
+      <div class="rank-card mb-16">
+        <div class="rank-pos">${rank.position}\u4F4D <span style="font-size:.8rem;font-weight:500">/ ${rank.total}\u4EBA\u4E2D</span></div>
+        <div class="rank-label">${esc(rank.label)}</div>
+      </div>`;
 
-      <div class="section-title">💬 先生からのコメント</div>
-      <div class="card">${commentsHtml}</div>
+    // ④ 先生からのコメント
+    html += `<div class="section-title"><span>\uD83D\uDCAC</span> \u5148\u751F\u304B\u3089\u306E\u30B3\u30E1\u30F3\u30C8</div>`;
+    html += '<div class="card">';
+    if (data.teacherComments && data.teacherComments.length > 0) {
+      html += '<div class="accordion" id="teacherAccordion">';
+      const grouped = groupByMonth(data.teacherComments, 'month');
+      let first = true;
+      for (const [month, items] of Object.entries(grouped)) {
+        html += `
+          <div class="accordion-item${first ? ' open' : ''}">
+            <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
+              <span class="accordion-month">${fmtMonth(month)}</span>
+              <span>
+                <span class="accordion-badge">${items.length}\u4EF6</span>
+                <span class="accordion-arrow">\u25BC</span>
+              </span>
+            </div>
+            <div class="accordion-body">
+              ${items.map(c => `<div class="accordion-content">${esc(c.comment)}</div>`).join('')}
+            </div>
+          </div>`;
+        first = false;
+      }
+      html += '</div>';
+    } else {
+      html += '<div class="card-empty">\u307E\u3060\u30B3\u30E1\u30F3\u30C8\u306F\u3042\u308A\u307E\u305B\u3093</div>';
+    }
+    html += '</div>';
 
-      <div class="section-title">🪙 ALT獲得りれき</div>
-      <div class="card">${coinHtml}</div>
+    // ⑤ AIからのコメント
+    html += `<div class="section-title"><span>\uD83E\uDD16</span> AI\u304B\u3089\u306E\u30B3\u30E1\u30F3\u30C8</div>`;
+    html += '<div class="card">';
+    if (data.aiComments && data.aiComments.length > 0) {
+      html += '<div class="accordion" id="aiAccordion">';
+      const grouped = groupByMonth(data.aiComments, 'month');
+      let first = true;
+      for (const [month, items] of Object.entries(grouped)) {
+        html += `
+          <div class="accordion-item${first ? ' open' : ''}">
+            <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
+              <span class="accordion-month">${fmtMonth(month)}</span>
+              <span>
+                <span class="accordion-badge ai">AI</span>
+                <span class="accordion-arrow">\u25BC</span>
+              </span>
+            </div>
+            <div class="accordion-body">
+              ${items.map(c => `<div class="accordion-content">${esc(c.comment)}</div>`).join('')}
+            </div>
+          </div>`;
+        first = false;
+      }
+      html += '</div>';
+    } else {
+      html += '<div class="card-empty">\u307E\u3060AI\u30B3\u30E1\u30F3\u30C8\u306F\u3042\u308A\u307E\u305B\u3093</div>';
+    }
+    html += '</div>';
 
-      <div class="section-title">🎮 ゲームプレイりれき</div>
-      <div class="card">${playHtml}</div>
-    `;
+    // ⑥ 学習カレンダー
+    html += `<div class="section-title"><span>\uD83D\uDCC5</span> \u5B66\u7FD2\u30AB\u30EC\u30F3\u30C0\u30FC</div>`;
+    html += '<div class="card">' + renderCalendar(data.calendar || []) + '</div>';
 
-    document.getElementById('logoutBtn').addEventListener('click',()=>{
-      clearAuth();
-      window.location.href='/';
+    // ⑦ カテゴリ別得意・苦手
+    html += `<div class="section-title"><span>\uD83D\uDCCA</span> \u30AB\u30C6\u30B4\u30EA\u5225\u6210\u7E3E</div>`;
+    html += '<div class="card">';
+    if (data.categoryStats && data.categoryStats.length > 0) {
+      const maxPlays = Math.max(...data.categoryStats.map(c => c.plays));
+      let bestCat = '';
+      let bestRate = -1;
+      data.categoryStats.forEach(c => {
+        const rate = c.total > 0 ? c.correct / c.total : 0;
+        if (rate > bestRate) { bestRate = rate; bestCat = c.category; }
+      });
+      data.categoryStats.forEach(c => {
+        const rate = c.total > 0 ? Math.round(c.correct / c.total * 100) : 0;
+        const barW = c.total > 0 ? rate : 0;
+        html += `
+          <div class="category-item">
+            <div class="category-name">${esc(c.category)}${c.category === bestCat ? '<span class="category-best">\u5F97\u610F\uFF01</span>' : ''}</div>
+            <div class="category-bar-wrap"><div class="category-bar" style="width:${barW}%"></div></div>
+            <div class="category-pct">${rate}%</div>
+          </div>`;
+      });
+    } else {
+      html += '<div class="card-empty">\u307E\u3060\u30C7\u30FC\u30BF\u304C\u3042\u308A\u307E\u305B\u3093</div>';
+    }
+    html += '</div>';
+
+    // ⑧ ランキング推移
+    html += `<div class="section-title"><span>\uD83D\uDCC8</span> \u30E9\u30F3\u30AD\u30F3\u30B0\u63A8\u79FB</div>`;
+    html += '<div class="card">';
+    if (data.rankHistory && data.rankHistory.length > 1) {
+      html += renderRankGraph(data.rankHistory, rank.total);
+    } else {
+      html += '<div class="card-empty">\u307E\u3060\u5341\u5206\u306A\u30C7\u30FC\u30BF\u304C\u3042\u308A\u307E\u305B\u3093</div>';
+    }
+    html += '</div>';
+
+    // ⑨ ゲーム別ベストスコア
+    html += `<div class="section-title"><span>\u2B50</span> \u30D9\u30B9\u30C8\u30B9\u30B3\u30A2</div>`;
+    html += '<div class="card">';
+    if (data.bestScores && data.bestScores.length > 0) {
+      html += '<div class="score-cards">';
+      data.bestScores.forEach(s => {
+        html += `
+          <div class="score-card">
+            <div class="score-emoji">${esc(s.game_emoji || '\uD83C\uDFAE')}</div>
+            <div class="score-name">${esc(s.game_name)}</div>
+            <div class="score-value">${s.score}</div>
+            <div class="score-label">${esc(s.score_label || '\u70B9')}</div>
+          </div>`;
+      });
+      html += '</div>';
+    } else {
+      html += '<div class="card-empty">\u307E\u3060\u30B9\u30B3\u30A2\u304C\u3042\u308A\u307E\u305B\u3093</div>';
+    }
+    html += '</div>';
+
+    // ⑩ 次の目標
+    html += `<div class="section-title"><span>\uD83C\uDFAF</span> \u6B21\u306E\u76EE\u6A19</div>`;
+    if (data.nextGoal) {
+      html += `
+        <div class="goal-card">
+          <div class="goal-icon">\uD83C\uDFAF</div>
+          <div class="goal-text">${esc(data.nextGoal)}</div>
+        </div>`;
+    } else {
+      html += `
+        <div class="goal-card">
+          <div class="goal-icon">\uD83C\uDF31</div>
+          <div class="goal-empty">\u307E\u3060\u8A2D\u5B9A\u3055\u308C\u3066\u3044\u307E\u305B\u3093</div>
+        </div>`;
+    }
+
+    // ⑪ 最近のゲーム履歴
+    html += `<div class="section-title"><span>\uD83C\uDFAE</span> \u6700\u8FD1\u306E\u30B2\u30FC\u30E0\u5C65\u6B74</div>`;
+    html += '<div class="card">';
+    if (data.recentPlays && data.recentPlays.length > 0) {
+      data.recentPlays.forEach(p => {
+        html += `
+          <div class="play-item">
+            <div class="play-emoji">${esc(p.game_emoji || '\uD83C\uDFAE')}</div>
+            <div class="play-body">
+              <div class="play-name">${esc(p.game_name)}</div>
+              <div class="play-date">${fmtDate(p.date)}</div>
+            </div>
+            ${p.alt > 0 ? '<div class="play-alt">+' + p.alt + ' ALT</div>' : ''}
+          </div>`;
+      });
+    } else {
+      html += '<div class="card-empty">\u307E\u3060\u30D7\u30EC\u30A4\u8A18\u9332\u304C\u3042\u308A\u307E\u305B\u3093</div>';
+    }
+    html += '</div>';
+
+    app.innerHTML = html;
+
+    // ── タブ切り替え ──
+    const tabs = document.querySelectorAll('.stats-tab');
+    const grid = document.getElementById('statsGrid');
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const key = tab.dataset.tab;
+        const s = data.stats ? data.stats[key] : {alt:0,plays:0,minutes:0};
+        grid.innerHTML = renderStats(s || {alt:0,plays:0,minutes:0});
+      });
     });
   }
 
-  function showError(msg,linkText,linkHref){
-    app.innerHTML=`
-      <div class="error-screen">
-        <h2>アクセスエラー</h2>
-        <p>${esc(msg)}</p>
-        <a href="${linkHref}">${esc(linkText)}</a>
+  // ── 統計カードHTML ──
+  function renderStats(s) {
+    return `
+      <div class="stat-card">
+        <div class="stat-value gold">${s.alt || 0}</div>
+        <div class="stat-label">ALT\u7372\u5F97</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">${s.plays || 0}</div>
+        <div class="stat-label">\u30D7\u30EC\u30A4\u6570</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">${s.minutes || 0}</div>
+        <div class="stat-label">\u5B66\u7FD2\u6642\u9593(\u5206)</div>
       </div>`;
   }
+
+  // ── 月別グループ化 ──
+  function groupByMonth(items, monthKey) {
+    const groups = {};
+    items.forEach(item => {
+      const m = item[monthKey] || 'unknown';
+      // monthが日付形式(YYYY-MM-DD)の場合、YYYY-MMに変換
+      const key = m.length > 7 ? m.substring(0, 7) : m;
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(item);
+    });
+    return groups;
+  }
+
+  // ── カレンダー描画 ──
+  function renderCalendar(calData) {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth();
+    const firstDay = new Date(year, month, 1).getDay(); // 0=Sun
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const today = now.getDate();
+
+    // 活動データをマップに変換
+    const actMap = {};
+    let maxAlt = 1;
+    calData.forEach(d => {
+      const day = parseInt(d.date.split('-')[2]);
+      actMap[day] = d;
+      if (d.alt > maxAlt) maxAlt = d.alt;
+    });
+
+    const dayNames = ['\u65E5','\u6708','\u706B','\u6C34','\u6728','\u91D1','\u571F'];
+    let html = '<div class="calendar-grid">';
+    html += '<div class="calendar-header">' + dayNames.map(d => '<span>' + d + '</span>').join('') + '</div>';
+    html += '<div class="calendar-days">';
+
+    // 空白埋め
+    for (let i = 0; i < firstDay; i++) {
+      html += '<div class="calendar-day empty"></div>';
+    }
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const act = actMap[d];
+      let cls = 'calendar-day';
+      if (d === today) cls += ' today';
+      if (act) {
+        const ratio = act.alt / maxAlt;
+        if (ratio >= 0.7) cls += ' activity-max';
+        else if (ratio >= 0.4) cls += ' activity-high';
+        else cls += ' has-activity';
+      }
+      html += `<div class="${cls}">${d}</div>`;
+    }
+
+    html += '</div></div>';
+    return html;
+  }
+
+  // ── ランキング推移グラフ ──
+  function renderRankGraph(history, totalStudents) {
+    const maxRank = totalStudents || Math.max(...history.map(h => h.position));
+    const barHeight = 100; // max px
+
+    let html = '<div class="rank-graph"><div class="rank-graph-inner">';
+    history.forEach(h => {
+      // 1位が最も高い棒にする（逆転）
+      const heightPct = maxRank > 0 ? ((maxRank - h.position + 1) / maxRank) * barHeight : 20;
+      const monthLabel = h.month ? parseInt(h.month.split('-')[1]) + '\u6708' : '';
+      html += `
+        <div class="rank-bar-wrap">
+          <div class="rank-bar" style="height:${Math.max(heightPct, 10)}px">
+            <div class="rank-bar-value">${h.position}\u4F4D</div>
+          </div>
+          <div class="rank-bar-month">${monthLabel}</div>
+        </div>`;
+    });
+    html += '</div></div>';
+    return html;
+  }
+
 })();
 </script>
 </body>
