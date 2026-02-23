@@ -176,6 +176,22 @@ db.exec(`
   );
   CREATE INDEX IF NOT EXISTS idx_activity_logs_tenant ON activity_logs(tenant_id);
   CREATE INDEX IF NOT EXISTS idx_activity_logs_created ON activity_logs(created_at);
+
+  -- ════════════════════════════════════════
+  -- 保護者トークン（PIN付き）
+  -- ════════════════════════════════════════
+  CREATE TABLE IF NOT EXISTS parent_tokens (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    tenant_id TEXT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    student_id INTEGER NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+    token TEXT NOT NULL,
+    pin TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    expires_at TEXT,
+    UNIQUE(tenant_id, student_id)
+  );
+  CREATE INDEX IF NOT EXISTS idx_parent_tokens_tenant ON parent_tokens(tenant_id);
+  CREATE INDEX IF NOT EXISTS idx_parent_tokens_student ON parent_tokens(student_id);
 `);
 
 console.log('Migrations completed successfully.');

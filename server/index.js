@@ -48,8 +48,11 @@ const analyticsRoutes = require('./routes/analytics');
 const tenantRoutes = require('./routes/tenants');
 const externalRoutes = require('./routes/external'); // ← 追加
 const playSessionsRoutes = require('./routes/playSessions');
-const parentRoutes = require('./routes/parent');       // ★ NEW: 保護者ダッシュボード
+const parentRoutes = require('./routes/parent');
+
 app.use('/api/auth', authRoutes);
+app.use('/api/auth', parentRoutes);
+app.use('/api/parent', parentRoutes);
 app.use('/api/t', gameRoutes);
 app.use('/api/t', studentRoutes);
 app.use('/api/t', classRoutes);
@@ -403,6 +406,12 @@ console.log('  Phase 0 migrations: OK');
 // ============================================================
 // END Phase 0 migrations
 // ============================================================
+// PIN column for parent_tokens (from dev/a-4)
+try {
+  db.exec(`ALTER TABLE parent_tokens ADD COLUMN pin TEXT`);
+} catch (e) { /* already exists */ }
+// UNIQUE constraint for tenant+student in parent_tokens
+db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_parent_tokens_tenant_student ON parent_tokens(tenant_id, student_id)`);
   console.log('  Migrations: OK');
 
   // Seed demo tenant if no tenants exist

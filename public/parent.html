@@ -2,815 +2,196 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TRAIL おやこダッシュボード</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>保護者ダッシュボード - TRAIL GAME PRO 3</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #FFF9F0;
-    --bg-card: #FFFFFF;
-    --primary: #2B9E8F;
-    --primary-light: #E8F6F3;
-    --primary-dark: #1E7A6E;
-    --accent: #F5A623;
-    --accent-light: #FFF3E0;
-    --accent-glow: #FFD54F;
-    --text: #3D3D3D;
-    --text-light: #888;
-    --text-muted: #AAA;
-    --border: #F0EBE3;
-    --success: #4CAF50;
-    --growth-up: #2B9E8F;
-    --growth-down: #E57373;
-    --shadow: 0 2px 16px rgba(43, 158, 143, 0.08);
-    --shadow-hover: 0 4px 24px rgba(43, 158, 143, 0.14);
-    --radius: 20px;
-    --radius-sm: 12px;
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    font-family: 'Zen Maru Gothic', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    line-height: 1.7;
-    min-height: 100vh;
-    -webkit-font-smoothing: antialiased;
-  }
-
-  .loading-screen {
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    min-height: 100vh; gap: 20px;
-  }
-  .loading-screen .logo { font-size: 2rem; font-weight: 900; color: var(--primary); }
-  .loading-dots { display: flex; gap: 6px; }
-  .loading-dots span {
-    width: 10px; height: 10px; border-radius: 50%;
-    background: var(--primary);
-    animation: bounce 1.4s infinite ease-in-out;
-  }
-  .loading-dots span:nth-child(2) { animation-delay: 0.16s; }
-  .loading-dots span:nth-child(3) { animation-delay: 0.32s; }
-  @keyframes bounce {
-    0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
-    40% { transform: scale(1); opacity: 1; }
-  }
-
-  .error-screen {
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    min-height: 100vh; gap: 16px; padding: 24px; text-align: center;
-  }
-  .error-screen .icon { font-size: 3rem; }
-  .error-screen h2 { font-size: 1.3rem; color: var(--text); }
-  .error-screen p { color: var(--text-light); font-size: 0.9rem; }
-
-  .dashboard { display: none; max-width: 480px; margin: 0 auto; padding: 0 16px 40px; }
-  .dashboard.visible { display: block; }
-
-  .header { text-align: center; padding: 32px 0 16px; }
-  .header .brand { font-size: 0.75rem; font-weight: 700; color: var(--primary); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 2px; }
-  .header .subtitle { font-size: 0.8rem; color: var(--text-light); }
-
-  .section { margin-top: 28px; animation: fadeUp 0.5s ease both; }
-  .section:nth-child(2) { animation-delay: 0.05s; }
-  .section:nth-child(3) { animation-delay: 0.1s; }
-  .section:nth-child(4) { animation-delay: 0.15s; }
-  .section:nth-child(5) { animation-delay: 0.2s; }
-  .section:nth-child(6) { animation-delay: 0.25s; }
-
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(16px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .section-title {
-    font-size: 0.85rem; font-weight: 700; color: var(--text-light);
-    margin-bottom: 12px; display: flex; align-items: center; gap: 6px;
-  }
-  .section-title .emoji { font-size: 1.1rem; }
-
-  /* ===== Hero ===== */
-  .hero {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-    border-radius: var(--radius); padding: 28px 24px;
-    color: white; text-align: center; position: relative; overflow: hidden;
-  }
-  .hero::before {
-    content: ''; position: absolute; top: -40px; right: -40px;
-    width: 120px; height: 120px; background: rgba(255,255,255,0.08); border-radius: 50%;
-  }
-  .hero::after {
-    content: ''; position: absolute; bottom: -20px; left: -20px;
-    width: 80px; height: 80px; background: rgba(255,255,255,0.05); border-radius: 50%;
-  }
-  .hero .student-name { font-size: 1.5rem; font-weight: 900; margin-bottom: 4px; position: relative; }
-  .hero .days-label { font-size: 0.85rem; opacity: 0.85; margin-bottom: 16px; position: relative; }
-  .hero .highlight-msg {
-    background: rgba(255,255,255,0.15); border-radius: var(--radius-sm);
-    padding: 10px 16px; font-size: 0.9rem; font-weight: 700;
-    margin-bottom: 20px; position: relative; backdrop-filter: blur(4px);
-  }
-  .stat-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; position: relative; }
-  .stat-item { background: rgba(255,255,255,0.15); border-radius: var(--radius-sm); padding: 12px 8px; backdrop-filter: blur(4px); }
-  .stat-item .val { font-size: 1.6rem; font-weight: 900; line-height: 1.2; }
-  .stat-item .unit { font-size: 0.7rem; opacity: 0.8; }
-  .stat-item .label { font-size: 0.65rem; opacity: 0.7; margin-top: 2px; }
-  .badge-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; justify-content: center; position: relative; }
-  .badge-chip {
-    background: var(--accent-light); border: 1.5px solid var(--accent);
-    border-radius: 100px; padding: 6px 14px; font-size: 0.8rem; font-weight: 700;
-    color: #9E6B00; white-space: nowrap;
-    animation: popIn 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55) both;
-  }
-  .badge-chip:nth-child(2) { animation-delay: 0.08s; }
-  .badge-chip:nth-child(3) { animation-delay: 0.16s; }
-  .no-badge { font-size: 0.8rem; color: rgba(255,255,255,0.6); padding: 8px 0; position: relative; }
-
-  @keyframes popIn {
-    from { transform: scale(0); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-  }
-
-  /* ===== Cards ===== */
-  .card {
-    background: var(--bg-card); border-radius: var(--radius); padding: 20px;
-    box-shadow: var(--shadow); border: 1px solid var(--border);
-  }
-  .card + .card { margin-top: 12px; }
-
-  /* ===== ★ ALTコイン セクション ===== */
-  .alt-card {
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-    border: 1px solid rgba(255, 149, 0, 0.3);
-    border-radius: var(--radius);
-    padding: 20px;
-    box-shadow: 0 4px 20px rgba(255, 149, 0, 0.1);
-  }
-  .alt-header {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 16px;
-  }
-  .alt-label { font-size: 0.78rem; font-weight: 700; color: rgba(255,149,0,0.8); letter-spacing: 2px; }
-  .alt-balance {
-    font-size: 2.8rem; font-weight: 900; color: #ff9500;
-    text-align: center; line-height: 1;
-    text-shadow: 0 0 20px rgba(255,149,0,0.4);
-  }
-  .alt-balance-unit { font-size: 1rem; opacity: 0.7; margin-left: 4px; }
-  .alt-awards { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
-  .alt-award-item {
-    display: flex; justify-content: space-between; align-items: center;
-    background: rgba(255,149,0,0.08); border-radius: 8px;
-    padding: 6px 12px; font-size: 0.8rem;
-  }
-  .alt-award-label { color: rgba(255,255,255,0.7); }
-  .alt-award-amount { color: #ff9500; font-weight: 700; }
-  .alt-no-data { text-align: center; color: rgba(255,255,255,0.3); font-size: 0.85rem; padding: 8px 0; }
-
-  /* ===== ★ ストリーク セクション ===== */
-  .streak-card {
-    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-    border: 1px solid rgba(100, 200, 255, 0.2);
-    border-radius: var(--radius); padding: 20px;
-    box-shadow: 0 4px 20px rgba(100,200,255,0.08);
-  }
-  .streak-top { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
-  .streak-flame { font-size: 2.5rem; animation: flicker 1.5s infinite alternate; }
-  @keyframes flicker {
-    from { transform: scale(1) rotate(-2deg); }
-    to   { transform: scale(1.05) rotate(2deg); }
-  }
-  .streak-numbers { flex: 1; }
-  .streak-current { font-size: 2rem; font-weight: 900; color: #fff; line-height: 1; }
-  .streak-current span { font-size: 1rem; opacity: 0.6; margin-left: 4px; }
-  .streak-max { font-size: 0.78rem; color: rgba(255,255,255,0.4); margin-top: 2px; }
-  .streak-alive { 
-    font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 20px;
-    background: rgba(76, 175, 80, 0.2); color: #81C784; border: 1px solid rgba(76,175,80,0.3);
-  }
-  .streak-dead { 
-    background: rgba(229,115,115,0.2); color: #E57373; border-color: rgba(229,115,115,0.3);
-  }
-  /* 7日間カレンダー */
-  .streak-calendar { display: flex; justify-content: space-between; gap: 4px; }
-  .streak-day { flex: 1; text-align: center; }
-  .streak-day-dot {
-    width: 32px; height: 32px; border-radius: 50%; margin: 0 auto 4px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1rem;
-  }
-  .streak-day-dot.played { background: rgba(255,149,0,0.3); border: 2px solid #ff9500; }
-  .streak-day-dot.not-played { background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); }
-  .streak-day-label { font-size: 0.6rem; color: rgba(255,255,255,0.3); }
-  .streak-monthly {
-    margin-top: 14px; display: flex; justify-content: center; gap: 20px;
-  }
-  .streak-monthly-item { text-align: center; }
-  .streak-monthly-val { font-size: 1.4rem; font-weight: 900; color: #fff; }
-  .streak-monthly-label { font-size: 0.65rem; color: rgba(255,255,255,0.4); }
-
-  /* ===== Chart ===== */
-  .chart-wrap { position: relative; width: 100%; height: 200px; }
-  .chart-wrap canvas { width: 100% !important; height: 100% !important; }
-  .chart-label { font-size: 0.75rem; color: var(--text-light); text-align: center; margin-top: 8px; }
-
-  /* ===== Game list ===== */
-  .game-item { padding: 16px 0; border-bottom: 1px solid var(--border); }
-  .game-item:last-child { border-bottom: none; }
-  .game-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-  .game-name { font-weight: 700; font-size: 0.95rem; }
-  .game-plays { font-size: 0.75rem; color: var(--text-light); background: var(--primary-light); padding: 2px 10px; border-radius: 100px; }
-  .game-comment { font-size: 0.82rem; color: var(--text-light); line-height: 1.5; }
-  .sparkline-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
-  .sparkline-label { font-size: 0.7rem; color: var(--text-muted); white-space: nowrap; }
-  .sparkline-bars { display: flex; align-items: flex-end; gap: 3px; height: 24px; }
-  .spark-bar { width: 14px; background: var(--primary); border-radius: 3px 3px 0 0; min-height: 3px; opacity: 0.6; }
-  .spark-bar:last-child { opacity: 1; }
-
-  /* ===== Donut ===== */
-  .donut-wrap { display: flex; align-items: center; gap: 16px; }
-  .donut-chart { width: 120px; height: 120px; flex-shrink: 0; }
-  .donut-legend { flex: 1; }
-  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; margin-bottom: 6px; }
-  .legend-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
-
-  /* ===== Teacher comment ===== */
-  .teacher-card { background: linear-gradient(135deg, #FFF8E1 0%, #FFFDE7 100%); border: 1.5px solid #FFE082; }
-  .teacher-card .icon-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
-  .teacher-card .icon-row .emoji { font-size: 1.3rem; }
-  .teacher-card .icon-row .label { font-size: 0.8rem; font-weight: 700; color: #9E6B00; }
-  .teacher-card .comment-text { font-size: 0.95rem; line-height: 1.8; color: var(--text); }
-  .comment-history { margin-top: 10px; }
-  .comment-history-toggle {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 10px 16px; background: rgba(245, 166, 35, 0.08);
-    border: 1.5px solid #FFE082; border-radius: var(--radius-sm);
-    cursor: pointer; font-size: 0.82rem; font-weight: 700; color: #9E6B00;
-    user-select: none; transition: background 0.2s;
-  }
-  .comment-history-toggle:hover { background: rgba(245, 166, 35, 0.14); }
-  .comment-history-toggle .toggle-arrow { font-size: 0.75rem; transition: transform 0.25s ease; display: inline-block; }
-  .comment-history-toggle.open .toggle-arrow { transform: rotate(180deg); }
-  .comment-history-body { display: none; flex-direction: column; gap: 8px; margin-top: 8px; }
-  .comment-history-body.open { display: flex; animation: slideDown 0.25s ease; }
-  @keyframes slideDown {
-    from { opacity: 0; transform: translateY(-8px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  .comment-history-item { background: #FFFDE7; border: 1px solid #FFE082; border-radius: var(--radius-sm); padding: 14px 16px; }
-  .comment-history-item .month-label { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; }
-  .comment-history-item .comment-body { font-size: 0.9rem; line-height: 1.75; color: var(--text); }
-
-  /* ===== Hints ===== */
-  .hint-card { background: var(--primary-light); border: 1.5px solid #B2DFDB; }
-  .hint-item { padding: 10px 0; font-size: 0.88rem; line-height: 1.6; border-bottom: 1px dashed #B2DFDB; display: flex; gap: 10px; }
-  .hint-item:last-child { border-bottom: none; }
-  .hint-bullet { color: var(--primary); font-size: 1.1rem; flex-shrink: 0; line-height: 1.6; }
-
-  /* ===== Footer ===== */
-  .footer { text-align: center; padding: 32px 0 16px; font-size: 0.7rem; color: var(--text-muted); }
-  .footer a { color: var(--primary); text-decoration: none; }
-
-  @keyframes spin { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }
-
-  @media print {
-    body { background: white; }
-    .dashboard { max-width: 100%; padding: 0; }
-    .card, .alt-card, .streak-card { box-shadow: none; break-inside: avoid; }
-    .footer { display: none; }
-  }
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg-light:#f0f2f5;--bg-card:#ffffff;--text-primary:#2d3748;--text-dim:#a0aec0;--accent-cyan:#0090d9;--accent-gold:#e8a020;--accent-green:#2cb562;--accent-purple:#7c5cbf;--accent-pink:#e05070;--accent-orange:#ff9800;--border-glow:rgba(0,229,255,0.15)}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg-light);color:var(--text-primary);min-height:100vh}
+.app{max-width:520px;margin:0 auto;padding:16px;min-height:100vh}
+.header{display:flex;align-items:center;justify-content:space-between;padding:12px 0;margin-bottom:20px;flex-wrap:wrap;gap:8px}
+.header-logo{font-family:'Orbitron',sans-serif;font-weight:900;font-size:1rem;background:linear-gradient(135deg,var(--accent-cyan),var(--accent-purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header-sub{font-size:.7rem;color:var(--text-dim);font-weight:700}
+.logout-btn{padding:6px 12px;border:1.5px solid rgba(224,80,112,0.25);background:none;color:var(--accent-pink);border-radius:8px;font-size:.7rem;cursor:pointer;transition:all .3s;font-family:inherit}
+.logout-btn:hover{background:rgba(224,80,112,0.06)}
+.student-card{background:var(--bg-card);border-radius:16px;padding:20px;border:1.5px solid rgba(0,0,0,0.06);box-shadow:0 4px 20px rgba(0,0,0,0.04);margin-bottom:20px;text-align:center}
+.student-avatar{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--accent-cyan),var(--accent-purple));display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.5rem;font-weight:900;margin:0 auto 10px}
+.student-name{font-size:1.3rem;font-weight:900;margin-bottom:4px}
+.student-class{font-size:.8rem;color:var(--text-dim);background:rgba(0,0,0,0.04);display:inline-block;padding:2px 12px;border-radius:20px}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+.stat-card{background:var(--bg-card);border:1.5px solid rgba(0,0,0,0.06);border-radius:14px;padding:14px 10px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,0.03)}
+.stat-value{font-family:'Orbitron',sans-serif;font-size:1.3rem;font-weight:900;margin-bottom:2px}
+.stat-label{font-size:.65rem;color:var(--text-dim)}
+.stat-gold .stat-value{color:var(--accent-gold)}
+.stat-cyan .stat-value{color:var(--accent-cyan)}
+.stat-orange .stat-value{color:var(--accent-orange)}
+.section-title{font-family:'Orbitron',sans-serif;font-size:.7rem;letter-spacing:2px;color:var(--text-dim);margin-bottom:10px;margin-top:24px}
+.card{background:var(--bg-card);border:1.5px solid rgba(0,0,0,0.06);border-radius:14px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.03);margin-bottom:16px}
+.card-empty{padding:24px;text-align:center;color:var(--text-dim);font-size:.85rem}
+.list-item{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid rgba(0,0,0,0.04)}
+.list-item:last-child{border-bottom:none}
+.list-icon{font-size:1.2rem;flex-shrink:0;width:28px;text-align:center}
+.list-body{flex:1;min-width:0}
+.list-body-main{font-size:.85rem;font-weight:600}
+.list-body-sub{font-size:.7rem;color:var(--text-dim);margin-top:1px}
+.list-right{font-family:'Orbitron',sans-serif;font-weight:700;font-size:.8rem;flex-shrink:0;white-space:nowrap}
+.alt-plus{color:var(--accent-gold)}
+.comment-item{padding:14px 16px;border-bottom:1px solid rgba(0,0,0,0.04)}
+.comment-item:last-child{border-bottom:none}
+.comment-msg{font-size:.85rem;font-weight:600;margin-bottom:4px}
+.comment-meta{font-size:.7rem;color:var(--text-dim)}
+.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;color:var(--text-dim);font-size:.9rem}
+.error-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;padding:20px}
+.error-screen h2{font-family:'Orbitron',sans-serif;font-size:1rem;color:var(--accent-pink);margin-bottom:12px}
+.error-screen p{color:var(--text-dim);font-size:.85rem;margin-bottom:20px}
+.error-screen a{color:var(--accent-cyan);text-decoration:none;font-weight:700}
+@media(min-width:600px){.app{padding:24px}}
 </style>
 </head>
 <body>
-
-<div id="loading" class="loading-screen">
-  <div class="logo">TRAIL</div>
-  <div class="loading-dots"><span></span><span></span><span></span></div>
-  <div style="font-size:0.85rem;color:var(--text-light)">データを読み込んでいます...</div>
+<div class="app" id="app">
+  <div class="loading" id="loadingScreen">読み込み中...</div>
 </div>
-
-<div id="error" class="error-screen" style="display:none">
-  <div class="icon">😢</div>
-  <h2>ページを表示できません</h2>
-  <p id="error-msg">リンクの有効期限が切れている可能性があります。<br>教室の先生に新しいリンクを発行してもらってください。</p>
-</div>
-
-<div id="dashboard" class="dashboard">
-
-  <div class="header">
-    <div class="brand">TRAIL</div>
-    <div class="subtitle">おやこダッシュボード</div>
-  </div>
-
-  <!-- ① Hero -->
-  <div class="section">
-    <div class="hero">
-      <div class="student-name" id="studentName">-</div>
-      <div class="days-label" id="daysLabel">TRAILに参加して - 日目！</div>
-      <div class="highlight-msg" id="highlightMsg">-</div>
-      <div class="stat-row">
-        <div class="stat-item">
-          <div class="val" id="statTime">-</div>
-          <div class="unit">分</div>
-          <div class="label">学習時間</div>
-        </div>
-        <div class="stat-item">
-          <div class="val" id="statPlays">-</div>
-          <div class="unit">回</div>
-          <div class="label">プレイ数</div>
-        </div>
-        <div class="stat-item">
-          <div class="val" id="statAccuracy">-</div>
-          <div class="unit">%</div>
-          <div class="label">正答率</div>
-        </div>
-      </div>
-      <div class="badge-row" id="badgeRow">
-        <div class="no-badge">まだバッジはありません</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ★ ALTコイン残高 (0-14追加) -->
-  <div class="section" id="altSection" style="display:none">
-    <div class="section-title"><span class="emoji">🪙</span> ALTコイン</div>
-    <div class="alt-card">
-      <div class="alt-header">
-        <span class="alt-label">BALANCE</span>
-        <span id="altAlive" style="font-size:0.75rem;color:rgba(255,149,0,0.6)">今月の合計</span>
-      </div>
-      <div class="alt-balance">
-        <span id="altBalance">0</span><span class="alt-balance-unit">ALT</span>
-      </div>
-      <div class="alt-awards" id="altAwards">
-        <div class="alt-no-data">まだ獲得履歴がありません</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ★ ストリーク (0-14追加) -->
-  <div class="section" id="streakSection" style="display:none">
-    <div class="section-title"><span class="emoji">🔥</span> 連続プレイ</div>
-    <div class="streak-card">
-      <div class="streak-top">
-        <div class="streak-flame">🔥</div>
-        <div class="streak-numbers">
-          <div class="streak-current" id="streakCurrent">0<span>日連続</span></div>
-          <div class="streak-max" id="streakMax">最長記録: 0日</div>
-        </div>
-        <div class="streak-alive" id="streakAlive">継続中</div>
-      </div>
-      <!-- 7日間カレンダー -->
-      <div class="streak-calendar" id="streakCalendar"></div>
-      <!-- 今月の統計 -->
-      <div class="streak-monthly">
-        <div class="streak-monthly-item">
-          <div class="streak-monthly-val" id="streakMonthlyPlays">-</div>
-          <div class="streak-monthly-label">今月のプレイ数</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ② 学習グラフ -->
-  <div class="section">
-    <div class="section-title"><span class="emoji">📊</span> 学習のようす</div>
-    <div class="card">
-      <div class="chart-wrap"><canvas id="weeklyChart"></canvas></div>
-      <div class="chart-label">直近8週間の学習時間（分）と正答率</div>
-    </div>
-  </div>
-
-  <!-- ③ ゲーム別 -->
-  <div class="section">
-    <div class="section-title"><span class="emoji">🎮</span> ゲーム別のようす</div>
-    <div class="card">
-      <div class="donut-wrap">
-        <div class="donut-chart"><canvas id="donutChart"></canvas></div>
-        <div class="donut-legend" id="donutLegend"></div>
-      </div>
-    </div>
-    <div class="card" id="gameList" style="margin-top:12px"></div>
-  </div>
-
-  <!-- ④ 先生からの一言 -->
-  <div class="section" id="teacherSection" style="display:none">
-    <div class="section-title"><span class="emoji">✉️</span> 先生からの一言</div>
-    <div class="card teacher-card" id="teacherLatest">
-      <div class="icon-row">
-        <span class="emoji">👩‍🏫</span>
-        <span class="label" id="teacherLatestMonth">TRAIL の先生より</span>
-      </div>
-      <div class="comment-text" id="teacherComment"></div>
-    </div>
-    <div class="comment-history" id="commentHistory" style="display:none">
-      <button class="comment-history-toggle" id="historyToggle" aria-expanded="false">
-        <span>📂 過去のコメントを見る</span>
-        <span class="toggle-arrow">▼</span>
-      </button>
-      <div class="comment-history-body" id="historyBody"></div>
-    </div>
-  </div>
-
-  <!-- ④.5 AI分析 -->
-  <div class="section" id="aiSection">
-    <div class="section-title"><span class="emoji">🤖</span> AI先生の分析</div>
-
-    <div id="aiMorningCard" style="display:none;margin-bottom:12px">
-      <div class="card" style="background:linear-gradient(135deg,#FFF8E1,#FFFDE7);border:1.5px solid #FFE082">
-        <div style="font-size:0.75rem;font-weight:700;color:#9E6B00;margin-bottom:6px">🌅 朝の提案（6:00更新）</div>
-        <div style="font-weight:700;color:#E65100;font-size:1rem;margin-bottom:6px" id="aiMorningHighlight"></div>
-        <div style="font-size:0.88rem;color:var(--text);line-height:1.6" id="aiMorningComment"></div>
-      </div>
-    </div>
-
-    <div id="aiEveningCard" style="display:none;margin-bottom:12px">
-      <div class="card" style="background:linear-gradient(135deg,#EDE7F6,#F3E5F5);border:1.5px solid #CE93D8">
-        <div style="font-size:0.75rem;font-weight:700;color:#6A1B9A;margin-bottom:6px">🌙 夜のまとめ（19:00更新）</div>
-        <div style="font-weight:700;color:#4A148C;font-size:1rem;margin-bottom:6px" id="aiEveningHighlight"></div>
-        <div style="font-size:0.88rem;color:var(--text);line-height:1.6" id="aiEveningComment"></div>
-      </div>
-    </div>
-
-    <div class="card" id="aiCard" style="background:linear-gradient(135deg,#f0f9ff,#e8f4f8);border:1.5px solid rgba(43,158,143,0.2)">
-      <div id="aiContent" style="display:none">
-        <div style="font-size:0.75rem;font-weight:700;color:var(--primary);margin-bottom:6px">🤖 AI分析（手動）</div>
-        <div style="font-weight:700;color:var(--primary);font-size:1.05rem;margin-bottom:8px" id="aiHighlight"></div>
-        <div style="color:var(--text);font-size:0.9rem;line-height:1.6" id="aiComment"></div>
-      </div>
-      <div id="aiPlaceholder" style="text-align:center;padding:10px 0">
-        <div style="color:var(--text-muted);font-size:0.85rem;margin-bottom:12px">AIがお子さんの学習データを分析して、<br>パーソナライズされたコメントを生成します</div>
-        <button id="generateAiBtn" style="background:linear-gradient(135deg,#2B9E8F,#3BB0A1);color:#fff;border:none;border-radius:24px;padding:12px 28px;font-family:inherit;font-size:0.9rem;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(43,158,143,0.25);transition:all 0.3s">
-          🤖 AI分析を実行
-        </button>
-      </div>
-      <div id="aiLoading" style="display:none;text-align:center;padding:16px 0">
-        <div style="font-size:1.5rem;animation:spin 1s linear infinite;display:inline-block">🔄</div>
-        <div style="color:var(--text-muted);font-size:0.85rem;margin-top:8px">AIが分析中...</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ⑤ おうちでできること -->
-  <div class="section" id="hintsSection" style="display:none">
-    <div class="section-title"><span class="emoji">🏠</span> おうちでできること</div>
-    <div class="card hint-card" id="hintsList"></div>
-  </div>
-
-  <div class="footer">
-    <a href="https://trail-game-pro-3-2.onrender.com">TRAIL Game Pro</a> — 探究教室TRAIL
-  </div>
-</div>
-
 <script>
-(async function() {
-  const params = new URLSearchParams(location.search);
-  const token = params.get('token');
+(function(){
+  const AUTH_KEY='trail_saas_auth';
+  function loadAuth(){try{return JSON.parse(sessionStorage.getItem(AUTH_KEY))}catch(e){return null}}
+  function clearAuth(){try{sessionStorage.removeItem(AUTH_KEY)}catch(e){}}
 
-  if (!token) {
-    showError('URLにトークンが含まれていません。教室の先生からリンクをもらってください。');
+  const auth=loadAuth();
+  if(!auth||!auth.token||(auth.user&&auth.user.role!=='parent')){
+    showError('保護者としてログインしてください','ログイン画面へ','/');
     return;
   }
 
-  try {
-    const res = await fetch(`/api/parent/${token}`);
-    if (!res.ok) {
-      if (res.status === 401) {
-        showError('リンクの有効期限が切れています。教室の先生に新しいリンクを発行してもらってください。');
-      } else {
-        showError('データの取得に失敗しました。しばらく時間をおいてから再度お試しください。');
-      }
-      return;
-    }
-    const data = await res.json();
-    render(data);
+  const token=auth.token;
+  const app=document.getElementById('app');
 
-    if (data.student && data.student.id) {
-      fetchTeacherComments(data.student.id);
-      // ★ ALT・ストリークを並行取得
-      fetchAltAndStreak(data.student.id, data.tenant_id);
+  fetch('/api/parent/dashboard',{headers:{'Authorization':'Bearer '+token}})
+    .then(r=>{if(!r.ok)throw new Error('unauthorized');return r.json()})
+    .then(data=>renderDashboard(data))
+    .catch(()=>{showError('セッションが切れました。再度ログインしてください','ログイン画面へ','/')});
+
+  function esc(s){if(s==null)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+  function formatDuration(sec){
+    if(!sec||sec<60)return'1分未満';
+    const h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60);
+    return h>0?h+'時間'+m+'分':m+'分';
+  }
+
+  function formatDate(str){
+    if(!str)return'';
+    try{
+      const d=new Date(str+'Z');
+      return(d.getMonth()+1)+'/'+d.getDate()+' '+d.getHours()+':'+String(d.getMinutes()).padStart(2,'0');
+    }catch(e){return str}
+  }
+
+  function renderDashboard(d){
+    const s=d.student;
+    const initial=s.name?s.name.charAt(0):'?';
+
+    // コメントセクション
+    let commentsHtml='';
+    if(d.comments&&d.comments.length>0){
+      commentsHtml=d.comments.map(c=>`
+        <div class="comment-item">
+          <div class="comment-msg">${esc(c.message)}</div>
+          <div class="comment-meta">${c.teacher?esc(c.teacher)+' · ':''}${formatDate(c.created_at)}</div>
+        </div>`).join('');
+    }else{
+      commentsHtml='<div class="card-empty">まだコメントはありません</div>';
     }
-  } catch (e) {
-    console.error(e);
-    showError('サーバーに接続できませんでした。インターネット接続をご確認ください。');
+
+    // ALTコインログ
+    let coinHtml='';
+    if(d.coinLogs&&d.coinLogs.length>0){
+      coinHtml=d.coinLogs.map(l=>`
+        <div class="list-item">
+          <div class="list-icon">${esc(l.game_emoji||'🪙')}</div>
+          <div class="list-body">
+            <div class="list-body-main">${esc(l.game_name||'ボーナス')}</div>
+            <div class="list-body-sub">${formatDate(l.created_at)}${l.note?' · '+esc(l.note):''}</div>
+          </div>
+          <div class="list-right alt-plus">+${l.amount}</div>
+        </div>`).join('');
+    }else{
+      coinHtml='<div class="card-empty">まだALT記録がありません</div>';
+    }
+
+    // ゲームプレイ履歴
+    let playHtml='';
+    if(d.playLogs&&d.playLogs.length>0){
+      playHtml=d.playLogs.map(l=>`
+        <div class="list-item">
+          <div class="list-icon">${esc(l.game_emoji||'🎮')}</div>
+          <div class="list-body">
+            <div class="list-body-main">${esc(l.game_name)}</div>
+            <div class="list-body-sub">${formatDate(l.played_at)}</div>
+          </div>
+          <div class="list-right" style="color:var(--accent-purple);font-size:.7rem">${formatDuration(l.duration_seconds)}</div>
+        </div>`).join('');
+    }else{
+      playHtml='<div class="card-empty">まだプレイ記録がありません</div>';
+    }
+
+    app.innerHTML=`
+      <div class="header">
+        <div>
+          <div class="header-logo">TRAIL GP3</div>
+          <div class="header-sub">保護者ダッシュボード</div>
+        </div>
+        <button class="logout-btn" id="logoutBtn">ログアウト</button>
+      </div>
+
+      <div class="student-card">
+        <div class="student-avatar">${esc(initial)}</div>
+        <div class="student-name">${esc(s.name)}</div>
+        <div class="student-class">${esc(s.className)}</div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card stat-gold">
+          <div class="stat-value">${d.monthlyCoins}</div>
+          <div class="stat-label">今月のALT</div>
+        </div>
+        <div class="stat-card stat-cyan">
+          <div class="stat-value">${d.totalCoins}</div>
+          <div class="stat-label">累計ALT</div>
+        </div>
+        <div class="stat-card stat-orange">
+          <div class="stat-value">${d.badgeCount}</div>
+          <div class="stat-label">バッジ</div>
+        </div>
+      </div>
+
+      <div class="section-title">💬 先生からのコメント</div>
+      <div class="card">${commentsHtml}</div>
+
+      <div class="section-title">🪙 ALT獲得りれき</div>
+      <div class="card">${coinHtml}</div>
+
+      <div class="section-title">🎮 ゲームプレイりれき</div>
+      <div class="card">${playHtml}</div>
+    `;
+
+    document.getElementById('logoutBtn').addEventListener('click',()=>{
+      clearAuth();
+      window.location.href='/';
+    });
+  }
+
+  function showError(msg,linkText,linkHref){
+    app.innerHTML=`
+      <div class="error-screen">
+        <h2>アクセスエラー</h2>
+        <p>${esc(msg)}</p>
+        <a href="${linkHref}">${esc(linkText)}</a>
+      </div>`;
   }
 })();
-
-function showError(msg) {
-  document.getElementById('loading').style.display = 'none';
-  document.getElementById('error').style.display = 'flex';
-  document.getElementById('error-msg').innerHTML = msg;
-}
-
-// ===== ★ ALT + ストリーク取得 (0-14追加) =====
-async function fetchAltAndStreak(studentId, tenantId) {
-  try {
-    // ストリーク
-    const sRes = await fetch(`/api/streaks/${studentId}?tenant_id=${tenantId}`);
-    if (sRes.ok) {
-      const sData = await sRes.json();
-      renderStreak(sData);
-    }
-  } catch (e) { console.warn('streak fetch failed:', e); }
-
-  try {
-    // ALT残高（coin_logs から集計）
-    const cRes = await fetch(`/api/t/${tenantId}/coins?student_id=${studentId}`);
-    if (cRes.ok) {
-      const cData = await cRes.json();
-      renderAlt(cData);
-    }
-  } catch (e) { console.warn('alt fetch failed:', e); }
-}
-
-function renderStreak(data) {
-  const streak = data.streak || data;
-  if (!streak) return;
-
-  document.getElementById('streakSection').style.display = 'block';
-
-  const current = streak.current_streak || 0;
-  const max     = streak.max_streak     || 0;
-  const alive   = streak.isAlive        || false;
-
-  document.getElementById('streakCurrent').innerHTML = `${current}<span>日連続</span>`;
-  document.getElementById('streakMax').textContent   = `最長記録: ${max}日`;
-
-  const aliveEl = document.getElementById('streakAlive');
-  if (alive) {
-    aliveEl.textContent = '継続中 ✅';
-    aliveEl.classList.remove('streak-dead');
-  } else {
-    aliveEl.textContent = current > 0 ? '途切れた...' : '未プレイ';
-    aliveEl.classList.add('streak-dead');
-  }
-
-  // 7日間カレンダー
-  const cal = document.getElementById('streakCalendar');
-  const days = data.calendar || [];
-  const dayNames = ['日','月','火','水','木','金','土'];
-
-  if (days.length > 0) {
-    cal.innerHTML = days.map(d => {
-      const date = new Date(d.date);
-      const dayName = dayNames[date.getDay()];
-      return `
-        <div class="streak-day">
-          <div class="streak-day-dot ${d.played ? 'played' : 'not-played'}">
-            ${d.played ? '🔥' : ''}
-          </div>
-          <div class="streak-day-label">${dayName}</div>
-        </div>
-      `;
-    }).join('');
-  }
-
-  // 今月のプレイ数
-  if (data.monthly_plays !== undefined) {
-    document.getElementById('streakMonthlyPlays').textContent = data.monthly_plays;
-  }
-}
-
-function renderAlt(data) {
-  const balance = data.balance || data.total_alt || 0;
-  const logs    = data.logs    || data.recent    || [];
-
-  if (balance === 0 && logs.length === 0) return;
-  document.getElementById('altSection').style.display = 'block';
-  document.getElementById('altBalance').textContent = balance.toLocaleString();
-
-  if (logs.length > 0) {
-    const awardsEl = document.getElementById('altAwards');
-    // 直近5件を表示
-    awardsEl.innerHTML = logs.slice(0, 5).map(log => `
-      <div class="alt-award-item">
-        <span class="alt-award-label">${log.reason_label || log.reason || 'ボーナス'}</span>
-        <span class="alt-award-amount">+${log.amount} ALT</span>
-      </div>
-    `).join('');
-  }
-}
-
-// ===== F3: 複数月コメント =====
-async function fetchTeacherComments(studentId) {
-  try {
-    const res = await fetch(`/api/teacher-comments/${studentId}`);
-    if (!res.ok) return;
-    const data = await res.json();
-    const allComments = Array.isArray(data) ? data : (data.comments || []);
-    if (!allComments || allComments.length === 0) return;
-
-    allComments.sort((a, b) => (b.month || '').localeCompare(a.month || ''));
-    const latest = allComments[0];
-    const past   = allComments.slice(1);
-
-    document.getElementById('teacherSection').style.display = 'block';
-    document.getElementById('teacherLatestMonth').textContent = formatMonth(latest.month) + ' の先生より';
-    document.getElementById('teacherComment').textContent = latest.comment;
-
-    if (past.length > 0) {
-      const historyEl = document.getElementById('commentHistory');
-      const bodyEl    = document.getElementById('historyBody');
-      const toggleEl  = document.getElementById('historyToggle');
-
-      bodyEl.innerHTML = past.map(c => `
-        <div class="comment-history-item">
-          <div class="month-label">📅 ${formatMonth(c.month)}</div>
-          <div class="comment-body">${escHtml(c.comment)}</div>
-        </div>
-      `).join('');
-
-      historyEl.style.display = 'block';
-      toggleEl.addEventListener('click', () => {
-        const isOpen = bodyEl.classList.toggle('open');
-        toggleEl.classList.toggle('open', isOpen);
-        toggleEl.setAttribute('aria-expanded', isOpen);
-        toggleEl.querySelector('span:first-child').textContent =
-          isOpen ? '📂 過去のコメントを閉じる' : '📂 過去のコメントを見る';
-      });
-    }
-  } catch (e) { console.warn('teacher-comments fetch failed:', e); }
-}
-
-function formatMonth(monthStr) {
-  if (!monthStr) return '先月';
-  const [y, m] = monthStr.split('-');
-  if (!y || !m) return monthStr;
-  return `${y}年${parseInt(m)}月`;
-}
-
-function escHtml(s) {
-  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-function render(d) {
-  document.getElementById('loading').style.display = 'none';
-  document.getElementById('dashboard').classList.add('visible');
-
-  const s = d.student;
-  document.getElementById('studentName').textContent = s.name + ' さん';
-  document.getElementById('daysLabel').textContent = `TRAILに参加して ${s.days_since_join} 日目！`;
-
-  const m = d.monthly;
-  const mins = Math.round(m.total_seconds / 60);
-  document.getElementById('statTime').textContent = mins;
-  document.getElementById('statPlays').textContent = m.total_plays;
-  document.getElementById('statAccuracy').textContent = m.avg_accuracy != null ? m.avg_accuracy : '-';
-
-  let hlMsg = '今月もがんばっています！';
-  if (m.growth_pct !== null) {
-    if (m.growth_pct > 0)      hlMsg = `先月より学習時間が ${m.growth_pct}% アップ！🎉`;
-    else if (m.growth_pct < 0) hlMsg = `先月より少しペースダウン。応援してあげてください 💪`;
-    else                        hlMsg = `先月と同じペースで学習中 ✨`;
-  }
-  if (d.aiComment && d.aiComment.highlight) hlMsg = d.aiComment.highlight;
-  document.getElementById('highlightMsg').textContent = hlMsg;
-
-  const badgeRow = document.getElementById('badgeRow');
-  if (d.badges && d.badges.length > 0) {
-    badgeRow.innerHTML = d.badges.map(b => `<span class="badge-chip">${b}</span>`).join('');
-  }
-
-  // Weekly Chart
-  if (d.weekly && d.weekly.length > 0) {
-    const ctx = document.getElementById('weeklyChart').getContext('2d');
-    new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: d.weekly.map(w => w.week),
-        datasets: [
-          {
-            label: '学習時間（分）',
-            data: d.weekly.map(w => Math.round(w.seconds / 60)),
-            backgroundColor: 'rgba(43,158,143,0.6)',
-            borderColor: 'rgba(43,158,143,1)',
-            borderWidth: 1, borderRadius: 6, yAxisID: 'y', order: 2
-          },
-          {
-            label: '正答率（%）',
-            data: d.weekly.map(w => w.accuracy),
-            type: 'line', borderColor: '#F5A623',
-            backgroundColor: 'rgba(245,166,35,0.1)',
-            pointBackgroundColor: '#F5A623', pointRadius: 4,
-            tension: 0.3, fill: true, yAxisID: 'y1', order: 1
-          }
-        ]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        interaction: { mode: 'index', intersect: false },
-        plugins: { legend: { position: 'bottom', labels: { font: { family: 'Zen Maru Gothic', size: 11 }, boxWidth: 12, padding: 12 } } },
-        scales: {
-          x: { ticks: { font: { family: 'Zen Maru Gothic', size: 10 }, maxRotation: 45 }, grid: { display: false } },
-          y: { position: 'left', beginAtZero: true, ticks: { font: { size: 10 } }, grid: { color: 'rgba(0,0,0,0.04)' } },
-          y1: { position: 'right', min: 0, max: 100, ticks: { font: { size: 10 }, callback: v => v + '%' }, grid: { display: false } }
-        }
-      }
-    });
-  }
-
-  // Donut + Game list
-  const colors = ['#2B9E8F','#F5A623','#E57373','#7986CB','#4DB6AC','#FF8A65','#A1887F','#90A4AE'];
-  if (d.byGame && d.byGame.length > 0) {
-    const dCtx = document.getElementById('donutChart').getContext('2d');
-    new Chart(dCtx, {
-      type: 'doughnut',
-      data: {
-        labels: d.byGame.map(g => g.name),
-        datasets: [{ data: d.byGame.map(g => Math.round(g.seconds / 60)), backgroundColor: d.byGame.map((_,i) => colors[i % colors.length]), borderWidth: 0 }]
-      },
-      options: { responsive: true, maintainAspectRatio: true, cutout: '65%', plugins: { legend: { display: false } } }
-    });
-
-    document.getElementById('donutLegend').innerHTML = d.byGame.map((g,i) =>
-      `<div class="legend-item"><span class="legend-dot" style="background:${colors[i % colors.length]}"></span><span>${g.name}（${Math.round(g.seconds/60)}分）</span></div>`
-    ).join('');
-
-    document.getElementById('gameList').innerHTML = d.byGame.map(g => {
-      const sparkBars = (g.accuracy_trend || []).map(v =>
-        `<div class="spark-bar" style="height:${Math.max((v/100)*24,3)}px"></div>`
-      ).join('');
-      return `<div class="game-item">
-        <div class="game-header"><span class="game-name">${g.name}</span><span class="game-plays">${g.plays}回</span></div>
-        <div class="game-comment">${g.comment}</div>
-        ${g.accuracy_trend && g.accuracy_trend.length > 1 ? `<div class="sparkline-row"><span class="sparkline-label">正答率の推移</span><div class="sparkline-bars">${sparkBars}</div></div>` : ''}
-      </div>`;
-    }).join('');
-  } else {
-    document.getElementById('gameList').innerHTML =
-      '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:0.9rem">まだプレイ記録がありません</div>';
-  }
-
-  if (d.teacherComment) {
-    document.getElementById('teacherSection').style.display = 'block';
-    document.getElementById('teacherComment').textContent = d.teacherComment;
-  }
-
-  if (d.scheduledComments) {
-    const morning = d.scheduledComments.find(c => c.type === 'morning');
-    if (morning) {
-      document.getElementById('aiMorningCard').style.display = 'block';
-      document.getElementById('aiMorningHighlight').textContent = morning.highlight || '';
-      document.getElementById('aiMorningComment').textContent = morning.comment || '';
-    }
-    const evening = d.scheduledComments.find(c => c.type === 'evening');
-    if (evening) {
-      document.getElementById('aiEveningCard').style.display = 'block';
-      document.getElementById('aiEveningHighlight').textContent = evening.highlight || '';
-      document.getElementById('aiEveningComment').textContent = evening.comment || '';
-    }
-  }
-  if (d.aiComment && d.aiComment.comment) showAiResult(d.aiComment);
-
-  document.getElementById('generateAiBtn').addEventListener('click', async function() {
-    const btn = this;
-    const tk = new URLSearchParams(location.search).get('token');
-    btn.disabled = true;
-    document.getElementById('aiPlaceholder').style.display = 'none';
-    document.getElementById('aiLoading').style.display = 'block';
-
-    try {
-      const aiRes = await fetch(`/api/parent/${tk}/ai-comment`, { method: 'POST' });
-      if (!aiRes.ok) { const err = await aiRes.json(); throw new Error(err.error || 'AI生成に失敗しました'); }
-      const aiData = await aiRes.json();
-      showAiResult(aiData);
-      if (aiData.highlight) document.getElementById('highlightMsg').textContent = aiData.highlight;
-      if (aiData.home_hints && aiData.home_hints.length > 0) {
-        document.getElementById('hintsSection').style.display = 'block';
-        document.getElementById('hintsList').innerHTML = aiData.home_hints.map(h =>
-          `<div class="hint-item"><span class="hint-bullet">💡</span><span>${h}</span></div>`
-        ).join('');
-      }
-    } catch (e) {
-      document.getElementById('aiLoading').style.display = 'none';
-      document.getElementById('aiPlaceholder').style.display = 'block';
-      btn.disabled = false;
-      btn.textContent = '⚠️ もう一度試す';
-    }
-  });
-
-  function showAiResult(ai) {
-    document.getElementById('aiPlaceholder').style.display = 'none';
-    document.getElementById('aiLoading').style.display = 'none';
-    document.getElementById('aiContent').style.display = 'block';
-    document.getElementById('aiHighlight').textContent = ai.highlight || '';
-    document.getElementById('aiComment').textContent = ai.comment || '';
-  }
-
-  const hints = (d.aiComment && d.aiComment.home_hints && d.aiComment.home_hints.length > 0)
-    ? d.aiComment.home_hints : d.homeHints;
-  if (hints && hints.length > 0) {
-    document.getElementById('hintsSection').style.display = 'block';
-    document.getElementById('hintsList').innerHTML = hints.map(h =>
-      `<div class="hint-item"><span class="hint-bullet">💡</span><span>${h}</span></div>`
-    ).join('');
-  }
-}
 </script>
 </body>
 </html>

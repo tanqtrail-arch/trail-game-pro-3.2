@@ -250,7 +250,6 @@ body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:
 <div class="app" id="app"></div>
 
 <script>
-const ADMIN_PASS = 'trail2024';
 const CATEGORIES = ['算数','地理','歴史','理科','国語','その他'];
 
 // ★★★ GASデプロイURLをここに貼る ★★★
@@ -274,6 +273,12 @@ const VALIDATION = {
 function validateName(name){
   if(!name || name.length===0) return '名前を入力してください';
   if(name.length > VALIDATION.MAX_NAME_LENGTH) return `${VALIDATION.MAX_NAME_LENGTH}文字以内で入力してください`;
+  if(!VALIDATION.HIRAGANA_PATTERN.test(name)) return 'ひらがなで入力してください';
+  return null;
+}
+function validateClassName(name){
+  if(!name || name.length===0) return 'クラス名を入力してください';
+  if(name.length > VALIDATION.MAX_CLASS_LENGTH) return `${VALIDATION.MAX_CLASS_LENGTH}文字以内で入力してください`;
   return null;
 }
 function validateUrl(url){
@@ -282,8 +287,35 @@ function validateUrl(url){
   if(!VALIDATION.URL_PATTERN.test(url)) return 'https:// で始まるURLを入力してください';
   return null;
 }
+// レンダリング時URLプロトコル検証（javascript: URI防御）
+function isSafeUrl(url){
+  if(!url) return false;
+  const trimmed = url.trim().toLowerCase();
+  return trimmed.startsWith('https://') || trimmed.startsWith('http://');
+}
 
-// ═══ セキュリティ: 管理者ログインレート制限 ═══
+// ═══ セキュリティ: 管理者トークン管理 ═══
+const ADMIN_TOKEN = {
+  KEY: 'trail_gp3_admin_token',
+  get(){
+    try {
+      const d=JSON.parse(sessionStorage.getItem(this.KEY));
+      if(d&&d.token&&Date.now()<d.expiresAt) return d.token;
+      this.clear();
+    } catch(e){}
+    return null;
+  },
+  set(token, expiresIn){
+    try {
+      sessionStorage.setItem(this.KEY, JSON.stringify({token, expiresAt:Date.now()+(expiresIn||3600000)}));
+    } catch(e){}
+  },
+  clear(){
+    try { sessionStorage.removeItem(this.KEY); } catch(e){}
+  }
+};
+
+// ═══ セキュリティ: 管理者ログインレート制限（クライアント側の補助。サーバー側でも制限される） ═══
 const LOGIN_SECURITY = {
   maxAttempts: 5,
   lockoutDuration: 60000, // 60秒
@@ -444,8 +476,23 @@ const gamePlayTracker = {
   }
 };
 gamePlayTracker.load();
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')gamePlayTracker.endPlay()});
+// ゲームプレイ時間トラッキング（visibilitychange + beforeunload）
+// visible: ゲームタブから戻ったとき → プレイ終了記録
+// hidden: タブ切り替え・ブラウザ最小化時 → ログイン滞在時間更新
+// beforeunload: ブラウザ閉じるとき → セッション保存
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='visible'){
+    gamePlayTracker.endPlay();
+  }
+});
 window.addEventListener('focus',()=>gamePlayTracker.endPlay());
+window.addEventListener('beforeunload',()=>{
+  gamePlayTracker.endPlay();
+  // ログインセッションも保存（ブラウザ閉じ対策）
+  if(state.user && state.user!=='__guest__'){
+    loginTracker.endSession(state.user);
+  }
+});
 
 let state = {
   screen:'login', user:null, loginClass:null, adminTab:'coins', selectedCategory:'すべて',
@@ -467,6 +514,7 @@ let state = {
     {id:13,name:'お土産暗算',emoji:'🛍️',url:'',category:'算数'},
     {id:14,name:'江戸時代迷路クイズ',emoji:'🏯',url:'',category:'歴史'},
     {id:15,name:'文明ビルダー',emoji:'🏛️',url:'',category:'歴史'},
+    {id:16,name:'ビルビルタウン',emoji:'🏙️',url:'https://tanqtrail-arch.github.io/building-town/',category:'算数'},
   ],
   classes:['探究キッズ','探究スターター','探究ベーシック','探究アドバンス','探究リミットレス','探究個別'],
   players:[],  // {name, className}
@@ -478,14 +526,66 @@ let state = {
 // ═══ API通信 ═══
 async function apiGet(action){
   if(!GAS_URL){return null}
-  const res=await fetch(GAS_URL+'?action='+action);
+  const res=await fetch(GAS_URL+'?action='+encodeURIComponent(action));
+  if(!res.ok) throw new Error('API error: '+res.status);
   return res.json();
 }
 async function apiPost(body){
   if(!GAS_URL){return null}
   const res=await fetch(GAS_URL,{method:'POST',body:JSON.stringify(body)});
-  return res.json();
+  if(!res.ok) throw new Error('API error: '+res.status);
+  const data=await res.json();
+  // サーバー側認証エラー時はトークンを破棄して再ログイン要求
+  if(data&&data.error==='AUTH_REQUIRED'){
+    ADMIN_TOKEN.clear();
+    showToast('🔒 セッション切れです。再ログインしてください');
+    state.screen='admin-login';render();
+    return null;
+  }
+  return data;
 }
+// 管理者API: トークンを自動付与してPOST
+async function adminApiPost(body){
+  const token=ADMIN_TOKEN.get();
+  if(!token){
+    showToast('🔒 再ログインが必要です');
+    state.screen='admin-login';render();
+    return null;
+  }
+  return apiPost({...body, token});
+}
+
+// ═══ Analytics API ═══
+// REST-like endpoints for analytics data (GET /api/t/:slug/analytics/...)
+// Falls back to local tracker data when REST API is not configured
+const ANALYTICS_API = {
+  baseUrl: '', // Set to REST API base URL when available (e.g., '/api/t/my-slug')
+  async getLogins(){
+    if(this.baseUrl){
+      try{
+        const res=await fetch(`${this.baseUrl}/analytics/logins`);
+        if(res.ok) return res.json();
+      }catch(e){console.warn('Analytics logins API unavailable, using local data')}
+    }
+    // GAS fallback: try dedicated action, else use local data
+    if(GAS_URL){
+      try{const d=await apiGet('analyticsLogins');if(d&&!d.error)return d}catch(e){}
+    }
+    return {active:loginTracker.getActive(),recent:loginTracker.getRecent(100)};
+  },
+  async getGameplay(){
+    if(this.baseUrl){
+      try{
+        const res=await fetch(`${this.baseUrl}/analytics/gameplay`);
+        if(res.ok) return res.json();
+      }catch(e){console.warn('Analytics gameplay API unavailable, using local data')}
+    }
+    if(GAS_URL){
+      try{const d=await apiGet('analyticsGameplay');if(d&&!d.error)return d}catch(e){}
+    }
+    return {gameStats:gamePlayTracker.getGameStats(),playerStats:gamePlayTracker.getPlayerStats(),sessions:gamePlayTracker.sessions.slice(0,30)};
+  }
+};
 
 // ═══ データ読み込み（起動時） ═══
 async function loadData(){
@@ -547,6 +647,25 @@ function getGamesWithRanking(){
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
 function getUsedCategories(){return CATEGORIES.filter(c=>state.games.some(g=>g.category===c))}
 
+// ═══ URLパラメータ管理 ═══
+function getUrlParam(key){
+  try{return new URLSearchParams(window.location.search).get(key)}catch(e){return null}
+}
+function setUrlParam(key,value){
+  try{
+    const url=new URL(window.location);
+    if(value!=null) url.searchParams.set(key,value); else url.searchParams.delete(key);
+    history.replaceState(null,'',url);
+  }catch(e){}
+}
+function applyUrlParams(){
+  const gid=getUrlParam('gameId');
+  if(gid){
+    state.selectedRankGame=parseInt(gid);
+    state.portalTab='ranking';
+  }
+}
+
 function getRanking(){
   return state.players.map(p=>({name:p.name,alt:getPlayerCoins(p.name),badges:getPlayerBadges(p.name)})).sort((a,b)=>b.alt-a.alt);
 }
@@ -592,7 +711,7 @@ function renderLogin(){
 
 function renderGuest(){
   const cards=state.games.map(g=>{
-    const hasUrl=g.url&&g.url.trim();const tag=hasUrl?'a':'div';const href=hasUrl?` href="${escHtml(g.url)}" target="_blank" rel="noopener"`:'';
+    const hasUrl=g.url&&isSafeUrl(g.url);const tag=hasUrl?'a':'div';const href=hasUrl?` href="${escHtml(g.url)}" target="_blank" rel="noopener"`:'';
     return`<${tag} class="game-card" data-gid="${g.id}"${href}><span class="game-emoji">${escHtml(g.emoji)}</span><div class="game-name">${escHtml(g.name)}</div>${g.category?`<span class="game-category-badge">${escHtml(g.category)}</span>`:''}<div class="game-link-hint">${hasUrl?'▶ タップでプレイ':'準備中...'}</div></${tag}>`;
   }).join('');
 
@@ -649,7 +768,7 @@ function renderPortalHome(){
   const available=state.games.filter(g=>g.url&&g.url.trim());
   const newGames=(available.length?available:[...state.games]).slice().reverse();
   const cards=newGames.map(g=>{
-    const hasUrl=g.url&&g.url.trim();const tag=hasUrl?'a':'div';const href=hasUrl?` href="${escHtml(g.url)}" target="_blank" rel="noopener"`:'';
+    const hasUrl=g.url&&isSafeUrl(g.url);const tag=hasUrl?'a':'div';const href=hasUrl?` href="${escHtml(g.url)}" target="_blank" rel="noopener"`:'';
     const c=getPlayerGameCoins(state.user,g.id);
     return`<${tag} class="game-card" data-gid="${g.id}"${href}><span class="game-emoji">${escHtml(g.emoji)}</span><div class="game-name">${escHtml(g.name)}</div>${g.category?`<span class="game-category-badge">${escHtml(g.category)}</span>`:''}<div class="game-coins">🪙 ${c} ALT</div>${hasUrl?'<div class="game-link-hint">▶ タップでプレイ</div>':'<div class="game-link-hint">準備中...</div>'}</${tag}>`;
   }).join('');
@@ -683,7 +802,7 @@ function renderPortalRanking(){
   const gamesWithRank=getGamesWithRanking();
   if(!state.selectedRankGame&&gamesWithRank.length>0) state.selectedRankGame=gamesWithRank[0].id;
   const gameTabsHtml=gamesWithRank.map(g=>
-    `<button class="game-rank-tab ${state.selectedRankGame===g.id?'active':''}" data-rgid="${g.id}">${g.emoji} ${g.name}</button>`
+    `<button class="game-rank-tab ${state.selectedRankGame===g.id?'active':''}" data-rgid="${g.id}">${escHtml(g.emoji)} ${escHtml(g.name)}</button>`
   ).join('');
 
   let gameRankContent='<div style="color:var(--text-dim);font-size:.85rem;text-align:center;padding:20px">まだゲームの記録がありません。<br>各ゲームで遊んでスコアを記録しよう！</div>';
@@ -697,7 +816,7 @@ function renderPortalRanking(){
         const isMe=r.player===state.user?'style="background:rgba(0,144,217,0.05);border-color:rgba(0,229,255,0.2)"':'';
         return`<tr ${isMe}><td style="width:40px;text-align:center">${numStr}</td><td><strong>${escHtml(r.player)}</strong><span style="font-size:.65rem;color:var(--text-dim);margin-left:6px">${escHtml(getPlayerClass(r.player))}</span></td><td class="game-rank-table"><span class="rank-score">${escHtml(r.score)}</span><span class="score-label">${escHtml(r.scoreLabel)}</span></td><td style="font-size:.65rem;color:var(--text-dim)">${escHtml(r.date)}</td></tr>`;
       }).join('');
-      gameRankContent=`<div class="tbl-wrap game-rank-table"><table><tr><th>#</th><th>プレイヤー</th><th>${g?g.name:'スコア'}</th><th>記録日</th></tr>${rows}</table></div>`;
+      gameRankContent=`<div class="tbl-wrap game-rank-table"><table><tr><th>#</th><th>プレイヤー</th><th>${g?escHtml(g.name):'スコア'}</th><th>記録日</th></tr>${rows}</table></div>`;
     } else {
       gameRankContent=`<div style="color:var(--text-dim);font-size:.85rem;text-align:center;padding:20px">このゲームの記録はまだありません</div>`;
     }
@@ -716,7 +835,7 @@ function renderPortalGames(){
   // カテゴリフィルターボタン
   const catBtns=['すべて',...CATEGORIES.filter(c=>usedCats.includes(c))].map(c=>{
     const count=c==='すべて'?state.games.length:state.games.filter(g=>g.category===c).length;
-    return`<button class="cat-btn ${state.selectedCategory===c?'active':''}" data-cat="${c}">${c}${c!=='すべて'?` (${count})`:''}</button>`;
+    return`<button class="cat-btn ${state.selectedCategory===c?'active':''}" data-cat="${escHtml(c)}">${escHtml(c)}${c!=='すべて'?` (${count})`:''}</button>`;
   }).join('');
 
   const filtered=state.selectedCategory==='すべて'?state.games:state.games.filter(g=>g.category===state.selectedCategory);
@@ -729,7 +848,7 @@ function renderPortalGames(){
     content=catsToShow.map(cat=>{
       const games=filtered.filter(g=>g.category===cat);
       const cards=games.map(g=>makeGameCard(g)).join('');
-      return`<div class="section-title" style="margin-top:8px">${getCatEmoji(cat)} ${cat}</div><div class="game-grid" style="margin-bottom:24px">${cards}</div>`;
+      return`<div class="section-title" style="margin-top:8px">${getCatEmoji(cat)} ${escHtml(cat)}</div><div class="game-grid" style="margin-bottom:24px">${cards}</div>`;
     }).join('');
     if(uncategorized.length){
       content+=`<div class="section-title" style="margin-top:8px">🎮 その他</div><div class="game-grid" style="margin-bottom:24px">${uncategorized.map(g=>makeGameCard(g)).join('')}</div>`;
@@ -747,7 +866,7 @@ function getCatEmoji(cat){
 
 function makeGameCard(g){
   const c=getPlayerGameCoins(state.user,g.id);
-  const hasUrl=g.url&&g.url.trim();const tag=hasUrl?'a':'div';const href=hasUrl?` href="${escHtml(g.url)}" target="_blank" rel="noopener"`:'';
+  const hasUrl=g.url&&isSafeUrl(g.url);const tag=hasUrl?'a':'div';const href=hasUrl?` href="${escHtml(g.url)}" target="_blank" rel="noopener"`:'';
   const gr=getGameRanking(g.id);const myRank=gr.findIndex(r=>r.player===state.user);
   const myRankTag=myRank>=0?`<div style="font-size:.6rem;color:var(--accent-cyan);margin-top:3px">#${myRank+1} / ${gr.length}人</div>`:'';
   return`<${tag} class="game-card" data-gid="${g.id}"${href}><span class="game-emoji">${escHtml(g.emoji)}</span><div class="game-name">${escHtml(g.name)}</div><div class="game-coins">🪙 ${c} ALT</div>${myRankTag}${hasUrl?'<div class="game-link-hint">▶ タップでプレイ</div>':'<div class="game-link-hint">準備中...</div>'}</${tag}>`;
@@ -755,7 +874,7 @@ function makeGameCard(g){
 
 function renderPortalHistory(){
   const logs=state.coinLog.filter(l=>l.player===state.user).sort((a,b)=>b.id-a.id);
-  const histRows=logs.length?logs.slice(0,30).map(l=>`<tr><td>${escHtml(getGameEmoji(l.gameId))} ${escHtml(getGameName(l.gameId))}</td><td class="coin-plus">+${l.amount}</td><td style="color:var(--text-dim);font-size:.75rem">${escHtml(l.date)}</td></tr>`).join(''):`<tr><td colspan="3" class="no-data">まだ記録がありません</td></tr>`;
+  const histRows=logs.length?logs.slice(0,30).map(l=>`<tr><td>${escHtml(getGameEmoji(l.gameId))} ${escHtml(getGameName(l.gameId))}</td><td class="coin-plus">+${parseInt(l.amount)||0}</td><td style="color:var(--text-dim);font-size:.75rem">${escHtml(l.date)}</td></tr>`).join(''):`<tr><td colspan="3" class="no-data">まだ記録がありません</td></tr>`;
   return`<div class="tbl-wrap"><table><tr><th>ゲーム</th><th>ALT</th><th>日付</th></tr>${histRows}</table></div>`;
 }
 function renderAdminLogin(){
@@ -812,7 +931,7 @@ function renderAdminCoins(){
   const pOpts=state.players.map(p=>`<option value="${escHtml(p.name)}">${escHtml(p.name)}</option>`).join('');
   const gOpts=state.games.map(g=>`<option value="${g.id}">${escHtml(g.emoji)} ${escHtml(g.name)}</option>`).join('');
   const logs=[...state.coinLog].sort((a,b)=>b.id-a.id).slice(0,30);
-  const rows=logs.length?logs.map(l=>`<tr><td>${escHtml(l.player)}</td><td>${escHtml(getGameEmoji(l.gameId))} ${escHtml(getGameName(l.gameId))}</td><td class="coin-plus">+${l.amount}</td><td style="color:var(--text-dim);font-size:.75rem">${escHtml(l.date)}</td></tr>`).join(''):`<tr><td colspan="4" class="no-data">まだ記録がありません</td></tr>`;
+  const rows=logs.length?logs.map(l=>`<tr><td>${escHtml(l.player)}</td><td>${escHtml(getGameEmoji(l.gameId))} ${escHtml(getGameName(l.gameId))}</td><td class="coin-plus">+${parseInt(l.amount)||0}</td><td style="color:var(--text-dim);font-size:.75rem">${escHtml(l.date)}</td></tr>`).join(''):`<tr><td colspan="4" class="no-data">まだ記録がありません</td></tr>`;
   return`
     <div class="admin-form">
       <h3>💰 ALT ADD</h3>
@@ -828,7 +947,7 @@ function renderAdminCoins(){
       <div class="form-stack">
         <div class="form-row-2">
           <div class="form-group"><label>新しい生徒を追加</label><input type="text" id="newPlayerName" placeholder="なまえ（ひらがな）"/></div>
-          <div class="form-group"><label>クラス</label><select id="newPlayerClass">${state.classes.map(c=>`<option value="${c}">${c}</option>`).join('')}</select></div>
+          <div class="form-group"><label>クラス</label><select id="newPlayerClass">${state.classes.map(c=>`<option value="${escHtml(c)}">${escHtml(c)}</option>`).join('')}</select></div>
         </div>
         <button class="btn-primary btn-purple" id="addPlayerBtn">追加</button>
       </div>
@@ -930,7 +1049,7 @@ function renderAdminRankings(){
       </tr>`;
     }).join('');
     return`<div style="margin-bottom:20px">
-      <div class="section-title">${emoji} ${name}（${entries.length}人）</div>
+      <div class="section-title">${escHtml(emoji)} ${escHtml(name)}（${entries.length}人）</div>
       <div class="tbl-wrap"><table><tr><th>#</th><th>プレイヤー</th><th>スコア</th><th>記録日</th><th></th></tr>${rows}</table></div>
     </div>`;
   }).join('');
@@ -946,7 +1065,7 @@ function renderAdminSummary(){
   const sorted=[...state.players].sort((a,b)=>getPlayerCoins(b.name)-getPlayerCoins(a.name));
   let rows=sorted.map(p=>{
     const total=getPlayerCoins(p.name);const badges=getPlayerBadges(p.name);
-    const bd=state.games.map(g=>{const c=getPlayerGameCoins(p.name,g.id);return c>0?`${g.emoji}${c}`:''}).filter(Boolean).join(' ');
+    const bd=state.games.map(g=>{const c=getPlayerGameCoins(p.name,g.id);return c>0?`${escHtml(g.emoji)}${c}`:''}).filter(Boolean).join(' ');
     return`<tr><td><strong>${escHtml(p.name)}</strong></td><td style="font-size:.7rem;color:var(--text-dim)">${escHtml(p.className)||'—'}</td><td style="font-size:.75rem;color:var(--text-dim)">${bd||'—'}</td><td class="total-coins">${total}</td><td style="text-align:center;color:var(--accent-orange)">${badges>0?'🏅'+badges:'—'}</td></tr>`;
   }).join('');
   if(!rows)rows=`<tr><td colspan="5" class="no-data">生徒がいません</td></tr>`;
@@ -969,6 +1088,7 @@ function renderAdminSummary(){
 }
 
 // ═══ 入退室ログ ═══
+// Analytics API対応: GET /api/t/:slug/analytics/logins
 function renderAdminLoginLog(){
   const active=loginTracker.getActive();
   const onlineHtml=active.length?active.map(s=>
@@ -985,14 +1105,28 @@ function renderAdminLoginLog(){
   return`
     <div class="section-title">🟢 現在オンライン（${active.length}名）</div>
     <div class="online-list">${onlineHtml}</div>
-    <div class="section-title">📋 入退室ログ</div>
+    <div class="section-title">📋 入退室ログ <button class="logout-btn" id="refreshLoginLog" style="font-size:.6rem;padding:3px 8px;margin-left:8px;border-color:var(--accent-cyan);color:var(--accent-cyan)">🔄 API更新</button></div>
     <div class="tbl-wrap"><table>
       <tr><th>名前</th><th>クラス</th><th>入室</th><th>退室</th><th>滞在時間</th></tr>
       ${rows}
     </table></div>`;
 }
+async function refreshLoginLogFromAPI(){
+  try{
+    const data=await ANALYTICS_API.getLogins();
+    if(data&&data.recent&&Array.isArray(data.recent)){
+      const localTs=new Set(loginTracker.sessions.map(s=>s.loginTs));
+      data.recent.forEach(s=>{if(s.loginTs&&!localTs.has(s.loginTs))loginTracker.sessions.push(s)});
+      loginTracker.sessions.sort((a,b)=>b.loginTs-a.loginTs);
+      loginTracker.save();
+      showToast('✅ ログインデータを更新しました');
+      render();
+    }
+  }catch(e){showToast('⚠️ API取得に失敗しました')}
+}
 
 // ═══ ゲーム利用状況 ═══
+// Analytics API対応: GET /api/t/:slug/analytics/gameplay
 function renderAdminGameUsage(){
   const gameStats=gamePlayTracker.getGameStats();
   const playerStats=gamePlayTracker.getPlayerStats();
@@ -1043,7 +1177,7 @@ function renderAdminGameUsage(){
   }).join(''):'<tr><td colspan="4" class="no-data">まだ記録がありません</td></tr>';
 
   return`
-    <div class="section-title">🎮 ゲーム別プレイ回数・時間</div>
+    <div class="section-title">🎮 ゲーム別プレイ回数・時間 <button class="logout-btn" id="refreshGameUsage" style="font-size:.6rem;padding:3px 8px;margin-left:8px;border-color:var(--accent-cyan);color:var(--accent-cyan)">🔄 API更新</button></div>
     <div class="usage-game-bars" style="background:var(--bg-card);border:1.5px solid rgba(0,0,0,0.06);border-radius:14px;padding:16px;margin-bottom:20px">${gameRows}</div>
     <div class="section-title">👤 生徒別ゲーム利用状況</div>
     ${playerCards}
@@ -1052,6 +1186,19 @@ function renderAdminGameUsage(){
       <tr><th>名前</th><th>ゲーム</th><th>プレイ時間</th><th>日時</th></tr>
       ${recentRows}
     </table></div>`;
+}
+async function refreshGameUsageFromAPI(){
+  try{
+    const data=await ANALYTICS_API.getGameplay();
+    if(data&&data.sessions&&Array.isArray(data.sessions)){
+      const localTs=new Set(gamePlayTracker.sessions.map(s=>s.startTs));
+      data.sessions.forEach(s=>{if(s.startTs&&!localTs.has(s.startTs))gamePlayTracker.sessions.push(s)});
+      gamePlayTracker.sessions.sort((a,b)=>b.startTs-a.startTs);
+      gamePlayTracker.save();
+      showToast('✅ ゲーム利用データを更新しました');
+      render();
+    }
+  }catch(e){showToast('⚠️ API取得に失敗しました')}
 }
 
 // ═══ アクティビティダッシュボード ═══
@@ -1127,7 +1274,7 @@ function renderAdminActivity(){
 function bindEvents(){
   // Class select
   document.querySelectorAll('.class-select-btn').forEach(b=>{
-    b.onclick=()=>{state.loginClass=b.dataset.cls;render()};
+    b.onclick=()=>{state.loginClass=b.dataset.cls;render();const ni=document.getElementById('nameInput');if(ni)ni.scrollIntoView({behavior:'smooth',block:'center'});};
   });
   // Name input login
   const loginBtn=document.getElementById('loginBtn');
@@ -1135,7 +1282,8 @@ function bindEvents(){
   if(loginBtn){
     loginBtn.onclick=()=>{
       const name=nameInput.value.trim();
-      if(!name){showToast('⚠️ なまえをいれてね');return}
+      const nameErr=validateName(name);
+      if(nameErr){showToast('⚠️ '+nameErr);return}
       // Check if registered player in this class
       const match=state.players.find(p=>p.name===name&&p.className===state.loginClass);
       if(match){
@@ -1159,33 +1307,52 @@ function bindEvents(){
   const bl=document.getElementById('backToLogin');if(bl)bl.onclick=()=>{state.screen='login';render()};
   const apb=document.getElementById('adminPassBtn');const api=document.getElementById('adminPassInput');
   if(apb){
-    apb.onclick=()=>{
+    apb.onclick=async()=>{
       if(LOGIN_SECURITY.isLocked()){showToast('🔒 ロックアウト中です');render();return}
-      if(api.value===ADMIN_PASS){
-        LOGIN_SECURITY.reset();
-        state.screen='admin';
-        SESSION.save('admin', null, null);
-        activityLog.add('admin','管理者','ログイン成功');
-        render();
-      } else {
-        LOGIN_SECURITY.recordFailure();
-        activityLog.add('security','管理者ログイン','パスワード不一致（試行'+LOGIN_SECURITY.attempts+'回目）');
-        if(LOGIN_SECURITY.isLocked()){
-          showToast('🔒 ロックアウトされました（60秒間）');
-          // ロックアウト中のカウントダウン更新
-          const lockTimer=setInterval(()=>{
-            if(!LOGIN_SECURITY.isLocked()){clearInterval(lockTimer);render();return}
-            render();
-          },1000);
+      const pw=api.value;
+      if(!pw){showToast('⚠️ パスワードを入力してください');return}
+      apb.disabled=true;apb.textContent='認証中...';
+      try{
+        const res=await apiPost({action:'adminLogin',password:pw});
+        if(res&&res.ok&&res.token){
+          LOGIN_SECURITY.reset();
+          ADMIN_TOKEN.set(res.token, res.expiresIn);
+          state.screen='admin';
+          SESSION.save('admin', null, null);
+          activityLog.add('admin','管理者','ログイン成功（サーバー認証）');
+          render();
         } else {
-          showToast('❌ パスワードが違います');
+          LOGIN_SECURITY.recordFailure();
+          const msg=(res&&res.message)?res.message:'パスワードが違います';
+          activityLog.add('security','管理者ログイン','パスワード不一致（試行'+LOGIN_SECURITY.attempts+'回目）');
+          if(res&&res.error==='RATE_LIMITED'){
+            LOGIN_SECURITY.lockedUntil=Date.now()+(res.waitSeconds||60)*1000;
+            showToast('🔒 サーバー側でロックされました');
+          } else if(LOGIN_SECURITY.isLocked()){
+            showToast('🔒 ロックアウトされました（60秒間）');
+            const lockTimer=setInterval(()=>{
+              if(!LOGIN_SECURITY.isLocked()){clearInterval(lockTimer);render();return}
+              render();
+            },1000);
+          } else {
+            showToast('❌ '+msg);
+          }
+          render();
         }
+      }catch(e){
+        showToast('⚠️ サーバーに接続できません');
         render();
       }
     };
     api.onkeydown=(e)=>{if(e.key==='Enter')apb.click()};api.focus();
   }
-  const lo=document.getElementById('logoutBtn');if(lo)lo.onclick=()=>{if(state.user&&state.user!=='__guest__')loginTracker.endSession(state.user);state.user=null;state.loginClass=null;state.screen='login';SESSION.clear();render()};
+  const lo=document.getElementById('logoutBtn');if(lo)lo.onclick=()=>{
+    if(state.user&&state.user!=='__guest__')loginTracker.endSession(state.user);
+    // 管理者トークン破棄（サーバー側も無効化）
+    const adminToken=ADMIN_TOKEN.get();
+    if(adminToken){apiPost({action:'adminLogout',token:adminToken}).catch(()=>{});ADMIN_TOKEN.clear()}
+    state.user=null;state.loginClass=null;state.screen='login';SESSION.clear();render();
+  };
 
   document.querySelectorAll('.cat-btn').forEach(b=>{b.onclick=()=>{state.selectedCategory=b.dataset.cat;render()}});
   // ゲームプレイ記録
@@ -1200,8 +1367,8 @@ function bindEvents(){
   document.querySelectorAll('.admin-tab').forEach(t=>{t.onclick=()=>{state.adminTab=t.dataset.tab;render()}});
   // ★ ポータルタブ
   document.querySelectorAll('.portal-tab').forEach(t=>{t.onclick=()=>{state.portalTab=t.dataset.ptab;render()}});
-  // ★ ゲーム別ランキングタブ
-  document.querySelectorAll('.game-rank-tab').forEach(t=>{t.onclick=()=>{state.selectedRankGame=parseInt(t.dataset.rgid);render()}});
+  // ★ ゲーム別ランキングタブ（URL ?gameId= パラメータ連動）
+  document.querySelectorAll('.game-rank-tab').forEach(t=>{t.onclick=()=>{state.selectedRankGame=parseInt(t.dataset.rgid);setUrlParam('gameId',t.dataset.rgid);render()}});
 
   // Add coin
   const acb=document.getElementById('addCoinBtn');
@@ -1217,7 +1384,7 @@ function bindEvents(){
     activityLog.add('coin', player, `${gameName} で ${amount} ALT獲得`);
     showToast(`🪙 ${player}に${amount}ALT付与！`);render();
     // API送信
-    await apiPost({action:'addCoin',player,gameId,gameName,amount});
+    await adminApiPost({action:'addCoin',player,gameId,gameName,amount});
   };
 
   // Add player
@@ -1226,14 +1393,13 @@ function bindEvents(){
     const name=document.getElementById('newPlayerName').value.trim();
     const className=document.getElementById('newPlayerClass').value;
     if(!name||!className){showToast('⚠️ なまえとクラスを入力');return}
-    if(playerExists(name)){showToast('⚠️ すでに登録されています');return}
     const nameErr = validateName(name);
     if(nameErr){showToast('⚠️ '+nameErr);return}
-    if(name.length > VALIDATION.MAX_NAME_LENGTH){showToast('⚠️ 名前が長すぎます');return}
+    if(playerExists(name)){showToast('⚠️ すでに登録されています');return}
     state.players.push({name,className});
     activityLog.add('player', name, `新規登録（${className}）`);
     showToast(`✅ ${name}（${className}）を追加`);render();
-    const res=await apiPost({action:'addPlayer',name,className});
+    const res=await adminApiPost({action:'addPlayer',name,className});
     if(res&&res.error)showToast('⚠️ '+res.error);
   };
 
@@ -1244,7 +1410,7 @@ function bindEvents(){
     state.badges[player]=(state.badges[player]||0)+1;
     activityLog.add('badge', player, `バッジ付与（計${state.badges[player]}個）`);
     showToast(`🏅 ${player}にバッジ付与！（計${state.badges[player]}個）`);render();
-    await apiPost({action:'addBadge',player});
+    await adminApiPost({action:'addBadge',player});
   };
 
   // Add game
@@ -1257,13 +1423,14 @@ function bindEvents(){
     if(urlErr){showToast('⚠️ '+urlErr);return}
     const emoji=document.getElementById('newGameEmoji').value.trim()||'🎮';
     const category=document.getElementById('newGameCat').value;
-    state.games.push({id:Date.now(),name,emoji,url,category});
+    const newGameId=Date.now();
+    state.games.push({id:newGameId,name,emoji,url,category});
     activityLog.add('game', name, `新しいゲーム追加（${category}）`);
     showToast(`✅ ${emoji} ${name}を追加しました`);render();
-    const res=await apiPost({action:'addGame',name,emoji,url,category});
+    const res=await adminApiPost({action:'addGame',name,emoji,url,category});
     if(res&&res.id){
       // APIから返ったIDでローカルを更新
-      const g=state.games.find(g=>g.name===name&&g.id===Date.now);
+      const g=state.games.find(g=>g.id===newGameId);
       if(g)g.id=res.id;
     }
   };
@@ -1272,7 +1439,7 @@ function bindEvents(){
   document.querySelectorAll('.delete-btn[data-gameid]').forEach(b=>{
     b.onclick=async()=>{const gid=parseInt(b.dataset.gameid);if(!confirm('このゲームを削除しますか？'))return;
       state.games=state.games.filter(g=>g.id!==gid);showToast('🗑️ 削除しました');render();
-      await apiPost({action:'deleteGame',gameId:gid});
+      await adminApiPost({action:'deleteGame',gameId:gid});
     };
   });
 
@@ -1283,7 +1450,7 @@ function bindEvents(){
       if(!confirm(`「${player}」の記録を削除しますか？`))return;
       state.rankings=state.rankings.filter(r=>!(r.gameId===gid&&r.player===player));
       showToast(`🗑️ ${player}の記録を削除`);render();
-      await apiPost({action:'deleteRankingEntry',gameId:gid,player});
+      await adminApiPost({action:'deleteRankingEntry',gameId:gid,player});
     };
   });
 
@@ -1297,7 +1464,7 @@ function bindEvents(){
       const g=state.games.find(g=>g.id===gid);
       if(g)g.url=url;
       showToast('✅ URL保存しました');render();
-      await apiPost({action:'updateGameUrl',gameId:gid,url});
+      await adminApiPost({action:'updateGameUrl',gameId:gid,url});
     };
   });
 
@@ -1305,9 +1472,11 @@ function bindEvents(){
   const aclb=document.getElementById('addClassBtn');
   if(aclb)aclb.onclick=async()=>{
     const name=document.getElementById('newClassName').value.trim();if(!name)return;
+    const clsErr=validateClassName(name);
+    if(clsErr){showToast('⚠️ '+clsErr);return}
     if(state.classes.includes(name)){showToast('⚠️ すでにあります');return}
     state.classes.push(name);showToast(`🏫 ${name}を追加`);render();
-    await apiPost({action:'addClass',className:name});
+    await adminApiPost({action:'addClass',className:name});
   };
 
   // Delete class
@@ -1316,13 +1485,19 @@ function bindEvents(){
       const count=state.players.filter(p=>p.className===cls).length;
       if(!confirm(`「${cls}」を削除しますか？${count>0?`\n（${count}名の生徒がこのクラスに所属しています）`:''}`))return;
       state.classes=state.classes.filter(c=>c!==cls);showToast('🗑️ 削除');render();
-      await apiPost({action:'deleteClass',className:cls});
+      await adminApiPost({action:'deleteClass',className:cls});
     };
   });
 
   // Refresh data
   const rfb=document.getElementById('refreshBtn');
   if(rfb)rfb.onclick=()=>{loadData()};
+
+  // Analytics API refresh buttons
+  const rll=document.getElementById('refreshLoginLog');
+  if(rll)rll.onclick=()=>{refreshLoginLogFromAPI()};
+  const rgu=document.getElementById('refreshGameUsage');
+  if(rgu)rgu.onclick=()=>{refreshGameUsageFromAPI()};
 }
 
 function createStars(){
@@ -1330,16 +1505,16 @@ function createStars(){
   for(let i=0;i<50;i++){const s=document.createElement('div');s.className='star';s.style.left=Math.random()*100+'%';s.style.top=Math.random()*100+'%';s.style.animationDelay=Math.random()*3+'s';s.style.animationDuration=(2+Math.random()*3)+'s';s.style.width=s.style.height=(1+Math.random()*2)+'px';c.appendChild(s)}
 }
 
-// セッション復元
+// セッション復元（管理者セッションは復元しない — パスワード再入力を強制）
 (function restoreSession(){
   const s = SESSION.load();
   if(s){
     if(s.screen==='portal' && s.user){
       state.screen='portal'; state.user=s.user; state.loginClass=s.loginClass;
-    } else if(s.screen==='admin'){
-      state.screen='admin';
     }
+    // admin セッションは復元しない（sessionStorage改竄によるバイパス防止）
   }
+  applyUrlParams(); // ?gameId= パラメータ対応
 })();
 loadData();createStars();
 </script>
