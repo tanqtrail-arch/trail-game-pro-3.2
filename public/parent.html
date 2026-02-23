@@ -44,6 +44,8 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .student-info h2{font-size:1.2rem;font-weight:900}
 .student-info .class-badge{display:inline-block;background:rgba(255,255,255,0.2);padding:2px 10px;border-radius:20px;font-size:.7rem;font-weight:500;margin-top:4px}
 .student-info .days-badge{display:inline-block;background:var(--gold);color:var(--text);padding:2px 10px;border-radius:20px;font-size:.65rem;font-weight:700;margin-left:6px}
+.student-info .rank-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,0.25);padding:4px 12px;border-radius:20px;font-size:.7rem;font-weight:700;margin-top:6px}
+.rank-letter{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,0.3);font-size:.75rem;font-weight:900}
 
 /* ── Section Title ── */
 .section-title{font-size:.75rem;font-weight:700;color:var(--text-dim);margin:24px 0 10px;display:flex;align-items:center;gap:6px}
@@ -242,6 +244,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
     const t = verify.tenant;
     const initial = s.name ? s.name.charAt(0) : '?';
     const totalDays = data.attendance ? data.attendance.total : 0;
+    const rank = data.rank || {position:'-',total:0,label:'F',name:'見習い探究者'};
 
     let html = '';
 
@@ -266,6 +269,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
               <span class="class-badge">${esc(s.className)}</span>
               ${totalDays > 0 ? '<span class="days-badge">' + totalDays + '\u65E5\u53C2\u52A0</span>' : ''}
             </div>
+            <div class="rank-badge"><span class="rank-letter">${esc(rank.label)}</span> ${esc(rank.name)}</div>
           </div>
         </div>
       </div>`;
@@ -285,7 +289,6 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
     const monthAlt = data.stats ? data.stats.total.alt : 0;
     const thisMonth = data.attendance ? data.attendance.thisMonth : 0;
     const lastMonth = data.attendance ? data.attendance.lastMonth : 0;
-    const rank = data.rank || {position:'-',total:0,label:''};
 
     html += `
       <div class="section-title"><span>\uD83C\uDFC6</span> \u4ECA\u6708\u306E\u6210\u7E3E</div>
@@ -303,7 +306,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
       </div>
       <div class="rank-card mb-16">
         <div class="rank-pos">${rank.position}\u4F4D <span style="font-size:.8rem;font-weight:500">/ ${rank.total}\u4EBA\u4E2D</span></div>
-        <div class="rank-label">${esc(rank.label)}</div>
+        <div class="rank-label">${esc(rank.label)}\u30E9\u30F3\u30AF\u300C${esc(rank.name)}\u300D</div>
       </div>`;
 
     // ④ 先生からのコメント

@@ -291,7 +291,7 @@ router.get('/parent-dashboard', (req, res) => {
     WHERE tenant_id = ? AND student_id = ?
   `).get(tenantId, studentId).s;
 
-  // ── rank: テナント内ALT合計ランキング ──
+  // ── rank: テナント内ALT合計ランキング + ALT累計ランク ──
   const allStudentAlts = db.prepare(`
     SELECT s.id, COALESCE(SUM(cl.amount), 0) as total_alt
     FROM students s
@@ -303,11 +303,18 @@ router.get('/parent-dashboard', (req, res) => {
 
   const totalStudents = allStudentAlts.length;
   const rankPosition = allStudentAlts.findIndex(r => r.id === studentId) + 1;
-  let rankLabel = 'ルーキー';
-  if (rankPosition === 1) rankLabel = 'チャンピオン';
-  else if (rankPosition <= 3) rankLabel = 'チャレンジャー';
-  else if (rankPosition <= Math.ceil(totalStudents * 0.3)) rankLabel = 'エリート';
-  else if (rankPosition <= Math.ceil(totalStudents * 0.6)) rankLabel = 'レギュラー';
+
+  // ALT累計ベースのランク定義
+  function getAltRank(alt) {
+    if (alt >= 9999) return { label: 'S', name: '探究レジェンド' };
+    if (alt >= 5000) return { label: 'A', name: '探究マスター' };
+    if (alt >= 3000) return { label: 'B', name: '探究エキスパート' };
+    if (alt >= 1500) return { label: 'C', name: '上級探究者' };
+    if (alt >= 500)  return { label: 'D', name: '中級探究者' };
+    if (alt >= 100)  return { label: 'E', name: '初級探究者' };
+    return { label: 'F', name: '見習い探究者' };
+  }
+  const altRank = getAltRank(totalAlt);
 
   // ── teacherComments: teacher_commentsテーブルから ──
   const teacherComments = db.prepare(`
@@ -443,7 +450,7 @@ router.get('/parent-dashboard', (req, res) => {
       week: { alt: weekAlt, plays: weekPlays, minutes: Math.round(weekMinutes / 60) },
       total: { alt: totalAlt, plays: totalPlays, minutes: Math.round(totalMinutes / 60) },
     },
-    rank: { position: rankPosition || 1, total: totalStudents, label: rankLabel },
+    rank: { position: rankPosition || 1, total: totalStudents, label: altRank.label, name: altRank.name },
     teacherComments,
     aiComments,
     calendar,
