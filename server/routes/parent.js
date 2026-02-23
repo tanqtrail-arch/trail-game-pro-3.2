@@ -660,10 +660,10 @@ async function generateScheduledComment(tenantId, studentId, type, ANTHROPIC_API
     ? `先月比 ${studyTimeGrowth >= 0 ? '+' : ''}${studyTimeGrowth}%`
     : '先月データなし（今月が初月）';
 
-  // 現在のストリーク日数
+  // 現在のストリーク日数（streaksテーブルから取得）
   const streakRow = db.prepare(
-    'SELECT current_streak FROM students WHERE id = ?'
-  ).get(studentId);
+    'SELECT current_streak FROM streaks WHERE student_id = ? AND tenant_id = ?'
+  ).get(studentId, tenantId);
   const currentStreak = (streakRow && streakRow.current_streak) || 0;
 
   const totalMin = Math.round((monthlyStats.total_seconds || 0) / 60);
