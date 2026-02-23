@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>保護者ダッシュボード - TRAIL GAME PRO 3</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg-light:#f0f2f5;--bg-card:#ffffff;--text-primary:#2d3748;--text-dim:#a0aec0;--accent-cyan:#0090d9;--accent-gold:#e8a020;--accent-green:#2cb562;--accent-purple:#7c5cbf;--accent-pink:#e05070;--accent-orange:#ff9800;--border-glow:rgba(0,229,255,0.15)}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg-light);color:var(--text-primary);min-height:100vh}
+.app{max-width:520px;margin:0 auto;padding:16px;min-height:100vh}
+.header{display:flex;align-items:center;justify-content:space-between;padding:12px 0;margin-bottom:20px;flex-wrap:wrap;gap:8px}
+.header-logo{font-family:'Orbitron',sans-serif;font-weight:900;font-size:1rem;background:linear-gradient(135deg,var(--accent-cyan),var(--accent-purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header-sub{font-size:.7rem;color:var(--text-dim);font-weight:700}
+.logout-btn{padding:6px 12px;border:1.5px solid rgba(224,80,112,0.25);background:none;color:var(--accent-pink);border-radius:8px;font-size:.7rem;cursor:pointer;transition:all .3s;font-family:inherit}
+.logout-btn:hover{background:rgba(224,80,112,0.06)}
+.student-card{background:var(--bg-card);border-radius:16px;padding:20px;border:1.5px solid rgba(0,0,0,0.06);box-shadow:0 4px 20px rgba(0,0,0,0.04);margin-bottom:20px;text-align:center}
+.student-avatar{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--accent-cyan),var(--accent-purple));display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.5rem;font-weight:900;margin:0 auto 10px}
+.student-name{font-size:1.3rem;font-weight:900;margin-bottom:4px}
+.student-class{font-size:.8rem;color:var(--text-dim);background:rgba(0,0,0,0.04);display:inline-block;padding:2px 12px;border-radius:20px}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+.stat-card{background:var(--bg-card);border:1.5px solid rgba(0,0,0,0.06);border-radius:14px;padding:14px 10px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,0.03)}
+.stat-value{font-family:'Orbitron',sans-serif;font-size:1.3rem;font-weight:900;margin-bottom:2px}
+.stat-label{font-size:.65rem;color:var(--text-dim)}
+.stat-gold .stat-value{color:var(--accent-gold)}
+.stat-cyan .stat-value{color:var(--accent-cyan)}
+.stat-orange .stat-value{color:var(--accent-orange)}
+.section-title{font-family:'Orbitron',sans-serif;font-size:.7rem;letter-spacing:2px;color:var(--text-dim);margin-bottom:10px;margin-top:24px}
+.card{background:var(--bg-card);border:1.5px solid rgba(0,0,0,0.06);border-radius:14px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.03);margin-bottom:16px}
+.card-empty{padding:24px;text-align:center;color:var(--text-dim);font-size:.85rem}
+.list-item{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid rgba(0,0,0,0.04)}
+.list-item:last-child{border-bottom:none}
+.list-icon{font-size:1.2rem;flex-shrink:0;width:28px;text-align:center}
+.list-body{flex:1;min-width:0}
+.list-body-main{font-size:.85rem;font-weight:600}
+.list-body-sub{font-size:.7rem;color:var(--text-dim);margin-top:1px}
+.list-right{font-family:'Orbitron',sans-serif;font-weight:700;font-size:.8rem;flex-shrink:0;white-space:nowrap}
+.alt-plus{color:var(--accent-gold)}
+.comment-item{padding:14px 16px;border-bottom:1px solid rgba(0,0,0,0.04)}
+.comment-item:last-child{border-bottom:none}
+.comment-msg{font-size:.85rem;font-weight:600;margin-bottom:4px}
+.comment-meta{font-size:.7rem;color:var(--text-dim)}
+.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;color:var(--text-dim);font-size:.9rem}
+.error-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;padding:20px}
+.error-screen h2{font-family:'Orbitron',sans-serif;font-size:1rem;color:var(--accent-pink);margin-bottom:12px}
+.error-screen p{color:var(--text-dim);font-size:.85rem;margin-bottom:20px}
+.error-screen a{color:var(--accent-cyan);text-decoration:none;font-weight:700}
+@media(min-width:600px){.app{padding:24px}}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <div class="loading" id="loadingScreen">読み込み中...</div>
+</div>
+<script>
+(function(){
+  const AUTH_KEY='trail_saas_auth';
+  function loadAuth(){try{return JSON.parse(sessionStorage.getItem(AUTH_KEY))}catch(e){return null}}
+  function clearAuth(){try{sessionStorage.removeItem(AUTH_KEY)}catch(e){}}
+
+  const auth=loadAuth();
+  if(!auth||!auth.token||(auth.user&&auth.user.role!=='parent')){
+    showError('保護者としてログインしてください','ログイン画面へ','/');
+    return;
+  }
+
+  const token=auth.token;
+  const app=document.getElementById('app');
+
+  fetch('/api/parent/dashboard',{headers:{'Authorization':'Bearer '+token}})
+    .then(r=>{if(!r.ok)throw new Error('unauthorized');return r.json()})
+    .then(data=>renderDashboard(data))
+    .catch(()=>{showError('セッションが切れました。再度ログインしてください','ログイン画面へ','/')});
+
+  function esc(s){if(s==null)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+  function formatDuration(sec){
+    if(!sec||sec<60)return'1分未満';
+    const h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60);
+    return h>0?h+'時間'+m+'分':m+'分';
+  }
+
+  function formatDate(str){
+    if(!str)return'';
+    try{
+      const d=new Date(str+'Z');
+      return(d.getMonth()+1)+'/'+d.getDate()+' '+d.getHours()+':'+String(d.getMinutes()).padStart(2,'0');
+    }catch(e){return str}
+  }
+
+  function renderDashboard(d){
+    const s=d.student;
+    const initial=s.name?s.name.charAt(0):'?';
+
+    // コメントセクション
+    let commentsHtml='';
+    if(d.comments&&d.comments.length>0){
+      commentsHtml=d.comments.map(c=>`
+        <div class="comment-item">
+          <div class="comment-msg">${esc(c.message)}</div>
+          <div class="comment-meta">${c.teacher?esc(c.teacher)+' · ':''}${formatDate(c.created_at)}</div>
+        </div>`).join('');
+    }else{
+      commentsHtml='<div class="card-empty">まだコメントはありません</div>';
+    }
+
+    // ALTコインログ
+    let coinHtml='';
+    if(d.coinLogs&&d.coinLogs.length>0){
+      coinHtml=d.coinLogs.map(l=>`
+        <div class="list-item">
+          <div class="list-icon">${esc(l.game_emoji||'🪙')}</div>
+          <div class="list-body">
+            <div class="list-body-main">${esc(l.game_name||'ボーナス')}</div>
+            <div class="list-body-sub">${formatDate(l.created_at)}${l.note?' · '+esc(l.note):''}</div>
+          </div>
+          <div class="list-right alt-plus">+${l.amount}</div>
+        </div>`).join('');
+    }else{
+      coinHtml='<div class="card-empty">まだALT記録がありません</div>';
+    }
+
+    // ゲームプレイ履歴
+    let playHtml='';
+    if(d.playLogs&&d.playLogs.length>0){
+      playHtml=d.playLogs.map(l=>`
+        <div class="list-item">
+          <div class="list-icon">${esc(l.game_emoji||'🎮')}</div>
+          <div class="list-body">
+            <div class="list-body-main">${esc(l.game_name)}</div>
+            <div class="list-body-sub">${formatDate(l.played_at)}</div>
+          </div>
+          <div class="list-right" style="color:var(--accent-purple);font-size:.7rem">${formatDuration(l.duration_seconds)}</div>
+        </div>`).join('');
+    }else{
+      playHtml='<div class="card-empty">まだプレイ記録がありません</div>';
+    }
+
+    app.innerHTML=`
+      <div class="header">
+        <div>
+          <div class="header-logo">TRAIL GP3</div>
+          <div class="header-sub">保護者ダッシュボード</div>
+        </div>
+        <button class="logout-btn" id="logoutBtn">ログアウト</button>
+      </div>
+
+      <div class="student-card">
+        <div class="student-avatar">${esc(initial)}</div>
+        <div class="student-name">${esc(s.name)}</div>
+        <div class="student-class">${esc(s.className)}</div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card stat-gold">
+          <div class="stat-value">${d.monthlyCoins}</div>
+          <div class="stat-label">今月のALT</div>
+        </div>
+        <div class="stat-card stat-cyan">
+          <div class="stat-value">${d.totalCoins}</div>
+          <div class="stat-label">累計ALT</div>
+        </div>
+        <div class="stat-card stat-orange">
+          <div class="stat-value">${d.badgeCount}</div>
+          <div class="stat-label">バッジ</div>
+        </div>
+      </div>
+
+      <div class="section-title">💬 先生からのコメント</div>
+      <div class="card">${commentsHtml}</div>
+
+      <div class="section-title">🪙 ALT獲得りれき</div>
+      <div class="card">${coinHtml}</div>
+
+      <div class="section-title">🎮 ゲームプレイりれき</div>
+      <div class="card">${playHtml}</div>
+    `;
+
+    document.getElementById('logoutBtn').addEventListener('click',()=>{
+      clearAuth();
+      window.location.href='/';
+    });
+  }
+
+  function showError(msg,linkText,linkHref){
+    app.innerHTML=`
+      <div class="error-screen">
+        <h2>アクセスエラー</h2>
+        <p>${esc(msg)}</p>
+        <a href="${linkHref}">${esc(linkText)}</a>
+      </div>`;
+  }
+})();
+</script>
+</body>
+</html>

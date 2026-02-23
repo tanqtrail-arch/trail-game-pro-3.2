@@ -47,8 +47,11 @@ const rankingRoutes = require('./routes/rankings');
 const analyticsRoutes = require('./routes/analytics');
 const tenantRoutes = require('./routes/tenants');
 const externalRoutes = require('./routes/external'); // ← 追加
+const parentRoutes = require('./routes/parent');
 
 app.use('/api/auth', authRoutes);
+app.use('/api/auth', parentRoutes);
+app.use('/api/parent', parentRoutes);
 app.use('/api/t', gameRoutes);
 app.use('/api/t', studentRoutes);
 app.use('/api/t', classRoutes);
@@ -113,6 +116,9 @@ app.use((err, req, res, _next) => {
     CREATE TABLE IF NOT EXISTS activity_logs (id INTEGER PRIMARY KEY AUTOINCREMENT, tenant_id TEXT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE, type TEXT NOT NULL, actor TEXT, detail TEXT, created_at TEXT NOT NULL DEFAULT (datetime('now')));
     CREATE INDEX IF NOT EXISTS idx_activity_logs_tenant ON activity_logs(tenant_id);
     CREATE INDEX IF NOT EXISTS idx_activity_logs_created ON activity_logs(created_at);
+    CREATE TABLE IF NOT EXISTS parent_tokens (id INTEGER PRIMARY KEY AUTOINCREMENT, tenant_id TEXT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE, student_id INTEGER NOT NULL REFERENCES students(id) ON DELETE CASCADE, token TEXT NOT NULL, pin TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT (datetime('now')), expires_at TEXT, UNIQUE(tenant_id, student_id));
+    CREATE INDEX IF NOT EXISTS idx_parent_tokens_tenant ON parent_tokens(tenant_id);
+    CREATE INDEX IF NOT EXISTS idx_parent_tokens_student ON parent_tokens(student_id);
   `);
   console.log('  Migrations: OK');
 
