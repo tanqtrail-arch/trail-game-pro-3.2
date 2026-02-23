@@ -342,7 +342,7 @@ router.get('/parent/:token', (req, res) => {
           `SELECT type, highlight, comment, home_hints FROM ai_comments
            WHERE student_id = ? AND tenant_id = ? AND date = ?
            AND type IN ('morning', 'evening')
-           ORDER BY created_at DESC`
+           ORDER BY generated_at DESC`
         ).all(student_id, tenant_id, today).map(r => ({
           ...r,
           home_hints: r.home_hints ? JSON.parse(r.home_hints) : []
