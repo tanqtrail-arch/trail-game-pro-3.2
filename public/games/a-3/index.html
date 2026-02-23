@@ -1,0 +1,1373 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>四角形ファクトリー | TRAIL</title>
+<link rel="stylesheet" href="/games/shared/trail-auth.css">
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+/* =============================================
+   四角形ファクトリー - A-3
+   ============================================= */
+:root {
+  --bg: #f0f0f0;
+  --bg-dark: #e0e0e0;
+  --factory-orange: #ff8c00;
+  --factory-yellow: #ffc107;
+  --factory-gray: #455a64;
+  --factory-light: #78909c;
+  --factory-dark: #263238;
+  --card-bg: #ffffff;
+  --correct: #4caf50;
+  --wrong: #f44336;
+  --hint-blue: #2196f3;
+  --star-gold: #ffc107;
+  --text: #333;
+  --text-dim: #777;
+  --shadow: rgba(0,0,0,0.12);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'M PLUS Rounded 1c', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  overflow-x: hidden;
+}
+
+/* ── Conveyor Belt BG ── */
+.conveyor-bg {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+}
+.conveyor-stripe {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 18px;
+  background: repeating-linear-gradient(90deg, #555 0, #555 20px, #666 20px, #666 40px);
+  animation: conveyorMove 1s linear infinite;
+}
+@keyframes conveyorMove { to { background-position: 40px 0; } }
+.gear {
+  position: absolute; border-radius: 50%; border: 4px solid #888;
+  animation: gearSpin 4s linear infinite;
+}
+.gear::before {
+  content: ''; position: absolute; inset: 25%; border-radius: 50%;
+  background: #999;
+}
+.gear-1 { width: 60px; height: 60px; bottom: 10px; left: 5%; }
+.gear-2 { width: 40px; height: 40px; bottom: 14px; right: 8%; animation-direction: reverse; }
+@keyframes gearSpin { to { transform: rotate(360deg); } }
+
+/* ── Screens ── */
+.screen { display: none; min-height: 100vh; position: relative; z-index: 1; }
+.screen.active { display: flex; flex-direction: column; align-items: center; }
+
+/* ── Title Screen ── */
+#titleScreen {
+  justify-content: center; gap: 20px;
+  background: linear-gradient(180deg, #eceff1 0%, #cfd8dc 50%, #b0bec5 100%);
+  padding: 20px;
+}
+.title-icon { font-size: 64px; text-align: center; }
+.title-name {
+  font-size: clamp(28px, 7vw, 48px); font-weight: 900; text-align: center;
+  color: var(--factory-dark); letter-spacing: 2px;
+}
+.title-sub {
+  font-size: clamp(12px, 3vw, 16px); color: var(--factory-light);
+  text-align: center; letter-spacing: 1px;
+}
+.diff-select {
+  display: flex; flex-direction: column; gap: 10px;
+  width: 100%; max-width: 340px; margin-top: 12px;
+}
+.diff-btn {
+  font-family: 'M PLUS Rounded 1c', sans-serif;
+  font-weight: 900; font-size: 16px;
+  padding: 16px 24px; border: none; border-radius: 14px;
+  cursor: pointer; transition: all 0.12s; letter-spacing: 1px;
+  display: flex; align-items: center; justify-content: space-between;
+  color: #fff;
+}
+.diff-btn:active { transform: scale(0.95); }
+.diff-easy {
+  background: linear-gradient(135deg, #66bb6a, #43a047);
+  box-shadow: 0 4px 0 #2e7d32;
+}
+.diff-normal {
+  background: linear-gradient(135deg, #ffa726, #fb8c00);
+  box-shadow: 0 4px 0 #e65100;
+}
+.diff-hard {
+  background: linear-gradient(135deg, #ef5350, #e53935);
+  box-shadow: 0 4px 0 #b71c1c;
+}
+.diff-label { display: flex; align-items: center; gap: 8px; }
+.diff-desc { font-size: 11px; opacity: 0.85; font-weight: 400; }
+
+/* ── Game Screen ── */
+#gameScreen { background: var(--bg); }
+.game-header {
+  width: 100%; padding: 10px 16px;
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--factory-dark); color: #fff;
+  box-shadow: 0 2px 8px var(--shadow);
+}
+.game-header-left { font-weight: 900; font-size: 14px; }
+.game-header-right { display: flex; gap: 10px; font-size: 13px; font-weight: 700; }
+.game-header-right span {
+  display: flex; align-items: center; gap: 4px;
+  background: rgba(255,255,255,0.12); padding: 4px 10px; border-radius: 16px;
+}
+
+/* ── Progress Bar ── */
+.progress-bar {
+  width: 100%; height: 6px; background: rgba(0,0,0,0.1);
+}
+.progress-fill {
+  height: 100%; background: var(--factory-orange);
+  transition: width 0.3s ease; border-radius: 0 3px 3px 0;
+}
+
+/* ── Question Area ── */
+.question-area {
+  flex: 1; width: 100%; max-width: 600px;
+  padding: 16px; display: flex; flex-direction: column;
+  align-items: center; gap: 16px; overflow-y: auto;
+  padding-bottom: 40px;
+}
+
+/* ── Condition Cards ── */
+.condition-cards {
+  display: flex; flex-wrap: wrap; gap: 10px;
+  justify-content: center; width: 100%;
+}
+.condition-card {
+  background: var(--factory-yellow);
+  color: var(--factory-dark); font-weight: 900; font-size: 15px;
+  padding: 12px 20px; border-radius: 12px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+  border: 2px solid rgba(0,0,0,0.06);
+  animation: cardSlideIn 0.4s cubic-bezier(0.2,1,0.3,1);
+  position: relative;
+}
+.condition-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0;
+  height: 4px; background: var(--factory-orange); border-radius: 12px 12px 0 0;
+}
+@keyframes cardSlideIn {
+  from { transform: translateY(-30px) scale(0.9); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+/* ── Question Text ── */
+.question-text {
+  font-size: 16px; font-weight: 700; text-align: center;
+  color: var(--factory-dark); padding: 8px;
+}
+
+/* ── Target Shape Display ── */
+.target-shape-display {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  background: var(--card-bg); padding: 20px 32px; border-radius: 16px;
+  box-shadow: 0 3px 12px var(--shadow); border: 2px solid rgba(0,0,0,0.06);
+}
+.target-shape-name {
+  font-size: 22px; font-weight: 900; color: var(--factory-dark);
+}
+
+/* ── Shape SVGs ── */
+.shape-svg { width: 80px; height: 60px; }
+.shape-svg-sm { width: 48px; height: 36px; }
+.shape-svg polygon, .shape-svg rect {
+  fill: none; stroke: var(--factory-dark); stroke-width: 2.5;
+  stroke-linejoin: round;
+}
+
+/* ── Shape Buttons (Type A, D) ── */
+.shape-choices {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px; width: 100%;
+}
+.shape-btn {
+  font-family: 'M PLUS Rounded 1c', sans-serif;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  background: var(--card-bg); border: 3px solid #ddd;
+  border-radius: 14px; padding: 14px 8px; cursor: pointer;
+  transition: all 0.15s; font-weight: 700; font-size: 14px;
+  color: var(--factory-dark);
+}
+.shape-btn:active { transform: scale(0.95); }
+.shape-btn.selected {
+  border-color: var(--factory-orange);
+  background: #fff8e1;
+  box-shadow: 0 0 0 3px rgba(255,140,0,0.25);
+}
+.shape-btn.correct-answer {
+  border-color: var(--correct); background: #e8f5e9;
+  box-shadow: 0 0 0 3px rgba(76,175,80,0.25);
+}
+.shape-btn.wrong-answer {
+  border-color: var(--wrong); background: #ffebee;
+  box-shadow: 0 0 0 3px rgba(244,67,54,0.25);
+}
+
+/* ── Property Checkboxes (Type B) ── */
+.property-list {
+  display: flex; flex-direction: column; gap: 8px; width: 100%;
+}
+.property-item {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--card-bg); padding: 12px 16px; border-radius: 12px;
+  border: 2px solid #ddd; cursor: pointer; transition: all 0.15s;
+  font-weight: 700; font-size: 14px;
+}
+.property-item:active { transform: scale(0.98); }
+.property-item.checked {
+  border-color: var(--factory-orange); background: #fff8e1;
+}
+.property-item.correct-prop {
+  border-color: var(--correct); background: #e8f5e9;
+}
+.property-item.wrong-prop {
+  border-color: var(--wrong); background: #ffebee;
+}
+.prop-checkbox {
+  width: 24px; height: 24px; border-radius: 6px;
+  border: 2px solid #bbb; display: flex; align-items: center;
+  justify-content: center; flex-shrink: 0; font-size: 16px;
+  transition: all 0.15s;
+}
+.property-item.checked .prop-checkbox {
+  background: var(--factory-orange); border-color: var(--factory-orange); color: #fff;
+}
+
+/* ── True/False Buttons (Type C) ── */
+.tf-choices {
+  display: flex; gap: 12px; width: 100%; max-width: 400px;
+}
+.tf-btn {
+  font-family: 'M PLUS Rounded 1c', sans-serif;
+  flex: 1; padding: 18px; border: 3px solid #ddd;
+  border-radius: 14px; font-size: 18px; font-weight: 900;
+  background: var(--card-bg); cursor: pointer; transition: all 0.15s;
+}
+.tf-btn:active { transform: scale(0.95); }
+.tf-btn.correct-answer { border-color: var(--correct); background: #e8f5e9; }
+.tf-btn.wrong-answer { border-color: var(--wrong); background: #ffebee; }
+
+/* ── Statement Box (Type C) ── */
+.statement-box {
+  background: var(--card-bg); padding: 24px; border-radius: 16px;
+  font-size: 18px; font-weight: 900; text-align: center;
+  box-shadow: 0 3px 12px var(--shadow); border: 2px solid rgba(0,0,0,0.06);
+  color: var(--factory-dark); line-height: 1.6;
+}
+
+/* ── Submit Button ── */
+.submit-btn {
+  font-family: 'M PLUS Rounded 1c', sans-serif;
+  background: linear-gradient(135deg, var(--factory-orange), #e67e00);
+  color: #fff; border: none; border-radius: 50px;
+  padding: 14px 40px; font-size: 16px; font-weight: 900;
+  cursor: pointer; box-shadow: 0 4px 0 #c56000;
+  transition: all 0.12s; letter-spacing: 1px;
+}
+.submit-btn:active { transform: scale(0.95) translateY(2px); box-shadow: 0 2px 0 #c56000; }
+.submit-btn:disabled { background: #ccc; color: #999; box-shadow: 0 4px 0 #aaa; cursor: not-allowed; }
+
+/* ── Hint Button ── */
+.hint-btn {
+  font-family: 'M PLUS Rounded 1c', sans-serif;
+  background: linear-gradient(135deg, var(--hint-blue), #1976d2);
+  color: #fff; border: none; border-radius: 50px;
+  padding: 10px 24px; font-size: 13px; font-weight: 700;
+  cursor: pointer; box-shadow: 0 3px 0 #1565c0;
+  transition: all 0.12s; animation: hintAppear 0.5s ease;
+  display: none;
+}
+.hint-btn.visible { display: inline-flex; align-items: center; gap: 6px; }
+.hint-btn:active { transform: scale(0.95); }
+@keyframes hintAppear {
+  from { opacity: 0; transform: translateY(10px) scale(0.9); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.hint-used-badge {
+  font-size: 11px; color: var(--hint-blue); font-weight: 700;
+  margin-top: 4px;
+}
+
+/* ── Hint Overlay ── */
+.hint-overlay {
+  background: rgba(33,150,243,0.08); border: 2px dashed var(--hint-blue);
+  border-radius: 14px; padding: 14px; text-align: center;
+  font-size: 13px; color: var(--hint-blue); font-weight: 700;
+  animation: hintAppear 0.4s ease;
+}
+
+/* ── Bubble Feedback ── */
+.bubble-feedback {
+  position: fixed; z-index: 100;
+  background: #fff; border-radius: 16px;
+  padding: 14px 20px; box-shadow: 0 6px 24px rgba(0,0,0,0.2);
+  border: 2px solid var(--wrong);
+  max-width: min(340px, 88vw);
+  animation: bubbleIn 0.3s cubic-bezier(0.2,1,0.3,1);
+  font-size: 14px; font-weight: 700; color: var(--factory-dark);
+  left: 50%; top: 50%; transform: translate(-50%, -50%);
+}
+.bubble-feedback::after {
+  content: ''; position: absolute; bottom: -10px; left: 50%;
+  transform: translateX(-50%);
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 10px solid #fff;
+}
+.bubble-speaker {
+  font-size: 12px; color: var(--wrong); margin-bottom: 4px;
+  display: flex; align-items: center; gap: 4px;
+}
+@keyframes bubbleIn {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.7); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+@keyframes bubbleOut {
+  from { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  to { opacity: 0; transform: translate(-50%, -50%) scale(0.7); }
+}
+
+/* ── Explanation Box ── */
+.explanation-box {
+  background: #e3f2fd; border: 2px solid var(--hint-blue);
+  border-radius: 14px; padding: 14px 18px;
+  font-size: 13px; color: #1565c0; font-weight: 700;
+  line-height: 1.6; width: 100%;
+  animation: fadeIn 0.3s ease;
+}
+.explanation-box .exp-label {
+  font-size: 11px; color: #1976d2; margin-bottom: 4px;
+  display: flex; align-items: center; gap: 4px;
+}
+
+/* ── Correct / Wrong Flash ── */
+.result-flash {
+  position: fixed; inset: 0; z-index: 50;
+  display: flex; align-items: center; justify-content: center;
+  pointer-events: none; animation: flashFade 0.6s ease forwards;
+}
+.result-flash.correct { background: rgba(76,175,80,0.15); }
+.result-flash.wrong { background: rgba(244,67,54,0.15); }
+.result-flash-icon { font-size: 72px; animation: flashPop 0.6s ease; }
+@keyframes flashFade { 0% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes flashPop {
+  0% { transform: scale(0.3); opacity: 0; }
+  50% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(1); opacity: 0; }
+}
+
+/* ── Next Button ── */
+.next-btn {
+  font-family: 'M PLUS Rounded 1c', sans-serif;
+  background: var(--factory-orange); color: #fff;
+  border: none; border-radius: 50px; padding: 12px 36px;
+  font-size: 15px; font-weight: 900; cursor: pointer;
+  box-shadow: 0 4px 0 #c56000; transition: all 0.12s;
+  animation: fadeIn 0.3s ease;
+}
+.next-btn:active { transform: scale(0.95); }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* ── Star Display ── */
+.stars-display {
+  display: flex; gap: 4px; font-size: 24px;
+  animation: starsIn 0.4s ease;
+}
+@keyframes starsIn {
+  from { transform: scale(0.5); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+.star-filled { color: var(--star-gold); }
+.star-empty { color: #ddd; }
+
+/* ── Result Screen ── */
+#resultScreen {
+  justify-content: center; gap: 16px; padding: 20px;
+  background: linear-gradient(180deg, #eceff1 0%, #cfd8dc 50%, #b0bec5 100%);
+}
+.result-card {
+  background: var(--card-bg); border-radius: 22px;
+  padding: 28px 24px; text-align: center;
+  max-width: 440px; width: 100%;
+  box-shadow: 0 4px 16px var(--shadow);
+  border: 2px solid rgba(0,0,0,0.06);
+}
+.result-title {
+  font-size: 22px; font-weight: 900; color: var(--factory-dark);
+  margin-bottom: 8px;
+}
+.result-icon { font-size: 56px; margin-bottom: 8px; }
+.result-score {
+  font-size: 48px; font-weight: 900; color: var(--factory-orange);
+  line-height: 1;
+}
+.result-score-unit { font-size: 18px; color: var(--text-dim); }
+.result-stats {
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px; margin: 16px 0;
+}
+.result-stat {
+  background: rgba(0,0,0,0.03); border-radius: 12px; padding: 12px 6px;
+}
+.result-stat-value {
+  font-size: 22px; font-weight: 900; color: var(--factory-dark);
+}
+.result-stat-label { font-size: 10px; color: var(--text-dim); margin-top: 4px; }
+.result-stars {
+  font-size: 32px; margin: 8px 0;
+}
+.result-alt {
+  background: linear-gradient(135deg, #fff8e1, #fff3e0);
+  border: 2px solid rgba(255,140,0,0.2);
+  border-radius: 14px; padding: 14px; margin: 12px 0;
+}
+.result-alt-value {
+  font-size: 28px; font-weight: 900; color: var(--factory-orange);
+}
+.result-alt-label { font-size: 11px; color: #e65100; margin-top: 4px; }
+.result-btns {
+  display: flex; gap: 10px; justify-content: center; margin-top: 12px;
+}
+.btn-retry {
+  font-family: 'M PLUS Rounded 1c', sans-serif;
+  padding: 12px 28px; font-size: 14px; font-weight: 900;
+  border: none; border-radius: 50px; cursor: pointer;
+  background: linear-gradient(135deg, var(--factory-orange), #e67e00);
+  color: #fff; box-shadow: 0 3px 0 #c56000; transition: all 0.12s;
+}
+.btn-retry:active { transform: scale(0.95); }
+.btn-back {
+  font-family: 'M PLUS Rounded 1c', sans-serif;
+  padding: 12px 28px; font-size: 14px; font-weight: 900;
+  border: none; border-radius: 50px; cursor: pointer;
+  background: rgba(0,0,0,0.06); color: var(--text);
+  transition: all 0.12s;
+}
+.btn-back:active { transform: scale(0.95); }
+
+/* ── Quit Button in-game ── */
+.quit-btn {
+  font-family: 'M PLUS Rounded 1c', sans-serif;
+  background: rgba(0,0,0,0.06); color: var(--text-dim);
+  border: none; border-radius: 20px; padding: 6px 14px;
+  font-size: 11px; font-weight: 700; cursor: pointer;
+  margin-top: 4px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+  .shape-choices { grid-template-columns: repeat(2, 1fr); }
+  .condition-card { font-size: 13px; padding: 10px 14px; }
+  .question-area { padding: 12px; gap: 12px; }
+  .tf-choices { flex-direction: column; }
+}
+@media (min-width: 768px) {
+  .shape-choices { grid-template-columns: repeat(3, 1fr); }
+  .question-area { max-width: 700px; padding: 24px; }
+  .game-header { padding: 12px 24px; }
+  .game-header-left { font-size: 16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ Conveyor Belt Background ═══ -->
+<div class="conveyor-bg">
+  <div class="conveyor-stripe"></div>
+  <div class="gear gear-1"></div>
+  <div class="gear gear-2"></div>
+</div>
+
+<!-- ═══ Title Screen ═══ -->
+<div id="titleScreen" class="screen active">
+  <div class="title-icon">&#x1F3ED;</div>
+  <div class="title-name">四角形ファクトリー</div>
+  <div class="title-sub">条件カードから四角形を見ぬけ！</div>
+  <div class="diff-select">
+    <button class="diff-btn diff-easy" onclick="startGame('easy')">
+      <span class="diff-label">&#x1F7E2; かんたん</span>
+      <span class="diff-desc">基本の問題</span>
+    </button>
+    <button class="diff-btn diff-normal" onclick="startGame('normal')">
+      <span class="diff-label">&#x1F7E0; ふつう</span>
+      <span class="diff-desc">少しむずかしい</span>
+    </button>
+    <button class="diff-btn diff-hard" onclick="startGame('hard')">
+      <span class="diff-label">&#x1F534; むずかしい</span>
+      <span class="diff-desc">全問チャレンジ</span>
+    </button>
+  </div>
+</div>
+
+<!-- ═══ Game Screen ═══ -->
+<div id="gameScreen" class="screen">
+  <div class="game-header">
+    <div class="game-header-left" id="headerLabel">四角形ファクトリー</div>
+    <div class="game-header-right">
+      <span>&#x1F4DD;<span id="qCount">1/10</span></span>
+      <span>&#x2B50;<span id="totalStars">0</span></span>
+    </div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  <div class="question-area" id="questionArea"></div>
+</div>
+
+<!-- ═══ Result Screen ═══ -->
+<div id="resultScreen" class="screen">
+  <div class="result-card">
+    <div class="result-icon" id="resultIcon">&#x1F3ED;</div>
+    <div class="result-title" id="resultTitle">出荷完了！</div>
+    <div class="result-score" id="resultScore">0</div>
+    <div class="result-score-unit">てん</div>
+    <div class="result-stars" id="resultStars"></div>
+    <div class="result-stats">
+      <div class="result-stat">
+        <div class="result-stat-value" id="rCorrect">0</div>
+        <div class="result-stat-label">正解</div>
+      </div>
+      <div class="result-stat">
+        <div class="result-stat-value" id="rTotal">0</div>
+        <div class="result-stat-label">出題数</div>
+      </div>
+      <div class="result-stat">
+        <div class="result-stat-value" id="rAccuracy">0%</div>
+        <div class="result-stat-label">正答率</div>
+      </div>
+    </div>
+    <div class="result-alt">
+      <div class="result-alt-value" id="rAlt">+0 ALT</div>
+      <div class="result-alt-label">獲得ポイント</div>
+    </div>
+    <div class="result-btns">
+      <button class="btn-retry" onclick="retryGame()">もう一度</button>
+      <button class="btn-back" onclick="backToTitle()">タイトルへ</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SDK ═══ -->
+<script src="/js/trail-sdk.js"></script>
+<script src="/games/shared/trail-auth.js"></script>
+<script src="/games/shared/trail-score.js"></script>
+<script src="/games/shared/trail-timer.js"></script>
+
+<script>
+/* =============================================
+   四角形ファクトリー - A-3
+   Game Logic
+   ============================================= */
+
+// ── Shape SVG Definitions ──
+const SHAPE_SVGS = {
+  '正方形':     '<svg class="shape-svg" viewBox="0 0 80 60"><rect x="15" y="5" width="50" height="50" fill="none" stroke="#263238" stroke-width="2.5" stroke-linejoin="round"/></svg>',
+  '長方形':     '<svg class="shape-svg" viewBox="0 0 80 60"><rect x="5" y="12" width="70" height="36" fill="none" stroke="#263238" stroke-width="2.5" stroke-linejoin="round"/></svg>',
+  'ひし形':     '<svg class="shape-svg" viewBox="0 0 80 60"><polygon points="40,2 75,30 40,58 5,30" fill="none" stroke="#263238" stroke-width="2.5" stroke-linejoin="round"/></svg>',
+  '平行四辺形': '<svg class="shape-svg" viewBox="0 0 80 60"><polygon points="20,5 75,5 60,55 5,55" fill="none" stroke="#263238" stroke-width="2.5" stroke-linejoin="round"/></svg>',
+  '台形':       '<svg class="shape-svg" viewBox="0 0 80 60"><polygon points="25,5 55,5 70,55 10,55" fill="none" stroke="#263238" stroke-width="2.5" stroke-linejoin="round"/></svg>',
+};
+
+const SHAPE_SVGS_SM = {
+  '正方形':     '<svg class="shape-svg-sm" viewBox="0 0 48 36"><rect x="7" y="1" width="34" height="34" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round"/></svg>',
+  '長方形':     '<svg class="shape-svg-sm" viewBox="0 0 48 36"><rect x="2" y="6" width="44" height="24" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round"/></svg>',
+  'ひし形':     '<svg class="shape-svg-sm" viewBox="0 0 48 36"><polygon points="24,1 46,18 24,35 2,18" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round"/></svg>',
+  '平行四辺形': '<svg class="shape-svg-sm" viewBox="0 0 48 36"><polygon points="12,3 45,3 36,33 3,33" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round"/></svg>',
+  '台形':       '<svg class="shape-svg-sm" viewBox="0 0 48 36"><polygon points="14,3 34,3 43,33 5,33" fill="none" stroke="#263238" stroke-width="2" stroke-linejoin="round"/></svg>',
+};
+
+// ── Shape Personality (for wrong-answer feedback) ──
+const SHAPE_PERSONALITY = {
+  '正方形':     { name: '正方形くん', emoji: '&#x1F7E8;' },
+  '長方形':     { name: '長方形さん', emoji: '&#x1F7E6;' },
+  'ひし形':     { name: 'ひし形ちゃん', emoji: '&#x1F536;' },
+  '平行四辺形': { name: '平行四辺形くん', emoji: '&#x1F7E9;' },
+  '台形':       { name: '台形さん', emoji: '&#x1F6A7;' },
+};
+
+// ── Hint content for shapes ──
+const SHAPE_HINTS = {
+  '正方形':     '4つの辺がぜんぶ同じ長さで、4つの角がぜんぶ直角だよ',
+  '長方形':     '向かい合う辺が同じ長さで、4つの角がぜんぶ直角だよ',
+  'ひし形':     '4つの辺がぜんぶ同じ長さだけど、角は直角じゃないこともあるよ',
+  '平行四辺形': '向かい合う辺が平行で同じ長さだよ。角は直角じゃないよ',
+  '台形':       '1組の辺だけが平行な四角形だよ',
+};
+
+// ══════════════════════════════════════════
+//  問題データ（10問）
+// ══════════════════════════════════════════
+const ALL_QUESTIONS = [
+  // ── Type A: conditions_to_shape ──
+  {
+    id: 1,
+    type: 'conditions_to_shape',
+    difficulty: 1,
+    conditions: ['すべての辺が等しい', 'すべての角が直角'],
+    answer: '正方形',
+    choices: ['正方形', '長方形', 'ひし形', '平行四辺形', '台形'],
+    explanation: '4つの辺がすべて等しく、4つの角がすべて直角なのは正方形だけです。長方形は角が直角ですが辺の長さが違います。ひし形は辺が等しいですが角は直角とは限りません。',
+    wrongFeedback: {
+      '長方形': 'ぼくは向かい合う辺が等しいけど、すべての辺が等しいわけじゃないよ',
+      'ひし形': 'わたしは辺はぜんぶ等しいけど、角が直角じゃないこともあるの',
+      '平行四辺形': 'ぼくは向かい合う辺が等しいだけで、ぜんぶの辺は等しくないよ',
+      '台形': 'わたしは1組の辺が平行なだけで、その条件は持っていないよ',
+    }
+  },
+  {
+    id: 2,
+    type: 'conditions_to_shape',
+    difficulty: 1,
+    conditions: ['向かい合う辺が等しい', 'すべての角が直角'],
+    answer: '長方形',
+    choices: ['正方形', '長方形', 'ひし形', '平行四辺形', '台形'],
+    explanation: '向かい合う辺が等しく、すべての角が直角なのは長方形です。正方形も当てはまりますが、「向かい合う辺が等しい」だけでは正方形とは限りません。ここでは長方形が最も適切です。',
+    wrongFeedback: {
+      '正方形': 'ぼくも条件を満たすけど、「向かい合う辺が等しい」だけなら長方形が正解だよ',
+      'ひし形': 'わたしは角が直角じゃないこともあるんだ',
+      '平行四辺形': 'ぼくの角はぜんぶ直角じゃないよ',
+      '台形': 'わたしは向かい合う辺が等しくないよ',
+    }
+  },
+  {
+    id: 3,
+    type: 'conditions_to_shape',
+    difficulty: 2,
+    conditions: ['すべての辺が等しい', '対角線が直交する'],
+    answer: 'ひし形',
+    choices: ['正方形', '長方形', 'ひし形', '平行四辺形', '台形'],
+    explanation: 'すべての辺が等しく、対角線が直交するのはひし形（と正方形）です。正方形もひし形の仲間ですが、この条件だけではひし形が最も適切な答えです。',
+    wrongFeedback: {
+      '正方形': 'ぼくもこの条件を持っているけど、もっとぴったりな仲間がいるよ',
+      '長方形': 'ぼくの辺はぜんぶ同じ長さじゃないし、対角線は直交しないよ',
+      '平行四辺形': 'ぼくの辺はぜんぶ同じじゃないし、対角線も直交しないよ',
+      '台形': 'わたしはこの条件のどれも持っていないよ',
+    }
+  },
+  {
+    id: 4,
+    type: 'conditions_to_shape',
+    difficulty: 2,
+    conditions: ['2組の向かい合う辺が平行', '角は直角ではない', '辺の長さはすべて同じではない'],
+    answer: '平行四辺形',
+    choices: ['正方形', '長方形', 'ひし形', '平行四辺形', '台形'],
+    explanation: '2組の辺が平行で、角が直角でなく、辺の長さもバラバラなのは平行四辺形です。ひし形は辺がすべて等しく、長方形は角が直角です。',
+    wrongFeedback: {
+      '正方形': 'ぼくは角が直角で辺もぜんぶ等しいから、条件に合わないよ',
+      '長方形': 'ぼくは角がぜんぶ直角だから「角は直角ではない」に合わないよ',
+      'ひし形': 'わたしは辺がぜんぶ同じ長さだから「すべて同じではない」に合わないよ',
+      '台形': 'わたしは1組しか平行じゃないから「2組が平行」に合わないよ',
+    }
+  },
+  {
+    id: 5,
+    type: 'conditions_to_shape',
+    difficulty: 3,
+    conditions: ['1組の辺だけが平行', '平行な辺の長さは異なる'],
+    answer: '台形',
+    choices: ['正方形', '長方形', 'ひし形', '平行四辺形', '台形'],
+    explanation: '1組の辺だけが平行で、その長さが異なるのは台形です。平行四辺形は2組とも平行で、正方形・長方形・ひし形も2組が平行です。',
+    wrongFeedback: {
+      '正方形': 'ぼくは2組とも平行だから「1組だけ」には合わないよ',
+      '長方形': 'ぼくも2組とも平行だよ',
+      'ひし形': 'わたしも2組とも平行なんだ',
+      '平行四辺形': 'ぼくも2組の辺が平行だから「1組だけ」じゃないよ',
+    }
+  },
+
+  // ── Type B: shape_to_properties ──
+  {
+    id: 6,
+    type: 'shape_to_properties',
+    difficulty: 2,
+    targetShape: 'ひし形',
+    properties: [
+      { text: 'すべての辺が等しい', correct: true },
+      { text: 'すべての角が直角', correct: false },
+      { text: '対角線が直交する', correct: true },
+      { text: '対角線が等しい', correct: false },
+      { text: '向かい合う辺が平行', correct: true }
+    ],
+    explanation: 'ひし形は4つの辺がすべて等しく、対角線が直交し、向かい合う辺が平行です。しかし角は直角とは限らず、対角線の長さも等しくありません。',
+  },
+  {
+    id: 7,
+    type: 'shape_to_properties',
+    difficulty: 3,
+    targetShape: '正方形',
+    properties: [
+      { text: '対角線が等しい', correct: true },
+      { text: '対角線が直交する', correct: true },
+      { text: '向かい合う辺だけが等しい', correct: false },
+      { text: 'すべての角が直角', correct: true },
+      { text: '1組の辺だけが平行', correct: false }
+    ],
+    explanation: '正方形は対角線が等しく直交し、すべての角が直角です。「向かい合う辺だけが等しい」ではなく「すべての辺が等しい」のが正しいです。また2組の辺が平行なので、1組だけではありません。',
+  },
+
+  // ── Type C: inclusion ──
+  {
+    id: 8,
+    type: 'inclusion',
+    difficulty: 2,
+    statement: '正方形は長方形の仲間である',
+    answer: true,
+    choices: ['正しい', '正しくない'],
+    explanation: '正方形は「すべての角が直角」「向かい合う辺が等しい」という長方形の条件をすべて満たしています。だから正方形は長方形の仲間（特別な長方形）です。',
+  },
+  {
+    id: 9,
+    type: 'inclusion',
+    difficulty: 2,
+    statement: '長方形はひし形の仲間である',
+    answer: false,
+    choices: ['正しい', '正しくない'],
+    explanation: 'ひし形は「すべての辺が等しい」四角形です。長方形は向かい合う辺が等しいですが、すべての辺が等しいとは限りません。だから長方形はひし形の仲間とはいえません。',
+  },
+
+  // ── Type D: count_or_exclude ──
+  {
+    id: 10,
+    type: 'count_or_exclude',
+    difficulty: 3,
+    condition: '対角線がそれぞれの中点で交わる四角形をすべて選ぼう',
+    answerShapes: ['正方形', '長方形', 'ひし形', '平行四辺形'],
+    choices: ['正方形', '長方形', 'ひし形', '平行四辺形', '台形'],
+    explanation: '対角線がそれぞれの中点で交わるのは、正方形・長方形・ひし形・平行四辺形の4つです。これらはすべて平行四辺形の仲間です。台形の対角線は中点では交わりません。',
+  },
+];
+
+// ══════════════════════════════════════════
+//  Game State
+// ══════════════════════════════════════════
+let gameState = {
+  difficulty: 'normal',
+  questions: [],
+  currentIndex: 0,
+  score: 0,
+  totalStars: 0,
+  correctCount: 0,
+  hintCount: 0,          // hints used for current question
+  answered: false,
+  hintTimerId: null,
+  lastDifficulty: 'normal',
+};
+
+// ══════════════════════════════════════════
+//  TrailSDK Integration (safe wrapper)
+// ══════════════════════════════════════════
+let sdkReady = false;
+function initSDK() {
+  try {
+    if (typeof TrailSDK !== 'undefined') {
+      TrailSDK.init({ gameId: 'A-3', tenantId: 'trail' });
+      sdkReady = true;
+      console.log('[A-3] TrailSDK initialized');
+    }
+  } catch (e) {
+    console.warn('[A-3] TrailSDK not available, running in local mode');
+    sdkReady = false;
+  }
+}
+async function sdkStartSession() {
+  if (!sdkReady) return;
+  try { await TrailSDK.startSession(); } catch (e) { console.warn('[A-3] startSession failed:', e); }
+}
+async function sdkEndSession(score, accuracy, correct, total) {
+  if (!sdkReady) return null;
+  try {
+    return await TrailSDK.endSession({
+      score,
+      accuracy,
+      correctCount: correct,
+      totalCount: total,
+    });
+  } catch (e) {
+    console.warn('[A-3] endSession failed:', e);
+    return null;
+  }
+}
+initSDK();
+
+// ══════════════════════════════════════════
+//  Utility
+// ══════════════════════════════════════════
+function $(id) { return document.getElementById(id); }
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  $(id).classList.add('active');
+}
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ══════════════════════════════════════════
+//  Start Game
+// ══════════════════════════════════════════
+function startGame(diff) {
+  gameState.difficulty = diff;
+  gameState.lastDifficulty = diff;
+
+  // Filter questions by difficulty
+  let maxDiff = 1;
+  if (diff === 'normal') maxDiff = 2;
+  if (diff === 'hard') maxDiff = 3;
+
+  const filtered = ALL_QUESTIONS.filter(q => q.difficulty <= maxDiff);
+  gameState.questions = shuffle(filtered);
+  gameState.currentIndex = 0;
+  gameState.score = 0;
+  gameState.totalStars = 0;
+  gameState.correctCount = 0;
+
+  sdkStartSession();
+  showScreen('gameScreen');
+  showQuestion();
+}
+
+// ══════════════════════════════════════════
+//  Show Question
+// ══════════════════════════════════════════
+function showQuestion() {
+  const q = gameState.questions[gameState.currentIndex];
+  const area = $('questionArea');
+  area.innerHTML = '';
+  gameState.answered = false;
+  gameState.hintCount = 0;
+  if (gameState.hintTimerId) clearTimeout(gameState.hintTimerId);
+
+  // Update header
+  $('qCount').textContent = `${gameState.currentIndex + 1}/${gameState.questions.length}`;
+  $('totalStars').textContent = gameState.totalStars;
+  $('progressFill').style.width = `${(gameState.currentIndex / gameState.questions.length) * 100}%`;
+
+  switch (q.type) {
+    case 'conditions_to_shape': renderTypeA(q, area); break;
+    case 'shape_to_properties': renderTypeB(q, area); break;
+    case 'inclusion':           renderTypeC(q, area); break;
+    case 'count_or_exclude':    renderTypeD(q, area); break;
+  }
+
+  // Schedule hint button
+  gameState.hintTimerId = setTimeout(() => {
+    const hintBtn = document.querySelector('.hint-btn');
+    if (hintBtn && !gameState.answered) hintBtn.classList.add('visible');
+  }, 10000);
+}
+
+// ══════════════════════════════════════════
+//  Type A: conditions_to_shape
+// ══════════════════════════════════════════
+function renderTypeA(q, area) {
+  // Question label
+  const label = document.createElement('div');
+  label.className = 'question-text';
+  label.textContent = 'この条件にあてはまる四角形は？';
+  area.appendChild(label);
+
+  // Condition cards
+  const cards = document.createElement('div');
+  cards.className = 'condition-cards';
+  q.conditions.forEach((c, i) => {
+    const card = document.createElement('div');
+    card.className = 'condition-card';
+    card.textContent = c;
+    card.style.animationDelay = `${i * 0.1}s`;
+    cards.appendChild(card);
+  });
+  area.appendChild(cards);
+
+  // Hint button
+  const hintBtn = createHintButton(q);
+  area.appendChild(hintBtn);
+
+  // Hint area
+  const hintArea = document.createElement('div');
+  hintArea.id = 'hintArea';
+  area.appendChild(hintArea);
+
+  // Shape choices
+  const choices = document.createElement('div');
+  choices.className = 'shape-choices';
+  q.choices.forEach(name => {
+    const btn = document.createElement('button');
+    btn.className = 'shape-btn';
+    btn.innerHTML = `${SHAPE_SVGS[name]}<span>${name}</span>`;
+    btn.onclick = () => answerTypeA(q, name, btn, choices);
+    choices.appendChild(btn);
+  });
+  area.appendChild(choices);
+
+  // Quit button
+  area.appendChild(createQuitBtn());
+}
+
+function answerTypeA(q, chosen, btn, container) {
+  if (gameState.answered) return;
+  gameState.answered = true;
+
+  const isCorrect = chosen === q.answer;
+  if (isCorrect) {
+    btn.classList.add('correct-answer');
+    showFlash(true);
+  } else {
+    btn.classList.add('wrong-answer');
+    // Highlight correct
+    container.querySelectorAll('.shape-btn').forEach(b => {
+      if (b.querySelector('span').textContent === q.answer) b.classList.add('correct-answer');
+    });
+    showFlash(false);
+    showBubbleFeedback(chosen, q.wrongFeedback?.[chosen] || q.explanation);
+  }
+
+  finalizeAnswer(isCorrect, q);
+}
+
+// ══════════════════════════════════════════
+//  Type B: shape_to_properties
+// ══════════════════════════════════════════
+function renderTypeB(q, area) {
+  const label = document.createElement('div');
+  label.className = 'question-text';
+  label.textContent = 'この四角形の性質として正しいものをすべて選ぼう';
+  area.appendChild(label);
+
+  // Target shape
+  const target = document.createElement('div');
+  target.className = 'target-shape-display';
+  target.innerHTML = `${SHAPE_SVGS[q.targetShape]}<div class="target-shape-name">${q.targetShape}</div>`;
+  area.appendChild(target);
+
+  // Hint button
+  const hintBtn = createHintButton(q);
+  area.appendChild(hintBtn);
+  const hintArea = document.createElement('div');
+  hintArea.id = 'hintArea';
+  area.appendChild(hintArea);
+
+  // Property list
+  const list = document.createElement('div');
+  list.className = 'property-list';
+  list.id = 'propList';
+  const shuffled = shuffle(q.properties.map((p, i) => ({ ...p, idx: i })));
+  shuffled.forEach(prop => {
+    const item = document.createElement('div');
+    item.className = 'property-item';
+    item.dataset.idx = prop.idx;
+    item.dataset.correct = prop.correct;
+    item.innerHTML = `<div class="prop-checkbox"></div><span>${prop.text}</span>`;
+    item.onclick = () => {
+      if (gameState.answered) return;
+      item.classList.toggle('checked');
+      const cb = item.querySelector('.prop-checkbox');
+      cb.textContent = item.classList.contains('checked') ? '\u2713' : '';
+    };
+    list.appendChild(item);
+  });
+  area.appendChild(list);
+
+  // Submit
+  const submitBtn = document.createElement('button');
+  submitBtn.className = 'submit-btn';
+  submitBtn.textContent = '決定';
+  submitBtn.onclick = () => answerTypeB(q, list, submitBtn);
+  area.appendChild(submitBtn);
+
+  area.appendChild(createQuitBtn());
+}
+
+function answerTypeB(q, list, submitBtn) {
+  if (gameState.answered) return;
+  gameState.answered = true;
+  submitBtn.disabled = true;
+
+  const items = list.querySelectorAll('.property-item');
+  let allCorrect = true;
+  items.forEach(item => {
+    const isChecked = item.classList.contains('checked');
+    const shouldBeCorrect = item.dataset.correct === 'true';
+    if (isChecked === shouldBeCorrect) {
+      item.classList.add('correct-prop');
+    } else {
+      item.classList.add('wrong-prop');
+      allCorrect = false;
+    }
+  });
+
+  showFlash(allCorrect);
+  if (!allCorrect) {
+    showBubbleFeedback(q.targetShape, q.explanation);
+  }
+  finalizeAnswer(allCorrect, q);
+}
+
+// ══════════════════════════════════════════
+//  Type C: inclusion
+// ══════════════════════════════════════════
+function renderTypeC(q, area) {
+  const label = document.createElement('div');
+  label.className = 'question-text';
+  label.textContent = '次の文は正しい？ 正しくない？';
+  area.appendChild(label);
+
+  const stmtBox = document.createElement('div');
+  stmtBox.className = 'statement-box';
+  stmtBox.textContent = q.statement;
+  area.appendChild(stmtBox);
+
+  // Hint button
+  const hintBtn = createHintButton(q);
+  area.appendChild(hintBtn);
+  const hintArea = document.createElement('div');
+  hintArea.id = 'hintArea';
+  area.appendChild(hintArea);
+
+  // True / False
+  const tfDiv = document.createElement('div');
+  tfDiv.className = 'tf-choices';
+  q.choices.forEach((ch, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'tf-btn';
+    btn.textContent = ch;
+    btn.onclick = () => answerTypeC(q, i === 0, btn, tfDiv);
+    tfDiv.appendChild(btn);
+  });
+  area.appendChild(tfDiv);
+
+  area.appendChild(createQuitBtn());
+}
+
+function answerTypeC(q, chosenTrue, btn, container) {
+  if (gameState.answered) return;
+  gameState.answered = true;
+
+  const isCorrect = chosenTrue === q.answer;
+  if (isCorrect) {
+    btn.classList.add('correct-answer');
+    showFlash(true);
+  } else {
+    btn.classList.add('wrong-answer');
+    const btns = container.querySelectorAll('.tf-btn');
+    const correctIdx = q.answer ? 0 : 1;
+    btns[correctIdx].classList.add('correct-answer');
+    showFlash(false);
+  }
+  finalizeAnswer(isCorrect, q);
+}
+
+// ══════════════════════════════════════════
+//  Type D: count_or_exclude
+// ══════════════════════════════════════════
+function renderTypeD(q, area) {
+  const label = document.createElement('div');
+  label.className = 'question-text';
+  label.textContent = q.condition;
+  area.appendChild(label);
+
+  // Hint button
+  const hintBtn = createHintButton(q);
+  area.appendChild(hintBtn);
+  const hintArea = document.createElement('div');
+  hintArea.id = 'hintArea';
+  area.appendChild(hintArea);
+
+  // Shape choices (multi-select)
+  const choices = document.createElement('div');
+  choices.className = 'shape-choices';
+  choices.id = 'dChoices';
+  q.choices.forEach(name => {
+    const btn = document.createElement('button');
+    btn.className = 'shape-btn';
+    btn.dataset.shape = name;
+    btn.innerHTML = `${SHAPE_SVGS[name]}<span>${name}</span>`;
+    btn.onclick = () => {
+      if (gameState.answered) return;
+      btn.classList.toggle('selected');
+    };
+    choices.appendChild(btn);
+  });
+  area.appendChild(choices);
+
+  // Submit
+  const submitBtn = document.createElement('button');
+  submitBtn.className = 'submit-btn';
+  submitBtn.textContent = '決定';
+  submitBtn.onclick = () => answerTypeD(q, choices, submitBtn);
+  area.appendChild(submitBtn);
+
+  area.appendChild(createQuitBtn());
+}
+
+function answerTypeD(q, container, submitBtn) {
+  if (gameState.answered) return;
+  gameState.answered = true;
+  submitBtn.disabled = true;
+
+  const selected = [...container.querySelectorAll('.shape-btn.selected')]
+    .map(b => b.dataset.shape);
+  const correct = new Set(q.answerShapes);
+
+  let allCorrect = selected.length === correct.size &&
+    selected.every(s => correct.has(s));
+
+  container.querySelectorAll('.shape-btn').forEach(btn => {
+    const name = btn.dataset.shape;
+    const isAnswer = correct.has(name);
+    const isSelected = btn.classList.contains('selected');
+    if (isAnswer) btn.classList.add('correct-answer');
+    if (isSelected && !isAnswer) btn.classList.add('wrong-answer');
+  });
+
+  showFlash(allCorrect);
+  if (!allCorrect) {
+    showBubbleFeedback(null, q.explanation);
+  }
+  finalizeAnswer(allCorrect, q);
+}
+
+// ══════════════════════════════════════════
+//  Hint System
+// ══════════════════════════════════════════
+function createHintButton(q) {
+  const btn = document.createElement('button');
+  btn.className = 'hint-btn';
+  btn.innerHTML = '&#x1F4A1; ヒント';
+  btn.onclick = () => {
+    if (gameState.answered) return;
+    gameState.hintCount++;
+    showHint(q);
+    // Update badge
+    const badge = document.querySelector('.hint-used-badge');
+    if (badge) badge.textContent = `ヒント ${gameState.hintCount}回使用`;
+    else {
+      const b = document.createElement('div');
+      b.className = 'hint-used-badge';
+      b.textContent = `ヒント ${gameState.hintCount}回使用`;
+      btn.parentElement.insertBefore(b, btn.nextSibling);
+    }
+  };
+  return btn;
+}
+
+function showHint(q) {
+  const hintArea = $('hintArea');
+  if (!hintArea) return;
+  let hintText = '';
+
+  if (q.type === 'conditions_to_shape') {
+    hintText = `正解の四角形のとくちょう: ${SHAPE_HINTS[q.answer]}`;
+  } else if (q.type === 'shape_to_properties') {
+    const correctCount = q.properties.filter(p => p.correct).length;
+    hintText = `正しい性質は ${correctCount} つあるよ`;
+  } else if (q.type === 'inclusion') {
+    // Extract shape names from statement
+    hintText = q.answer
+      ? 'この文の四角形の性質をよく思い出してみよう。上位の仲間に含まれるかな？'
+      : '「すべての辺が等しい」かどうか考えてみよう';
+  } else if (q.type === 'count_or_exclude') {
+    hintText = `正解は ${q.answerShapes.length} つの四角形だよ`;
+  }
+
+  hintArea.innerHTML = `<div class="hint-overlay">&#x1F4A1; ${hintText}</div>`;
+}
+
+// ══════════════════════════════════════════
+//  Bubble Feedback
+// ══════════════════════════════════════════
+function showBubbleFeedback(shapeName, text) {
+  // Remove existing
+  const existing = document.querySelector('.bubble-feedback');
+  if (existing) existing.remove();
+
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble-feedback';
+
+  if (shapeName && SHAPE_PERSONALITY[shapeName]) {
+    const p = SHAPE_PERSONALITY[shapeName];
+    bubble.innerHTML = `
+      <div class="bubble-speaker">${p.emoji} ${p.name}</div>
+      <div>${text}</div>
+    `;
+  } else {
+    bubble.innerHTML = `<div>${text}</div>`;
+  }
+  document.body.appendChild(bubble);
+
+  setTimeout(() => {
+    bubble.style.animation = 'bubbleOut 0.3s ease forwards';
+    setTimeout(() => bubble.remove(), 300);
+  }, 2500);
+}
+
+// ══════════════════════════════════════════
+//  Flash Effect
+// ══════════════════════════════════════════
+function showFlash(isCorrect) {
+  const flash = document.createElement('div');
+  flash.className = `result-flash ${isCorrect ? 'correct' : 'wrong'}`;
+  flash.innerHTML = `<div class="result-flash-icon">${isCorrect ? '\u2B50' : '\u274C'}</div>`;
+  document.body.appendChild(flash);
+  setTimeout(() => flash.remove(), 600);
+}
+
+// ══════════════════════════════════════════
+//  Finalize Answer & Show Explanation
+// ══════════════════════════════════════════
+function finalizeAnswer(isCorrect, q) {
+  if (gameState.hintTimerId) clearTimeout(gameState.hintTimerId);
+  // Hide hint button
+  const hintBtn = document.querySelector('.hint-btn');
+  if (hintBtn) hintBtn.style.display = 'none';
+
+  // Calculate stars
+  let stars = 0;
+  if (isCorrect) {
+    gameState.correctCount++;
+    if (gameState.hintCount === 0) stars = 3;
+    else if (gameState.hintCount === 1) stars = 2;
+    else stars = 1;
+  }
+  // stars = 0 for wrong answer
+
+  const pointsPerStar = 10;
+  const points = stars * pointsPerStar;
+  gameState.score += points;
+  gameState.totalStars += stars;
+  $('totalStars').textContent = gameState.totalStars;
+
+  // Show stars + explanation + next
+  const area = $('questionArea');
+
+  // Stars
+  if (isCorrect) {
+    const starsDiv = document.createElement('div');
+    starsDiv.className = 'stars-display';
+    for (let i = 0; i < 3; i++) {
+      const s = document.createElement('span');
+      s.className = i < stars ? 'star-filled' : 'star-empty';
+      s.textContent = '\u2605';
+      starsDiv.appendChild(s);
+    }
+    area.appendChild(starsDiv);
+  }
+
+  // Explanation
+  const expBox = document.createElement('div');
+  expBox.className = 'explanation-box';
+  expBox.innerHTML = `
+    <div class="exp-label">&#x1F4D6; 解説</div>
+    <div>${q.explanation}</div>
+  `;
+  area.appendChild(expBox);
+
+  // Next / Finish button
+  const isLast = gameState.currentIndex >= gameState.questions.length - 1;
+  const nextBtn = document.createElement('button');
+  nextBtn.className = 'next-btn';
+  nextBtn.textContent = isLast ? '結果を見る' : '次の問題へ';
+  nextBtn.onclick = () => {
+    if (isLast) {
+      finishGame();
+    } else {
+      gameState.currentIndex++;
+      showQuestion();
+    }
+  };
+  area.appendChild(nextBtn);
+
+  // Scroll to explanation
+  setTimeout(() => expBox.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
+}
+
+// ══════════════════════════════════════════
+//  Finish Game
+// ══════════════════════════════════════════
+async function finishGame() {
+  const total = gameState.questions.length;
+  const correct = gameState.correctCount;
+  const accuracy = total > 0 ? Math.round(correct * 100 / total) : 0;
+  const score = gameState.score;
+  const maxStars = total * 3;
+
+  // SDK end session
+  await sdkEndSession(score, accuracy, correct, total);
+
+  // Result screen
+  $('resultScore').textContent = score;
+  $('rCorrect').textContent = correct;
+  $('rTotal').textContent = total;
+  $('rAccuracy').textContent = `${accuracy}%`;
+
+  // Stars summary
+  const avgStars = total > 0 ? Math.round(gameState.totalStars / total) : 0;
+  let starsHtml = '';
+  for (let i = 0; i < 3; i++) {
+    starsHtml += i < avgStars
+      ? '<span style="color:#ffc107">\u2605</span>'
+      : '<span style="color:#ddd">\u2605</span>';
+  }
+  $('resultStars').innerHTML = starsHtml;
+
+  // ALT
+  const alt = gameState.totalStars;
+  $('rAlt').textContent = `+${alt} ALT`;
+
+  // Title & icon
+  if (accuracy === 100) {
+    $('resultTitle').textContent = 'パーフェクト出荷！';
+    $('resultIcon').textContent = '\uD83C\uDFC6';
+  } else if (accuracy >= 80) {
+    $('resultTitle').textContent = '出荷完了！';
+    $('resultIcon').textContent = '\uD83C\uDFED';
+  } else if (accuracy >= 50) {
+    $('resultTitle').textContent = 'まずまずの出荷';
+    $('resultIcon').textContent = '\uD83D\uDCE6';
+  } else {
+    $('resultTitle').textContent = '練習あるのみ！';
+    $('resultIcon').textContent = '\uD83D\uDD27';
+  }
+
+  showScreen('resultScreen');
+  $('progressFill').style.width = '100%';
+}
+
+// ══════════════════════════════════════════
+//  Retry / Back
+// ══════════════════════════════════════════
+function retryGame() {
+  startGame(gameState.lastDifficulty);
+}
+function backToTitle() {
+  showScreen('titleScreen');
+}
+
+// ══════════════════════════════════════════
+//  Quit Button
+// ══════════════════════════════════════════
+function createQuitBtn() {
+  const btn = document.createElement('button');
+  btn.className = 'quit-btn';
+  btn.textContent = 'やめる';
+  btn.onclick = () => {
+    if (confirm('タイトルにもどる？')) backToTitle();
+  };
+  return btn;
+}
+</script>
+</body>
+</html>

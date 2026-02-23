@@ -271,7 +271,7 @@ let S={
   games:[],classes:[],students:[],coinLogs:[],badges:[],rankings:[],
   // UI
   adminTab:'activity',portalTab:'home',selectedCategory:'すべて',
-  selectedRankGame:null,loginClass:null,loading:false,
+  selectedRankGame:null,loginClass:null,loginTab:'student',loading:false,
   // Analytics cache
   dashboard:null,loginLogs:[],gameplay:null,
 };
@@ -395,24 +395,45 @@ function renderRegister(){
 
 // ═══ Student Login ═══
 function renderStudentLogin(){
-  const classBtns=(S.classes||[]).map(c=>
-    `<button class="class-select-btn${S.loginClass===c.name?' active':''}" data-cls="${esc(c.name)}">${esc(c.name)}</button>`
-  ).join('');
-  const nameSection=S.loginClass?`
-    <div style="margin-top:20px">
-      <div style="font-size:.75rem;color:var(--text-dim);margin-bottom:8px">「${esc(S.loginClass)}」のなまえをいれてね</div>
-      <input class="login-input" id="nameInput" placeholder="なまえ（ひらがな）" maxlength="20" autocomplete="off"/>
-      <button class="login-btn" id="loginBtn">にゅうしつ ▶</button>
-    </div>`:'<div style="margin-top:16px;font-size:.8rem;color:var(--text-dim)">↑ クラスをえらんでね</div>';
+  const isStudent=S.loginTab==='student';
+  const tabStyle='display:flex;gap:3px;margin-bottom:16px;background:rgba(0,0,0,0.03);border-radius:10px;padding:3px';
+  const tabBtnBase='flex:1;padding:8px 6px;border:none;border-radius:8px;font-family:inherit;font-size:.8rem;font-weight:700;cursor:pointer;transition:all .3s';
+  const tabBtnActive='background:var(--accent-cyan);color:#fff';
+  const tabBtnInactive='background:none;color:var(--text-dim)';
+  const loginTabs=`<div style="${tabStyle}">
+    <button id="tabStudent" style="${tabBtnBase};${isStudent?tabBtnActive:tabBtnInactive}">🎮 せいと</button>
+    <button id="tabParent" style="${tabBtnBase};${!isStudent?tabBtnActive:tabBtnInactive}">👨‍👩‍👧 ほごしゃ</button>
+  </div>`;
+
+  let formContent='';
+  if(isStudent){
+    const classBtns=(S.classes||[]).map(c=>
+      `<button class="class-select-btn${S.loginClass===c.name?' active':''}" data-cls="${esc(c.name)}">${esc(c.name)}</button>`
+    ).join('');
+    const nameSection=S.loginClass?`
+      <div style="margin-top:20px">
+        <div style="font-size:.75rem;color:var(--text-dim);margin-bottom:8px">「${esc(S.loginClass)}」のなまえをいれてね</div>
+        <input class="login-input" id="nameInput" placeholder="なまえ（ひらがな）" maxlength="20" autocomplete="off"/>
+        <button class="login-btn" id="loginBtn">にゅうしつ ▶</button>
+      </div>`:'<div style="margin-top:16px;font-size:.8rem;color:var(--text-dim)">↑ クラスをえらんでね</div>';
+    formContent=`<div style="font-size:.8rem;color:var(--text-dim);margin-bottom:14px">クラスをえらんでね</div>
+      <div class="class-select-grid">${classBtns}</div>
+      ${nameSection}`;
+  } else {
+    formContent=`<div style="font-size:.8rem;color:var(--text-dim);margin-bottom:14px">おこさまの名前とPINを入力してください</div>
+      <input class="login-input" id="parentStudentName" placeholder="おこさまのなまえ" maxlength="20" autocomplete="off"/>
+      <input class="login-input" id="parentPin" type="tel" placeholder="4桁PIN" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" autocomplete="off" style="letter-spacing:8px;text-align:center;font-family:'Orbitron',sans-serif;font-size:1.2rem"/>
+      <button class="login-btn" id="parentLoginBtn">ログイン ▶</button>`;
+  }
+
   return`<div class="login-screen">
     <div class="login-logo">TRAIL GAME PRO 3</div>
     <div class="login-subtitle">EXPLORE • PLAY • GROW</div>
     <div style="font-size:.75rem;color:var(--accent-purple);margin-bottom:16px;font-weight:700">${esc(S.tenant?S.tenant.name:'')}</div>
     <div class="login-box" style="max-width:420px">
-      <h2>にゅうしつ</h2>
-      <div style="font-size:.8rem;color:var(--text-dim);margin-bottom:14px">クラスをえらんでね</div>
-      <div class="class-select-grid">${classBtns}</div>
-      ${nameSection}
+      <h2>${isStudent?'にゅうしつ':'ほごしゃログイン'}</h2>
+      ${loginTabs}
+      ${formContent}
     </div>
     <div class="admin-link" id="guestLink" style="margin-top:20px;color:var(--accent-purple)">🎮 なまえなしであそぶ</div>
     <div class="admin-link" id="adminLink">🔧 管理者ログイン</div>
@@ -566,6 +587,7 @@ function renderAdmin(){
     <button class="admin-tab ${S.adminTab==='games'?'active':''}" data-tab="games">🎮 ゲーム</button>
     <button class="admin-tab ${S.adminTab==='rankings'?'active':''}" data-tab="rankings">🏆 ランキング</button>
     <button class="admin-tab ${S.adminTab==='usage'?'active':''}" data-tab="usage">🕹️ 利用状況</button>
+    <button class="admin-tab ${S.adminTab==='parent'?'active':''}" data-tab="parent">📩 保護者PIN</button>
     <button class="admin-tab ${S.adminTab==='summary'?'active':''}" data-tab="summary">📊 一覧</button>
   </div>`;
   let content='';
@@ -576,6 +598,7 @@ function renderAdmin(){
   else if(S.adminTab==='games')content=renderAdminGames();
   else if(S.adminTab==='rankings')content=renderAdminRankings();
   else if(S.adminTab==='usage')content=renderAdminGameUsage();
+  else if(S.adminTab==='parent')content=renderAdminParentPin();
   else content=renderAdminSummary();
   return`<div class="admin-panel">
     <div class="header"><div class="header-logo">TRAIL GP3</div><div class="header-right">
@@ -781,6 +804,20 @@ function renderAdminGameUsage(){
     ${playerCards}`;
 }
 
+// ═══ 保護者PIN管理（管理者用） ═══
+function renderAdminParentPin(){
+  const sOpts=S.students.map(s=>`<option value="${s.id}">${esc(s.name)}（${esc(s.className)}）</option>`).join('');
+  return`<div class="admin-form" style="border-color:rgba(0,144,217,0.15)">
+    <h3 style="color:var(--accent-cyan)">📩 保護者PIN発行</h3>
+    <div class="form-stack">
+      <div class="form-group"><label>生徒を選択</label><select id="parentPinStudent">${sOpts}</select></div>
+      <button class="btn-primary btn-purple" id="issueParentPinBtn">📩 PIN発行</button>
+    </div>
+    <div id="parentPinResult"></div>
+    <div style="margin-top:16px;font-size:.75rem;color:var(--text-dim)">発行されたPINは保護者にお伝えください。保護者はログイン画面の「ほごしゃ」タブから、お子さまの名前とPINでログインできます。</div>
+  </div>`;
+}
+
 // ════════════════════════════════════
 // EVENTS
 // ════════════════════════════════════
@@ -826,6 +863,24 @@ function bindEvents(){
     }catch(e){toast(e.message)}
   });
   const ni=document.getElementById('nameInput');if(ni){ni.onkeydown=e=>{if(e.key==='Enter'){const b=document.getElementById('loginBtn');if(b)b.click()}};ni.focus()}
+
+  // Login tab switch
+  on('tabStudent','click',()=>{S.loginTab='student';render()});
+  on('tabParent','click',()=>{S.loginTab='parent';render()});
+
+  // Parent login
+  on('parentLoginBtn','click',async()=>{
+    const name=val('parentStudentName'),pin=val('parentPin');
+    if(!name||!pin){toast('名前とPINを入力してください');return}
+    if(!/^\d{4}$/.test(pin)){toast('PINは4桁の数字です');return}
+    try{
+      const r=await apiPost('/auth/parent-login',{tenantSlug:S.tenant.slug,studentName:name,pin});
+      S.token=r.token;S.user={id:r.student.id,name:r.student.name,className:r.student.className,role:'parent'};
+      AUTH.save({token:S.token,tenant:S.tenant,user:S.user,screen:'portal'});
+      window.location.href='/parent.html';
+    }catch(e){toast(e.message)}
+  });
+  const pi=document.getElementById('parentPin');if(pi){pi.onkeydown=e=>{if(e.key==='Enter'){const b=document.getElementById('parentLoginBtn');if(b)b.click()}}}
 
   // Guest
   on('guestLink','click',()=>{S.screen='guest';render()});
@@ -938,6 +993,26 @@ function bindEvents(){
   on('addClassBtn','click',async()=>{
     const name=val('newClassName');if(!name)return;
     try{await apiPost('/t/'+S.tenant.slug+'/classes',{name});toast('🏫 '+name+'を追加');await loadTenantData()}catch(e){toast(e.message)}
+  });
+
+  // Issue parent PIN
+  on('issueParentPinBtn','click',async()=>{
+    const sid=val('parentPinStudent');if(!sid)return;
+    try{
+      const r=await apiPost('/auth/parent-tokens',{studentId:parseInt(sid)});
+      const url=location.origin+'/';
+      const msg=`【TRAIL GAME PRO 3 保護者ログイン】\nお子さま: ${r.student.name}（${r.student.className}）\nPIN: ${r.pin}\nログインURL: ${url}\n※ログイン画面で「ほごしゃ」タブを選び、お子さまの名前とPINを入力してください。`;
+      const box=document.getElementById('parentPinResult');
+      box.innerHTML=`<div style="margin-top:14px;background:rgba(0,144,217,0.06);border:1.5px solid rgba(0,144,217,0.2);border-radius:10px;padding:14px">
+        <div style="font-family:'Orbitron',sans-serif;font-size:.65rem;color:var(--accent-cyan);margin-bottom:8px;letter-spacing:1px">PIN発行完了</div>
+        <div style="font-size:.85rem;font-weight:700;margin-bottom:4px">${esc(r.student.name)}（${esc(r.student.className)}）</div>
+        <div style="font-family:'Orbitron',sans-serif;font-size:1.6rem;font-weight:900;letter-spacing:8px;color:var(--accent-purple);margin:8px 0">${esc(r.pin)}</div>
+        <button class="btn-primary btn-purple" id="copyPinBtn" style="font-size:.7rem;padding:10px">📋 LINEやメール用にコピー</button>
+      </div>`;
+      document.getElementById('copyPinBtn').onclick=()=>{
+        navigator.clipboard.writeText(msg).then(()=>toast('コピーしました！LINEやメールに貼り付けてください')).catch(()=>{prompt('以下をコピーしてください:',msg)});
+      };
+    }catch(e){toast('PIN発行エラー: '+e.message)}
   });
 
   // Delete class
