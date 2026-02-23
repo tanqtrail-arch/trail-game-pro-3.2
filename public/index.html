@@ -170,6 +170,68 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .alt-popup-award-lbl{color:rgba(255,255,255,0.55)}
 .alt-popup-award-amt{color:#ff9500;font-weight:700}
 
+/* ─── 生徒ダッシュボード ─── */
+.dash-section{background:var(--bg-card);border:1.5px solid rgba(0,0,0,0.06);border-radius:14px;padding:16px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,0.03)}
+.dash-section-title{font-family:'Orbitron',sans-serif;font-size:.65rem;letter-spacing:1.5px;color:var(--text-dim);margin-bottom:10px}
+.dash-level-box{text-align:center;padding:14px 0}
+.dash-rank-label{font-family:'Orbitron',sans-serif;font-size:1.5rem;font-weight:900;background:linear-gradient(135deg,var(--accent-gold),var(--accent-orange));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.dash-rank-name{font-size:.85rem;color:var(--text-primary);font-weight:700;margin-top:2px}
+.dash-progress-wrap{margin:10px 0 4px;position:relative}
+.dash-progress-track{width:100%;height:14px;background:rgba(0,0,0,0.06);border-radius:7px;overflow:hidden}
+.dash-progress-fill{height:100%;border-radius:7px;background:linear-gradient(90deg,var(--accent-gold),var(--accent-orange));transition:width .5s ease;position:relative}
+.dash-progress-fill::after{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.3),transparent);animation:dash-shimmer 2s infinite}
+@keyframes dash-shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.dash-progress-text{font-family:'Orbitron',sans-serif;font-size:.6rem;color:var(--text-dim);display:flex;justify-content:space-between;margin-top:3px}
+.dash-streak-row{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:8px;font-weight:700;color:var(--accent-orange)}
+.dash-mission-card{position:relative;overflow:hidden}
+.dash-mission-card.completed{border-color:rgba(44,181,98,0.3);background:rgba(44,181,98,0.04)}
+.dash-mission-desc{font-size:.9rem;font-weight:700;margin-bottom:8px}
+.dash-mission-btn{display:inline-block;padding:8px 18px;border:none;border-radius:8px;font-family:'Orbitron',sans-serif;font-size:.65rem;font-weight:700;cursor:pointer;color:#fff;background:linear-gradient(135deg,var(--accent-cyan),var(--accent-purple));letter-spacing:1px;transition:all .3s}
+.dash-mission-btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,144,217,0.25)}
+.dash-stat-tabs{display:flex;gap:3px;margin-bottom:10px;background:rgba(0,0,0,0.03);border-radius:8px;padding:2px}
+.dash-stat-tab{flex:1;padding:7px 4px;background:none;border:none;font-family:'Orbitron',sans-serif;font-size:.55rem;color:var(--text-dim);cursor:pointer;border-radius:6px;transition:all .2s;letter-spacing:.5px}
+.dash-stat-tab.active{background:var(--bg-card);color:var(--accent-cyan);box-shadow:0 1px 3px rgba(0,0,0,0.08)}
+.dash-stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.dash-stat-item{text-align:center;padding:8px 4px}
+.dash-stat-val{font-family:'Orbitron',sans-serif;font-size:1.3rem;font-weight:900}
+.dash-stat-lbl{font-size:.6rem;color:var(--text-dim);margin-top:2px}
+.dash-cat-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.04)}
+.dash-cat-row:last-child{border-bottom:none}
+.dash-cat-emoji{font-size:1.2rem;width:28px;text-align:center;flex-shrink:0}
+.dash-cat-name{font-size:.8rem;font-weight:700;min-width:44px;flex-shrink:0}
+.dash-cat-bar-wrap{flex:1;height:10px;background:rgba(0,0,0,0.05);border-radius:5px;overflow:hidden}
+.dash-cat-bar{height:100%;border-radius:5px;background:linear-gradient(90deg,var(--accent-cyan),var(--accent-purple));transition:width .4s}
+.dash-cat-pct{font-family:'Orbitron',sans-serif;font-size:.65rem;color:var(--text-dim);min-width:36px;text-align:right;flex-shrink:0}
+.dash-cat-badge{font-size:.55rem;padding:1px 6px;border-radius:10px;background:rgba(232,160,32,0.15);color:var(--accent-gold);font-weight:700;flex-shrink:0}
+.dash-badge-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.dash-badge-item{text-align:center;padding:10px 4px;border-radius:10px;border:1.5px solid rgba(0,0,0,0.06);transition:all .3s}
+.dash-badge-item.earned{background:linear-gradient(135deg,rgba(232,160,32,0.08),rgba(255,152,0,0.06));border-color:rgba(232,160,32,0.25);box-shadow:0 0 8px rgba(232,160,32,0.1)}
+.dash-badge-item.locked{opacity:.45;filter:grayscale(.8)}
+.dash-badge-emoji{font-size:1.6rem;margin-bottom:2px}
+.dash-badge-name{font-size:.6rem;font-weight:700;color:var(--text-primary)}
+.dash-score-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+.dash-score-card{text-align:center;padding:12px 8px;border-radius:10px;background:rgba(0,0,0,0.015);border:1px solid rgba(0,0,0,0.05)}
+.dash-score-emoji{font-size:1.5rem}
+.dash-score-name{font-size:.7rem;font-weight:700;margin:2px 0}
+.dash-score-val{font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:900;color:var(--accent-cyan)}
+.dash-score-lbl{font-size:.55rem;color:var(--text-dim)}
+.dash-weekly-list{display:flex;flex-direction:column;gap:4px}
+.dash-weekly-row{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:8px;font-size:.85rem}
+.dash-weekly-row.me{background:rgba(0,144,217,0.08);border:1px solid rgba(0,144,217,0.2)}
+.dash-weekly-rank{font-family:'Orbitron',sans-serif;font-weight:900;width:22px;text-align:center;color:var(--text-dim);font-size:.75rem}
+.dash-weekly-name{flex:1;font-weight:700}
+.dash-weekly-alt{font-family:'Orbitron',sans-serif;font-weight:700;color:var(--accent-gold);font-size:.8rem}
+.dash-cal{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;text-align:center}
+.dash-cal-head{font-size:.55rem;color:var(--text-dim);padding:2px 0;font-weight:700}
+.dash-cal-day{width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:.65rem;border-radius:6px;color:var(--text-dim);position:relative}
+.dash-cal-day.has-play{background:rgba(0,144,217,0.12);color:var(--accent-cyan);font-weight:700}
+.dash-cal-day.has-play.hot{background:rgba(232,160,32,0.2);color:var(--accent-gold)}
+.dash-cal-day.has-play.fire{background:rgba(255,106,0,0.25);color:var(--accent-orange)}
+.dash-cal-day.today{box-shadow:inset 0 0 0 2px var(--accent-cyan)}
+.dash-cal-day.empty{visibility:hidden}
+.game-card .new-badge{position:absolute;top:6px;right:6px;font-family:'Orbitron',sans-serif;font-size:.5rem;font-weight:900;padding:2px 8px;border-radius:6px;background:linear-gradient(135deg,var(--accent-pink),var(--accent-orange));color:#fff;letter-spacing:1px;z-index:2;animation:new-pulse 2s infinite}
+@keyframes new-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.85;transform:scale(1.05)}}
+
 @media(min-width:600px){.app{padding:20px}.login-logo{font-size:3rem}.game-grid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:18px}}
 </style>
 </head>
@@ -206,7 +268,7 @@ gamePlayTracker.load();
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&gamePlayTracker.currentPlay)gamePlayTracker.endPlay()});
 window.addEventListener('beforeunload',()=>gamePlayTracker.endPlay());
 
-let S={screen:'landing',tenant:null,user:null,token:null,games:[],classes:[],students:[],coinLogs:[],badges:[],rankings:[],adminTab:'activity',portalTab:'home',selectedCategory:'すべて',selectedRankGame:null,loginClass:null,loginTab:'student',loading:false,dashboard:null,loginLogs:[],gameplay:null,parentTokens:null,streak:null};
+let S={screen:'landing',tenant:null,user:null,token:null,games:[],classes:[],students:[],coinLogs:[],badges:[],rankings:[],adminTab:'activity',portalTab:'home',selectedCategory:'すべて',selectedRankGame:null,loginClass:null,loginTab:'student',loading:false,dashboard:null,loginLogs:[],gameplay:null,parentTokens:null,streak:null,studentDashboard:null,dashStatPeriod:'today'};
 (function restore(){const d=AUTH.load();if(!d)return;S.token=d.token;S.tenant=d.tenant;S.user=d.user;S.screen=d.screen||'landing'})();
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
 function createStars(){const c=document.getElementById('stars');for(let i=0;i<50;i++){const s=document.createElement('div');s.className='star';s.style.left=Math.random()*100+'%';s.style.top=Math.random()*100+'%';s.style.animationDelay=Math.random()*3+'s';s.style.animationDuration=(2+Math.random()*3)+'s';s.style.width=s.style.height=(1+Math.random()*2)+'px';c.appendChild(s)}}
@@ -231,6 +293,13 @@ async function loadStreak(){
   try{const r=await apiGet('/streaks/'+S.user.id+'?tenant_id='+encodeURIComponent(S.tenant.id));S.streak=r;render()}catch(e){}
 }
 
+// ★ 生徒ダッシュボード取得
+async function loadStudentDashboard(){
+  if(!S.tenant||!S.user)return;
+  try{S.studentDashboard=await apiGet('/t/'+S.tenant.slug+'/student-dashboard')}catch(e){S.studentDashboard={}}
+  render();
+}
+
 // ★ 0-15: ストリークウィジェット描画
 function renderStreakWidget(){
   if(!S.streak)return'';
@@ -249,7 +318,7 @@ function renderStreakWidget(){
 
 async function loadTenantData(){if(!S.tenant)return;const slug=S.tenant.slug;S.loading=true;render();try{const[gRes,cRes]=await Promise.all([apiGet('/t/'+slug+'/games'),apiGet('/t/'+slug+'/classes')]);S.games=gRes.games||[];S.classes=cRes.classes||[];try{const rRes=await apiGet('/t/'+slug+'/rankings');S.rankings=rRes.rankings||[]}catch(e){}if(S.user&&S.user.role&&S.user.role!=='student'){try{const[sRes,coRes,bRes]=await Promise.all([apiGet('/t/'+slug+'/students'),apiGet('/t/'+slug+'/coins'),apiGet('/t/'+slug+'/badges')]);S.students=sRes.students||[];S.coinLogs=coRes.logs||[];S.badges=bRes.summary||[]}catch(e){console.error(e)}}else if(S.user&&S.user.role==='student'){try{const coRes=await apiGet('/t/'+slug+'/coins');S.coinLogs=coRes.logs||[]}catch(e){}}}catch(e){console.error('loadData:',e);toast('データ読み込みエラー')}S.loading=false;render();
   // ★ 0-15: ストリーク非同期取得
-  if(S.user&&S.user.role==='student')loadStreak();
+  if(S.user&&S.user.role==='student'){loadStreak();loadStudentDashboard()}
 }
 async function loadDashboard(){if(!S.tenant)return;try{S.dashboard=await apiGet('/t/'+S.tenant.slug+'/analytics/dashboard')}catch(e){}}
 async function loadLoginLogs(){if(!S.tenant)return;try{const r=await apiGet('/t/'+S.tenant.slug+'/analytics/logins');S.loginLogs=r.logs||[]}catch(e){}}
@@ -263,10 +332,128 @@ function renderRegister(){return`<div class="login-screen"><div class="login-log
 function renderStudentLogin(){const classBtns=(S.classes||[]).map(c=>`<button class="class-select-btn${S.loginClass===c.name?' active':''}" data-cls="${esc(c.name)}">${esc(c.name)}</button>`).join('');const nameSection=S.loginClass?`<div style="margin-top:20px"><div style="font-size:.75rem;color:var(--text-dim);margin-bottom:8px">「${esc(S.loginClass)}」のなまえをいれてね</div><input class="login-input" id="nameInput" placeholder="なまえ（ひらがな）" maxlength="20" autocomplete="off"/><button class="login-btn" id="loginBtn">にゅうしつ ▶</button></div>`:'<div style="margin-top:16px;font-size:.8rem;color:var(--text-dim)">↑ クラスをえらんでね</div>';return`<div class="login-screen"><div class="login-logo">TRAIL GAME PRO 3</div><div class="login-subtitle">EXPLORE • PLAY • GROW</div><div style="font-size:.75rem;color:var(--accent-purple);margin-bottom:16px;font-weight:700">${esc(S.tenant?S.tenant.name:'')}</div><div class="login-box" style="max-width:420px"><h2>にゅうしつ</h2><div style="font-size:.8rem;color:var(--text-dim);margin-bottom:14px">クラスをえらんでね</div><div class="class-select-grid">${classBtns}</div>${nameSection}</div><div class="admin-link" id="guestLink" style="margin-top:20px;color:var(--accent-purple)">🎮 なまえなしであそぶ</div><div class="admin-link" id="adminLink">🔧 管理者ログイン</div><div class="admin-link" id="backToLanding" style="margin-top:8px">← 教室選択に戻る</div></div>`}
 function renderAdminLogin(){const locked=LOGIN_SECURITY.isLocked();const lockMsg=locked?`<div class="lockout-msg"><strong>🔒 LOCKED</strong><br>ログイン試行回数が上限に達しました。<br><span id="lockCountdown">${LOGIN_SECURITY.getRemainingSeconds()}</span>秒後に再試行してください。</div>`:'';const attemptsLeft=LOGIN_SECURITY.maxAttempts-LOGIN_SECURITY.attempts;const attemptsMsg=LOGIN_SECURITY.attempts>0&&!locked?`<div style="font-size:.7rem;color:var(--accent-pink);margin-top:8px">残り${attemptsLeft}回</div>`:'';return`<div class="login-screen"><div class="login-box" style="text-align:center"><h2>🔒 ADMIN</h2><p style="color:var(--text-dim);margin-bottom:14px;font-size:.8rem">管理者アカウントでログイン</p><input class="login-input" id="adminEmail" type="email" placeholder="メールアドレス" ${locked?'disabled':''}/><input class="login-input" id="adminPass" type="password" placeholder="パスワード" ${locked?'disabled':''}/><button class="login-btn" id="adminLoginBtn" ${locked?'disabled style="opacity:.5;cursor:not-allowed"':''}>LOGIN</button>${lockMsg}${attemptsMsg}</div><div class="admin-link" id="backToStudentLogin">← プレイヤーログインに戻る</div></div>`}
 function renderGuest(){const cards=S.games.map(g=>{const hasUrl=g.url&&g.url.trim();const tag=hasUrl?'a':'div';const href=hasUrl?` href="${esc(g.url)}" target="_blank" rel="noopener"`:'';return`<${tag} class="game-card"${href}><span class="game-emoji">${esc(g.emoji)}</span><div class="game-name">${esc(g.name)}</div>${g.category?`<span class="game-category-badge">${esc(g.category)}</span>`:''}<div class="game-link-hint">${hasUrl?'▶ タップでプレイ':'準備中...'}</div></${tag}>`}).join('');return`<div class="portal"><div class="header"><div class="header-logo">TRAIL GP3</div><div class="header-right"><span style="font-size:.75rem;color:var(--text-dim)">🎮 おためしモード</span><button class="logout-btn" id="logoutBtn">もどる</button></div></div><div style="padding:10px 14px;margin-bottom:16px;background:rgba(124,92,191,0.06);border:1px solid rgba(124,92,191,0.15);border-radius:10px;font-size:.8rem;color:var(--text-dim);text-align:center">おためしモード：ALTはたまりません</div><div class="section-title">🎮 GAMES</div><div class="game-grid">${cards}</div></div>`}
-function renderPortal(){const name=S.user?S.user.name:'';const total=getStudentCoins(name);const badges=getStudentBadges(name);const tabs=`<div class="portal-tabs"><button class="portal-tab ${S.portalTab==='home'?'active':''}" data-ptab="home">🏠 HOME</button><button class="portal-tab ${S.portalTab==='ranking'?'active':''}" data-ptab="ranking">🏆 ランキング</button><button class="portal-tab ${S.portalTab==='games'?'active':''}" data-ptab="games">🎮 ゲーム</button><button class="portal-tab ${S.portalTab==='history'?'active':''}" data-ptab="history">📊 ALT履歴</button></div>`;let content='';if(S.portalTab==='home')content=renderPortalHome();else if(S.portalTab==='ranking')content=renderPortalRanking();else if(S.portalTab==='games')content=renderPortalGames();else content=renderPortalHistory();return`<div class="portal"><div class="header"><div class="header-logo">TRAIL GP3</div><div class="header-right"><div class="coin-display">🪙 ${total}</div>${badges>0?`<div class="badge-count">🏅${badges}</div>`:''}<div class="user-badge"><div class="user-avatar">${esc(name.charAt(0))}</div>${esc(name)}</div><span style="font-size:.65rem;color:var(--text-dim);background:rgba(0,0,0,0.04);padding:2px 8px;border-radius:10px">${esc(S.user?S.user.className:'')}</span><button class="logout-btn" id="logoutBtn">ログアウト</button></div></div>${tabs}${content}</div>`}
+function renderPortal(){const name=S.user?S.user.name:'';const total=getStudentCoins(name);const badges=getStudentBadges(name);const tabs=`<div class="portal-tabs"><button class="portal-tab ${S.portalTab==='home'?'active':''}" data-ptab="home">🏠 HOME</button><button class="portal-tab ${S.portalTab==='dashboard'?'active':''}" data-ptab="dashboard">📈 ダッシュボード</button><button class="portal-tab ${S.portalTab==='ranking'?'active':''}" data-ptab="ranking">🏆 ランキング</button><button class="portal-tab ${S.portalTab==='games'?'active':''}" data-ptab="games">🎮 ゲーム</button><button class="portal-tab ${S.portalTab==='history'?'active':''}" data-ptab="history">📊 ALT履歴</button></div>`;let content='';if(S.portalTab==='home')content=renderPortalHome();else if(S.portalTab==='dashboard')content=renderPortalDashboard();else if(S.portalTab==='ranking')content=renderPortalRanking();else if(S.portalTab==='games')content=renderPortalGames();else content=renderPortalHistory();return`<div class="portal"><div class="header"><div class="header-logo">TRAIL GP3</div><div class="header-right"><div class="coin-display">🪙 ${total}</div>${badges>0?`<div class="badge-count">🏅${badges}</div>`:''}<div class="user-badge"><div class="user-avatar">${esc(name.charAt(0))}</div>${esc(name)}</div><span style="font-size:.65rem;color:var(--text-dim);background:rgba(0,0,0,0.04);padding:2px 8px;border-radius:10px">${esc(S.user?S.user.className:'')}</span><button class="logout-btn" id="logoutBtn">ログアウト</button></div></div>${tabs}${content}</div>`}
 
 // ★ 0-15: ストリークウィジェットをホームタブに組み込み
 function renderPortalHome(){const cards=S.games.slice().reverse().map(g=>{const hasUrl=g.url&&g.url.trim();const tag=hasUrl?'a':'div';const playerParam=S.user&&S.user.name?'?player='+encodeURIComponent(S.user.name):'';const href=hasUrl?` href="${esc(g.url)}${playerParam}" target="_blank" rel="noopener"`:'';return`<${tag} class="game-card" data-gid="${g.id}"${href}><span class="game-emoji">${esc(g.emoji)}</span><div class="game-name">${esc(g.name)}</div>${g.category?`<span class="game-category-badge">${esc(g.category)}</span>`:''}<div class="game-link-hint">${hasUrl?'▶ タップでプレイ':'準備中...'}</div></${tag}>`}).join('');return`${renderStreakWidget()}<div class="section-title">🆕 NEW GAMES</div><div class="game-grid">${cards||'<div class="no-data">ゲームがまだありません</div>'}</div>`}
+
+// ★ 生徒ダッシュボード描画
+function renderPortalDashboard(){
+  const d=S.studentDashboard;
+  if(!d||!d.stats){if(!S.studentDashboard)loadStudentDashboard();return'<div class="no-data">読み込み中...</div>'}
+
+  // ① レベル・ストリーク
+  const rk=d.rank||{};
+  const pct=rk.nextAlt?Math.min(100,Math.round((rk.currentAlt||0)/(rk.nextAlt)*100)):100;
+  const levelSection=`<div class="dash-section"><div class="dash-level-box">
+    <div class="dash-rank-label">${esc(rk.label||'Fランク')}</div>
+    <div class="dash-rank-name">${esc(rk.name||'見習い探究者')}</div>
+    <div class="dash-progress-wrap"><div class="dash-progress-track"><div class="dash-progress-fill" style="width:${pct}%"></div></div>
+    <div class="dash-progress-text"><span>${rk.currentAlt||0} ALT</span><span>${rk.nextAlt?rk.nextAlt+' ALT':'MAX'}</span></div></div>
+    <div class="dash-streak-row">🔥 ${d.streak||0}日連続ログイン！</div>
+  </div></div>`;
+
+  // ② 今日のミッション
+  const ms=d.todayMission||{};
+  const missionSection=`<div class="dash-section dash-mission-card${ms.completed?' completed':''}">
+    <div class="dash-section-title">🎯 TODAY'S MISSION</div>
+    <div class="dash-mission-desc">${ms.completed?'✅ ':''}${esc(ms.description||'ミッションなし')}</div>
+    ${ms.completed?'<div style="font-size:.75rem;color:var(--accent-green);font-weight:700">クリア済み！おめでとう！🎉</div>':'<button class="dash-mission-btn" data-dash-go-games>挑戦する ▶</button>'}
+  </div>`;
+
+  // ③ 統計タブ（今日/今週/累計）
+  const period=S.dashStatPeriod||'today';
+  const periodData=d.stats[period]||{alt:0,plays:0,minutes:0};
+  const statsSection=`<div class="dash-section">
+    <div class="dash-section-title">📊 STATS</div>
+    <div class="dash-stat-tabs">
+      <button class="dash-stat-tab${period==='today'?' active':''}" data-dash-period="today">今日</button>
+      <button class="dash-stat-tab${period==='week'?' active':''}" data-dash-period="week">今週</button>
+      <button class="dash-stat-tab${period==='total'?' active':''}" data-dash-period="total">累計</button>
+    </div>
+    <div class="dash-stat-grid">
+      <div class="dash-stat-item"><div class="dash-stat-val" style="color:var(--accent-gold)">${periodData.alt}</div><div class="dash-stat-lbl">ALT獲得</div></div>
+      <div class="dash-stat-item"><div class="dash-stat-val" style="color:var(--accent-cyan)">${periodData.plays}</div><div class="dash-stat-lbl">プレイ数</div></div>
+      <div class="dash-stat-item"><div class="dash-stat-val" style="color:var(--accent-purple)">${periodData.minutes}</div><div class="dash-stat-lbl">分</div></div>
+    </div>
+  </div>`;
+
+  // ④ カテゴリ別能力値
+  const cats=d.categoryStats||[];
+  const maxPlays=cats.length?Math.max(...cats.map(c=>c.plays),1):1;
+  const bestCat=cats.length?cats.reduce((a,b)=>((a.plays>0&&(a.correct/a.plays)>=(b.plays>0?(b.correct/b.plays):0))?a:b),cats[0]):null;
+  const catRows=cats.length?cats.map(c=>{
+    const pctVal=c.plays>0?Math.round(c.correct/c.plays*100):0;
+    const isBest=bestCat&&c.category===bestCat.category&&c.plays>0;
+    return`<div class="dash-cat-row">
+      <div class="dash-cat-emoji">${esc(c.emoji)}</div>
+      <div class="dash-cat-name">${esc(c.category)}</div>
+      <div class="dash-cat-bar-wrap"><div class="dash-cat-bar" style="width:${pctVal}%"></div></div>
+      <div class="dash-cat-pct">${pctVal}%</div>
+      ${isBest?'<div class="dash-cat-badge">得意！</div>':''}
+    </div>`;
+  }).join(''):'<div style="color:var(--text-dim);font-size:.8rem;text-align:center;padding:12px">まだプレイ記録がありません</div>';
+  const catSection=`<div class="dash-section"><div class="dash-section-title">📚 SKILLS</div>${catRows}</div>`;
+
+  // ⑤ バッジコレクション
+  const bdgs=d.badges||[];
+  const badgeItems=bdgs.map(b=>`<div class="dash-badge-item ${b.earned?'earned':'locked'}">
+    <div class="dash-badge-emoji">${b.earned?esc(b.emoji):'❓'}</div>
+    <div class="dash-badge-name">${b.earned?esc(b.name):'???'}</div>
+  </div>`).join('');
+  const earnedCount=bdgs.filter(b=>b.earned).length;
+  const badgeSection=`<div class="dash-section"><div class="dash-section-title">🏅 BADGES (${earnedCount}/${bdgs.length})</div><div class="dash-badge-grid">${badgeItems||'<div style="color:var(--text-dim);font-size:.8rem">バッジなし</div>'}</div></div>`;
+
+  // ⑥ ゲーム別ベストスコア
+  const scores=d.bestScores||[];
+  const scoreCards=scores.length?scores.map(s=>`<div class="dash-score-card">
+    <div class="dash-score-emoji">${esc(s.game_emoji||'🎮')}</div>
+    <div class="dash-score-name">${esc(s.game_name)}</div>
+    <div class="dash-score-val">${esc(s.score)}</div>
+    <div class="dash-score-lbl">${esc(s.score_label||'点')}</div>
+  </div>`).join(''):'<div style="color:var(--text-dim);font-size:.8rem;text-align:center;padding:12px">まだスコアがありません</div>';
+  const scoreSection=`<div class="dash-section"><div class="dash-section-title">🏆 BEST SCORES</div><div class="dash-score-cards">${scoreCards}</div></div>`;
+
+  // ⑦ 今週のランキング
+  const wr=d.weeklyRanking||[];
+  const myName=S.user?S.user.name:'';
+  const weeklyRows=wr.length?wr.slice(0,5).map(r=>{
+    const isMe=r.student_name===myName;
+    const medal=r.rank===1?'👑':r.rank===2?'🥈':r.rank===3?'🥉':'';
+    return`<div class="dash-weekly-row${isMe?' me':''}">
+      <div class="dash-weekly-rank">${medal||r.rank}</div>
+      <div class="dash-weekly-name">${esc(r.student_name)}${isMe?' ← 自分':''}</div>
+      <div class="dash-weekly-alt">${r.total_coins} ALT</div>
+    </div>`;
+  }).join(''):'<div style="color:var(--text-dim);font-size:.8rem;text-align:center;padding:12px">まだデータがありません</div>';
+  const weeklySection=`<div class="dash-section"><div class="dash-section-title">🏅 WEEKLY RANKING</div><div class="dash-weekly-list">${weeklyRows}</div></div>`;
+
+  // ⑧ 学習カレンダー（今月）
+  const cal=d.calendar||[];
+  const calMap={};cal.forEach(c=>{calMap[c.date]={plays:c.plays,alt:c.alt}});
+  const now=new Date(Date.now()+9*60*60*1000);
+  const year=now.getUTCFullYear();const month=now.getUTCMonth();
+  const firstDay=new Date(Date.UTC(year,month,1));
+  const daysInMonth=new Date(Date.UTC(year,month+1,0)).getUTCDate();
+  const startDow=firstDay.getUTCDay();
+  const todayStr=now.toISOString().slice(0,10);
+  const heads=['日','月','火','水','木','金','土'].map(d=>`<div class="dash-cal-head">${d}</div>`).join('');
+  let calCells='';
+  for(let i=0;i<startDow;i++)calCells+='<div class="dash-cal-day empty"></div>';
+  for(let d=1;d<=daysInMonth;d++){
+    const ds=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const info=calMap[ds];
+    const isToday=ds===todayStr;
+    let cls='dash-cal-day';
+    if(info&&info.plays>0){cls+=' has-play';if(info.alt>=20)cls+=' fire';else if(info.alt>=10)cls+=' hot'}
+    if(isToday)cls+=' today';
+    calCells+=`<div class="${cls}">${d}</div>`;
+  }
+  const monthNames=['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  const calSection=`<div class="dash-section"><div class="dash-section-title">📅 ${monthNames[month]} CALENDAR</div><div class="dash-cal">${heads}${calCells}</div></div>`;
+
+  return levelSection+missionSection+statsSection+catSection+badgeSection+scoreSection+weeklySection+calSection;
+}
 
 function renderPortalRanking(){const ranking=S.rankings||[];const globalHtml=ranking.slice(0,10).map((r,i)=>{const cls=i===0?' rank-gold':i===1?' rank-silver':i===2?' rank-bronze':'';const num=i<3?'<div class="rank-medal">'+(i===0?'👑':i===1?'🥈':'🥉')+'</div>':'<div class="rank-num">'+(i+1)+'</div>';const isMe=S.user&&r.student_name===S.user.name&&i>=3?' style="border-color:rgba(0,229,255,0.25)"':'';return`<div class="rank-item${cls}"${isMe}>${num}<div class="rank-name">${esc(r.student_name||r.name||'')}<span style="font-size:.65rem;color:var(--text-dim);margin-left:6px">${esc(r.class_name||'')}</span></div><div class="rank-alt">${r.total_coins||0} ALT</div></div>`}).join('');const byGame={};(S.rankings||[]).forEach(r=>{if(r.game_name){const k=r.game_name;if(!byGame[k])byGame[k]={name:k,emoji:r.game_emoji||'🎮',id:r.game_id,entries:[]};byGame[k].entries.push(r)}});const gamesWithRank=Object.values(byGame);if(!S.selectedRankGame&&gamesWithRank.length>0)S.selectedRankGame=gamesWithRank[0].id;const gameTabsHtml=gamesWithRank.map(g=>`<button class="game-rank-tab ${S.selectedRankGame===g.id?'active':''}" data-rgid="${g.id}">${g.emoji} ${esc(g.name)}</button>`).join('');let gameRankContent='<div style="color:var(--text-dim);font-size:.85rem;text-align:center;padding:20px">まだゲームの記録がありません</div>';if(S.selectedRankGame){const selGame=gamesWithRank.find(g=>g.id===S.selectedRankGame);if(selGame&&selGame.entries.length>0){const rows=selGame.entries.slice(0,10).map((r,i)=>{const medal=i===0?'👑':i===1?'🥈':i===2?'🥉':'';const numStr=medal?`<span style="font-size:1.1rem">${medal}</span>`:`<span style="font-family:'Orbitron';font-size:.8rem;color:var(--text-dim)">${i+1}</span>`;const isMe=S.user&&r.student_name===S.user.name?'style="background:rgba(0,144,217,0.05);border-color:rgba(0,229,255,0.2)"':'';return`<tr ${isMe}><td style="width:40px;text-align:center">${numStr}</td><td><strong>${esc(r.student_name)}</strong></td><td class="game-rank-table"><span class="rank-score">${esc(r.score)}</span><span class="score-label">${esc(r.score_label||'')}</span></td></tr>`}).join('');gameRankContent=`<div class="tbl-wrap game-rank-table"><table><tr><th>#</th><th>プレイヤー</th><th>スコア</th></tr>${rows}</table></div>`}}return`<div class="section-title">🏆 総合ランキング</div><div class="ranking-section"><div class="ranking-list">${globalHtml||'<div class="no-data">まだ記録がありません</div>'}</div></div><div class="section-title" style="margin-top:10px">🎮 ゲーム別ランキング</div>${gamesWithRank.length?`<div class="game-rank-tabs">${gameTabsHtml}</div>${gameRankContent}`:'<div style="color:var(--text-dim);font-size:.85rem;padding:16px;background:var(--bg-card);border-radius:12px;text-align:center">まだゲームの記録がありません</div>'}`}
 function renderPortalGames(){const usedCats=[...new Set(S.games.map(g=>g.category||'その他'))];const catBtns=['すべて',...CATEGORIES.filter(c=>usedCats.includes(c))].map(c=>{const count=c==='すべて'?S.games.length:S.games.filter(g=>g.category===c).length;return`<button class="cat-btn ${S.selectedCategory===c?'active':''}" data-cat="${c}">${c}${c!=='すべて'?` (${count})`:''}</button>`}).join('');const filtered=S.selectedCategory==='すべて'?S.games:S.games.filter(g=>g.category===S.selectedCategory);const cards=filtered.map(g=>{const hasUrl=g.url&&g.url.trim();const tag=hasUrl?'a':'div';const playerParam=S.user&&S.user.name?'?player='+encodeURIComponent(S.user.name):'';const href=hasUrl?` href="${esc(g.url)}${playerParam}" target="_blank" rel="noopener"`:'';return`<${tag} class="game-card" data-gid="${g.id}"${href}><span class="game-emoji">${esc(g.emoji)}</span><div class="game-name">${esc(g.name)}</div><div class="game-link-hint">${hasUrl?'▶ タップでプレイ':'準備中...'}</div></${tag}>`}).join('');return`<div class="category-filter">${catBtns}</div><div class="game-grid">${cards}</div>`}
@@ -476,7 +663,9 @@ function renderPortalGames(){
     const hasUrl=g.url&&g.url.trim();const tag=hasUrl?'a':'div';
     const playerParam=S.user&&S.user.name?'?player='+encodeURIComponent(S.user.name):'';
     const href=hasUrl?` href="${esc(g.url)}${playerParam}" target="_blank" rel="noopener"`:'';
-    return`<${tag} class="game-card" data-gid="${g.id}"${href}><span class="game-emoji">${esc(g.emoji)}</span><div class="game-name">${esc(g.name)}</div><div class="game-link-hint">${hasUrl?'▶ タップでプレイ':'準備中...'}</div></${tag}>`;
+    const unplayed=S.studentDashboard&&S.studentDashboard.unplayedGames||[];
+    const isNew=unplayed.includes(g.id);
+    return`<${tag} class="game-card" data-gid="${g.id}"${href}>${isNew?'<div class="new-badge">NEW</div>':''}<span class="game-emoji">${esc(g.emoji)}</span><div class="game-name">${esc(g.name)}</div><div class="game-link-hint">${hasUrl?'▶ タップでプレイ':'準備中...'}</div></${tag}>`;
   }).join('');
   return`<div class="category-filter">${catBtns}</div><div class="game-grid">${cards}</div>`;
 }
@@ -764,8 +953,10 @@ function bindEvents(){
   on('adminLink','click',()=>{S.screen='admin-login';render()});
   on('backToStudentLogin','click',()=>{S.screen='student-login';render()});
   on('adminLoginBtn','click',async()=>{if(LOGIN_SECURITY.isLocked()){toast('ロックアウト中です');return}const email=val('adminEmail'),pass=val('adminPass');if(!email||!pass){toast('入力してください');return}try{const r=await apiPost('/auth/admin/login',{email,password:pass});LOGIN_SECURITY.reset();S.token=r.token;S.tenant=r.tenant;S.user={...r.user,role:r.user.role};S.screen='admin';AUTH.save({token:S.token,tenant:S.tenant,user:S.user,screen:'admin'});await loadTenantData()}catch(e){LOGIN_SECURITY.recordFailure();toast(e.message);render();if(LOGIN_SECURITY.isLocked()){const iv=setInterval(()=>{const el=document.getElementById('lockCountdown');if(!el||!LOGIN_SECURITY.isLocked()){clearInterval(iv);if(!LOGIN_SECURITY.isLocked())render();return}el.textContent=LOGIN_SECURITY.getRemainingSeconds()},1000)}}});
-  on('logoutBtn','click',()=>{S.token=null;S.user=null;S.dashboard=null;S.coinLogs=[];S.students=[];S.badges=[];S.streak=null;AUTH.clear();S.screen=S.tenant?'student-login':'landing';render()});
-  document.querySelectorAll('.portal-tab').forEach(t=>{t.onclick=()=>{S.portalTab=t.dataset.ptab;render()}});
+  on('logoutBtn','click',()=>{S.token=null;S.user=null;S.dashboard=null;S.coinLogs=[];S.students=[];S.badges=[];S.streak=null;S.studentDashboard=null;AUTH.clear();S.screen=S.tenant?'student-login':'landing';render()});
+  document.querySelectorAll('.portal-tab').forEach(t=>{t.onclick=()=>{S.portalTab=t.dataset.ptab;if(t.dataset.ptab==='dashboard'&&!S.studentDashboard)loadStudentDashboard();render()}});
+  document.querySelectorAll('.dash-stat-tab').forEach(t=>{t.onclick=()=>{S.dashStatPeriod=t.dataset.dashPeriod;render()}});
+  document.querySelectorAll('[data-dash-go-games]').forEach(b=>{b.onclick=()=>{S.portalTab='games';render()}});
   document.querySelectorAll('.cat-btn:not(.comment-tpl)').forEach(b=>{b.onclick=()=>{S.selectedCategory=b.dataset.cat;render()}});
   document.querySelectorAll('.game-rank-tab').forEach(t=>{t.onclick=()=>{S.selectedRankGame=parseInt(t.dataset.rgid);render()}});
   document.querySelectorAll('.game-card[href]').forEach(a=>{a.addEventListener('click',()=>{const gid=a.dataset.gid;const g=S.games.find(g=>String(g.id)===gid);if(g&&S.user)gamePlayTracker.startPlay(S.user.name,g.id,g.name)})});
