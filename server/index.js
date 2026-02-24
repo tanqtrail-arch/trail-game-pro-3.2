@@ -405,6 +405,8 @@ try {
 } catch (e) { /* already exists */ }
 // UNIQUE constraint for tenant+student in parent_tokens
 db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_parent_tokens_tenant_student ON parent_tokens(tenant_id, student_id)`);
+// PIN初期値を0000に統一（NULLまたは空文字のもの）
+db.exec(`UPDATE parent_tokens SET pin = '0000' WHERE pin IS NULL OR pin = ''`);
   console.log('  Migrations: OK');
 
   // Seed demo tenant if no tenants exist
