@@ -82,6 +82,14 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', version: '4.0.0', timestamp: new Date().toISOString() });
 });
 
+// ═══ Named HTML routes (拡張子なしでもアクセス可能に) ═══
+app.get('/parent', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/parent.html'));
+});
+app.get('/super-admin', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/super-admin.html'));
+});
+
 // ═══ SPA Fallback ═══
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/index.html'));
@@ -334,37 +342,20 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_saves_game ON game_saves(game_id);
 `);
 
-// ── 0-1g: 既存生徒にPINを自動生成（未設定の生徒のみ） ──
+// ── 0-1g: 既存生徒にPINを初期値0000で設定（未設定の生徒のみ） ──
 const studentsWithoutPin = db.prepare(
-  `SELECT id, tenant_id FROM students WHERE pin IS NULL`
+  `SELECT id FROM students WHERE pin IS NULL`
 ).all();
 
 if (studentsWithoutPin.length > 0) {
   const updatePin = db.prepare(`UPDATE students SET pin = ? WHERE id = ?`);
-  const checkPin = db.prepare(
-    `SELECT COUNT(*) as c FROM students WHERE tenant_id = ? AND pin = ?`
-  );
-
-  const generateUniquePin = (tenantId) => {
-    let pin;
-    let attempts = 0;
-    do {
-      pin = String(Math.floor(1000 + Math.random() * 9000)); // 4桁: 1000-9999
-      const exists = checkPin.get(tenantId, pin).c;
-      if (exists === 0) return pin;
-      attempts++;
-    } while (attempts < 100);
-    // フォールバック: タイムスタンプベース
-    return String(Date.now()).slice(-4);
-  };
 
   db.transaction(() => {
     for (const s of studentsWithoutPin) {
-      const pin = generateUniquePin(s.tenant_id);
-      updatePin.run(pin, s.id);
+      updatePin.run('0000', s.id);
     }
   })();
-  console.log(`  PIN generated for ${studentsWithoutPin.length} students`);
+  console.log(`  PIN set to 0000 for ${studentsWithoutPin.length} students`);
 }
 
 // ── 0-1h: alt_rules にデフォルトルールをシード ──
