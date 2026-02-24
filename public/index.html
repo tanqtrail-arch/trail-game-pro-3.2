@@ -582,12 +582,14 @@ function renderPortal(){
   const badges=getStudentBadges(name);
   const tabs=`<div class="portal-tabs">
     <button class="portal-tab ${S.portalTab==='home'?'active':''}" data-ptab="home">🏠 HOME</button>
+    <button class="portal-tab ${S.portalTab==='dashboard'?'active':''}" data-ptab="dashboard">📈 ダッシュボード</button>
     <button class="portal-tab ${S.portalTab==='ranking'?'active':''}" data-ptab="ranking">🏆 ランキング</button>
     <button class="portal-tab ${S.portalTab==='games'?'active':''}" data-ptab="games">🎮 ゲーム</button>
     <button class="portal-tab ${S.portalTab==='history'?'active':''}" data-ptab="history">📊 ALT履歴</button>
   </div>`;
   let content='';
   if(S.portalTab==='home')content=renderPortalHome();
+  else if(S.portalTab==='dashboard'){if(!S.studentDashboard)loadStudentDashboard();content=renderPortalDashboard();}
   else if(S.portalTab==='ranking')content=renderPortalRanking();
   else if(S.portalTab==='games')content=renderPortalGames();
   else content=renderPortalHistory();
