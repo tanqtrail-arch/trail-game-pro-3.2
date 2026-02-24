@@ -524,6 +524,7 @@ let state = {
   coinLog:[], // {id, player, gameId, gameName, amount, date}
   badges:{},  // { playerName: number }
   rankings:[], // ★ 追加: [{gameId,gameName,player,score,scoreLabel,date}]
+  studentDashboard:null,
 };
 
 // ═══ API通信 ═══
@@ -756,6 +757,7 @@ function renderPortal(){
   // ポータルタブ
   const portalTabsHtml=`<div class="portal-tabs">
     <button class="portal-tab ${state.portalTab==='home'?'active':''}" data-ptab="home">🏠 HOME</button>
+    <button class="portal-tab ${state.portalTab==='dashboard'?'active':''}" data-ptab="dashboard">📈 ダッシュボード</button>
     <button class="portal-tab ${state.portalTab==='ranking'?'active':''}" data-ptab="ranking">🏆 ランキング</button>
     <button class="portal-tab ${state.portalTab==='games'?'active':''}" data-ptab="games">🎮 ゲーム</button>
     <button class="portal-tab ${state.portalTab==='history'?'active':''}" data-ptab="history">📊 ALT履歴</button>
@@ -763,6 +765,7 @@ function renderPortal(){
 
   let tabContent='';
   if(state.portalTab==='home') tabContent=renderPortalHome();
+  else if(state.portalTab==='dashboard') tabContent=renderStudentDashboard();
   else if(state.portalTab==='ranking') tabContent=renderPortalRanking();
   else if(state.portalTab==='games') tabContent=renderPortalGames();
   else tabContent=renderPortalHistory();
@@ -890,6 +893,72 @@ function makeGameCard(g){
   const gr=getGameRanking(g.id);const myRank=gr.findIndex(r=>r.player===state.user);
   const myRankTag=myRank>=0?`<div style="font-size:.6rem;color:var(--accent-cyan);margin-top:3px">#${myRank+1} / ${gr.length}人</div>`:'';
   return`<${tag} class="game-card" data-gid="${g.id}"${href}><span class="game-emoji">${escHtml(g.emoji)}</span><div class="game-name">${escHtml(g.name)}</div><div class="game-coins">🪙 ${c} ALT</div>${myRankTag}${hasUrl?'<div class="game-link-hint">▶ タップでプレイ</div>':'<div class="game-link-hint">準備中...</div>'}</${tag}>`;
+}
+
+async function loadStudentDashboard(){
+  const slug=state.tenant?state.tenant.slug:'demo';
+  try{
+    const res=await fetch(`/api/t/${slug}/student-dashboard?student=${encodeURIComponent(state.user)}`);
+    if(res.ok){state.studentDashboard=await res.json();}
+    else{state.studentDashboard={error:'データ取得に失敗しました'};}
+  }catch(e){state.studentDashboard={error:'通信エラー'};}
+  render();
+}
+
+function renderStudentDashboard(){
+  const d=state.studentDashboard;
+  if(!d) return`<div class="no-data" style="padding:2rem;text-align:center">📈 読み込み中...</div>`;
+  if(d.error) return`<div class="no-data" style="padding:2rem;text-align:center">⚠️ ${escHtml(d.error)}</div>`;
+
+  const level=d.level||1;
+  const rank=d.rank||'F';
+  const totalAlt=d.totalAlt||0;
+  const streak=d.streak||0;
+
+  // 能力値レーダー
+  const stats=d.stats||{};
+  const statItems=Object.entries(stats).map(([k,v])=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0"><span style="font-size:.75rem">${escHtml(k)}</span><div style="flex:1;margin:0 8px;background:rgba(255,255,255,.1);border-radius:4px;height:8px;overflow:hidden"><div style="width:${Math.min(v,100)}%;height:100%;background:var(--accent-cyan);border-radius:4px"></div></div><span style="font-size:.7rem;color:var(--text-dim)">${v}</span></div>`).join('');
+
+  // バッジ一覧
+  const badges=d.badges||[];
+  const badgeHtml=badges.length?badges.map(b=>`<span style="display:inline-block;background:rgba(255,255,255,.06);border-radius:8px;padding:4px 10px;margin:3px;font-size:.75rem">${escHtml(b)}</span>`).join(''):'<span class="no-data">まだバッジがありません</span>';
+
+  // カレンダー（直近7日）
+  const calendar=d.calendar||[];
+  const calHtml=calendar.map(c=>`<div style="text-align:center;padding:4px 6px"><div style="font-size:.65rem;color:var(--text-dim)">${escHtml(c.date||'')}</div><div style="font-size:1.1rem">${c.active?'🟢':'⚫'}</div></div>`).join('');
+
+  return`<div style="padding:1rem">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:16px">
+      <div style="background:rgba(255,255,255,.06);border-radius:12px;padding:16px;text-align:center">
+        <div style="font-size:2rem;font-weight:bold;color:var(--accent-cyan)">Lv.${level}</div>
+        <div style="font-size:.7rem;color:var(--text-dim)">レベル</div>
+      </div>
+      <div style="background:rgba(255,255,255,.06);border-radius:12px;padding:16px;text-align:center">
+        <div style="font-size:2rem;font-weight:bold;color:var(--accent-pink)">${escHtml(rank)}</div>
+        <div style="font-size:.7rem;color:var(--text-dim)">ランク</div>
+      </div>
+      <div style="background:rgba(255,255,255,.06);border-radius:12px;padding:16px;text-align:center">
+        <div style="font-size:2rem;font-weight:bold">🪙 ${totalAlt}</div>
+        <div style="font-size:.7rem;color:var(--text-dim)">累計ALT</div>
+      </div>
+      <div style="background:rgba(255,255,255,.06);border-radius:12px;padding:16px;text-align:center">
+        <div style="font-size:2rem;font-weight:bold;color:var(--accent-green)">🔥 ${streak}</div>
+        <div style="font-size:.7rem;color:var(--text-dim)">連続日数</div>
+      </div>
+    </div>
+    <div style="background:rgba(255,255,255,.04);border-radius:12px;padding:14px;margin-bottom:12px">
+      <div style="font-size:.8rem;font-weight:bold;margin-bottom:8px">📊 能力値</div>
+      ${statItems||'<div class="no-data">データなし</div>'}
+    </div>
+    <div style="background:rgba(255,255,255,.04);border-radius:12px;padding:14px;margin-bottom:12px">
+      <div style="font-size:.8rem;font-weight:bold;margin-bottom:8px">🏅 バッジ</div>
+      <div style="display:flex;flex-wrap:wrap">${badgeHtml}</div>
+    </div>
+    <div style="background:rgba(255,255,255,.04);border-radius:12px;padding:14px">
+      <div style="font-size:.8rem;font-weight:bold;margin-bottom:8px">📅 アクティビティ（直近7日）</div>
+      <div style="display:flex;justify-content:center;gap:4px">${calHtml||'<span class="no-data">データなし</span>'}</div>
+    </div>
+  </div>`;
 }
 
 function renderPortalHistory(){
@@ -1409,7 +1478,7 @@ function bindEvents(){
   });
   document.querySelectorAll('.admin-tab').forEach(t=>{t.onclick=()=>{state.adminTab=t.dataset.tab;render()}});
   // ★ ポータルタブ
-  document.querySelectorAll('.portal-tab').forEach(t=>{t.onclick=()=>{state.portalTab=t.dataset.ptab;render()}});
+  document.querySelectorAll('.portal-tab').forEach(t=>{t.onclick=()=>{state.portalTab=t.dataset.ptab;if(t.dataset.ptab==='dashboard'&&!state.studentDashboard)loadStudentDashboard();else render()}});
   // ★ ゲーム別ランキングタブ（URL ?gameId= パラメータ連動）
   document.querySelectorAll('.game-rank-tab').forEach(t=>{t.onclick=()=>{state.selectedRankGame=parseInt(t.dataset.rgid);setUrlParam('gameId',t.dataset.rgid);render()}});
 
