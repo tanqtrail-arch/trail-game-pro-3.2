@@ -43,6 +43,9 @@ body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:
 .login-btn:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,229,255,0.3)}
 .admin-link{margin-top:20px;color:var(--text-dim);font-size:.8rem;cursor:pointer;transition:color .3s}
 .admin-link:hover{color:var(--accent-gold)}
+.login-tabs{display:flex;border-bottom:1.5px solid rgba(0,0,0,0.06);margin:-32px -24px 20px;overflow:hidden;border-radius:16px 16px 0 0}
+.login-tab{flex:1;padding:12px 0;border:none;background:transparent;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .2s;color:var(--text-dim)}
+.login-tab.active{background:rgba(0,144,217,0.06);color:var(--accent-cyan);border-bottom:2px solid var(--accent-cyan)}
 
 /* Header */
 .header{display:flex;align-items:center;justify-content:space-between;padding:12px 0;margin-bottom:20px;border-bottom:1.5px solid rgba(0,0,0,0.06);gap:10px;flex-wrap:wrap}
@@ -495,7 +498,7 @@ window.addEventListener('beforeunload',()=>{
 });
 
 let state = {
-  screen:'login', user:null, loginClass:null, adminTab:'coins', selectedCategory:'すべて',
+  screen:'login', user:null, loginClass:null, loginTab:'student', adminTab:'coins', selectedCategory:'すべて',
   portalTab:'home', selectedRankGame:null, // ★ 追加
   loading:false,
   games:[
@@ -694,14 +697,31 @@ function renderLogin(){
       <input class="login-input" id="nameInput" placeholder="なまえ（ひらがな）" autocomplete="off" maxlength="${VALIDATION.MAX_NAME_LENGTH}" style="ime-mode:active"/>
       <button class="login-btn" id="loginBtn">にゅうしつ ▶</button>
     </div>`:'<div style="margin-top:16px;font-size:.8rem;color:var(--text-dim)">↑ クラスをえらんでね</div>';
+  const parentTab=`
+    <div style="margin-top:4px">
+      <div style="font-size:.8rem;color:var(--text-dim);margin-bottom:14px">お子さまの情報を入力してください</div>
+      <input class="login-input" id="parentNameInput" placeholder="お子さまのなまえ" autocomplete="off" style="margin-bottom:12px"/>
+      <input class="login-input" id="parentPinInput" type="tel" placeholder="PIN（4けた）" maxlength="4" inputmode="numeric" style="letter-spacing:8px"/>
+      <button class="login-btn" id="parentLoginBtn">保護者ログイン ▶</button>
+    </div>`;
+
+  const studentTab=`
+    <h2>にゅうしつ</h2>
+    <div style="font-size:.8rem;color:var(--text-dim);margin-bottom:14px">クラスをえらんでね</div>
+    <div class="class-select-grid">${classBtns}</div>
+    ${showNameInput}`;
+
+  const tabContent=state.loginTab==='parent'?parentTab:studentTab;
+
   return`<div class="login-screen">
     <div class="login-logo">TRAIL GAME PRO 3</div>
     <div class="login-subtitle">EXPLORE • PLAY • GROW</div>
     <div class="login-box" style="max-width:420px">
-      <h2>にゅうしつ</h2>
-      <div style="font-size:.8rem;color:var(--text-dim);margin-bottom:14px">クラスをえらんでね</div>
-      <div class="class-select-grid">${classBtns}</div>
-      ${showNameInput}
+      <div class="login-tabs">
+        <button class="login-tab${state.loginTab==='student'?' active':''}" id="tabStudent">🧒 生徒</button>
+        <button class="login-tab${state.loginTab==='parent'?' active':''}" id="tabParent">👨‍👩‍👧 保護者</button>
+      </div>
+      ${tabContent}
     </div>
     <div class="admin-link" id="guestLink" style="margin-top:20px;color:var(--accent-purple);font-size:.85rem;cursor:pointer">🎮 なまえなしであそぶ</div>
     <div class="admin-link" id="adminLink">🔧 管理者ログイン</div>
@@ -1301,6 +1321,29 @@ function bindEvents(){
     };
     nameInput.onkeydown=(e)=>{if(e.key==='Enter')loginBtn.click()};
     nameInput.focus();
+  }
+  // Login tab switching
+  const tabS=document.getElementById('tabStudent');if(tabS)tabS.onclick=()=>{state.loginTab='student';render()};
+  const tabP=document.getElementById('tabParent');if(tabP)tabP.onclick=()=>{state.loginTab='parent';render()};
+  // Parent login
+  const plBtn=document.getElementById('parentLoginBtn');
+  const pnInput=document.getElementById('parentNameInput');
+  const ppInput=document.getElementById('parentPinInput');
+  if(plBtn){
+    plBtn.onclick=async()=>{
+      const sName=pnInput.value.trim();
+      const pin=ppInput.value.trim();
+      if(!sName||!pin){showToast('⚠️ 名前とPINを入力してください');return}
+      plBtn.disabled=true;plBtn.textContent='ログイン中...';
+      try{
+        const r=await fetch('/api/auth/parent-login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tenantSlug:state.tenant?state.tenant.slug:'demo',studentName:sName,pin:pin})});
+        const d=await r.json();
+        if(r.ok&&d.token){location.href='/parent.html?token='+encodeURIComponent(d.token)}
+        else{showToast('❌ '+(d.error||'ログインに失敗しました'));plBtn.disabled=false;plBtn.textContent='保護者ログイン ▶'}
+      }catch(e){showToast('⚠️ サーバーに接続できません');plBtn.disabled=false;plBtn.textContent='保護者ログイン ▶'}
+    };
+    if(ppInput)ppInput.onkeydown=(e)=>{if(e.key==='Enter')plBtn.click()};
+    if(pnInput)pnInput.focus();
   }
   const gl=document.getElementById('guestLink');if(gl)gl.onclick=()=>{state.user='__guest__';state.screen='guest';render()};
   const al=document.getElementById('adminLink');if(al)al.onclick=()=>{state.screen='admin-login';render()};
