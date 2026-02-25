@@ -53,40 +53,49 @@ router.post('/parent-tokens', requireAdmin, (req, res) => {
 
 // ═══ 保護者ログイン（生徒名＋PIN） ═══
 router.post('/parent-login', (req, res) => {
-  const { tenantSlug, studentName, pin } = req.body;
-  if (!tenantSlug || !studentName || !pin) {
-    return res.status(400).json({ error: '必須項目が不足しています' });
+  const tenant_slug = req.body.tenant_slug || req.body.tenantSlug;
+  const student_name = req.body.student_name || req.body.studentName;
+  const pin = req.body.pin;
+  if (!tenant_slug || !student_name || !pin) {
+    return res.status(400).json({ error: '全項目を入力してください' });
   }
 
-  const tenant = db.prepare('SELECT * FROM tenants WHERE slug = ?').get(tenantSlug);
+  const tenant = db.prepare('SELECT * FROM tenants WHERE slug = ?').get(tenant_slug);
   if (!tenant) {
-    return res.status(404).json({ error: 'テナントが見つかりません' });
+    return res.status(404).json({ error: '教室が見つかりません' });
   }
 
-  // 生徒名でparent_tokensを検索
-  const row = db.prepare(`
-    SELECT pt.*, s.name as student_name, s.id as sid, c.name as class_name
-    FROM parent_tokens pt
-    JOIN students s ON pt.student_id = s.id
-    JOIN classes c ON s.class_id = c.id
-    WHERE pt.tenant_id = ? AND s.name = ? AND pt.pin = ?
-  `).get(tenant.id, studentName, pin);
-
-  if (!row) {
-    return res.status(401).json({ error: '生徒名またはPINが正しくありません' });
+  const student = db.prepare('SELECT * FROM students WHERE tenant_id = ? AND name = ?').get(tenant.id, student_name);
+  if (!student) {
+    return res.status(404).json({ error: '生徒が見つかりません' });
   }
+
+  const ptRow = db.prepare(
+    'SELECT * FROM parent_tokens WHERE student_id = ? AND tenant_id = ?'
+  ).get(student.id, tenant.id);
+  if (!ptRow) {
+    return res.status(401).json({ error: 'PINが設定されていません。先生に連絡してください' });
+  }
+
+  const pinValue = ptRow.pin || '0000';
+  if (pin !== pinValue) {
+    return res.status(401).json({ error: 'PINが違います' });
+  }
+
+  const className = db.prepare('SELECT name FROM classes WHERE id = ?').get(student.class_id);
 
   const jwt = signToken({
-    parentOf: row.sid,
+    parentOf: student.id,
     tenantId: tenant.id,
-    studentName: row.student_name,
-    className: row.class_name,
+    token_id: ptRow.id,
+    studentName: student.name,
+    className: className ? className.name : '',
     role: 'parent',
-  }, '24h');
+  }, '30d');
 
   res.json({
     token: jwt,
-    student: { id: row.sid, name: row.student_name, className: row.class_name },
+    student: { id: student.id, name: student.name, className: className ? className.name : '' },
     tenant: { id: tenant.id, name: tenant.name, slug: tenant.slug },
   });
 });
@@ -476,6 +485,38 @@ router.get('/parent-dashboard', (req, res) => {
     },
     nextGoal,
   });
+});
+
+// ═══ PIN変更 ═══
+router.post('/parent-change-pin', requireParent, (req, res) => {
+  const { current_pin, new_pin } = req.body;
+  if (!current_pin || !new_pin) {
+    return res.status(400).json({ error: '全項目を入力してください' });
+  }
+  if (!/^\d{4}$/.test(new_pin)) {
+    return res.status(400).json({ error: 'PINは4桁の数字です' });
+  }
+
+  const tokenId = req.user.token_id;
+  let ptRow;
+  if (tokenId) {
+    ptRow = db.prepare('SELECT * FROM parent_tokens WHERE id = ?').get(tokenId);
+  }
+  if (!ptRow) {
+    // token_idがない場合はstudent_id+tenant_idで検索
+    ptRow = db.prepare('SELECT * FROM parent_tokens WHERE student_id = ? AND tenant_id = ?').get(req.user.parentOf, req.user.tenantId);
+  }
+  if (!ptRow) {
+    return res.status(404).json({ error: 'トークンが見つかりません' });
+  }
+
+  const currentPin = ptRow.pin || '0000';
+  if (current_pin !== currentPin) {
+    return res.status(401).json({ error: '現在のPINが違います' });
+  }
+
+  db.prepare('UPDATE parent_tokens SET pin = ? WHERE id = ?').run(new_pin, ptRow.id);
+  res.json({ success: true });
 });
 
 module.exports = router;

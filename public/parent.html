@@ -160,6 +160,44 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 /* ── Utility ── */
 .mb-10{margin-bottom:10px}
 .mb-16{margin-bottom:16px}
+
+/* ── PINログイン画面 ── */
+.pin-login-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80vh;padding:24px}
+.pin-login-box{width:100%;max-width:340px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:28px 24px;box-shadow:var(--shadow)}
+.pin-login-title{font-size:1.1rem;font-weight:900;color:var(--sage-dark);text-align:center;margin-bottom:20px}
+.pin-login-input{width:100%;padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:inherit;font-size:1rem;outline:none;margin-bottom:10px;transition:border-color .3s}
+.pin-login-input:focus{border-color:var(--sage);box-shadow:0 0 0 3px rgba(122,158,126,0.12)}
+.pin-login-btn{width:100%;padding:14px;background:linear-gradient(135deg,var(--sage),var(--sage-dark));border:none;border-radius:10px;color:#fff;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .3s;margin-top:6px}
+.pin-login-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(122,158,126,0.25)}
+.pin-login-btn:disabled{opacity:.6;cursor:not-allowed;transform:none;box-shadow:none}
+.pin-login-error{color:#d44;font-size:.8rem;text-align:center;margin-top:10px;min-height:1.2em}
+
+/* ── PIN変更モーダル ── */
+.pin-change-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;z-index:100;padding:16px}
+.pin-change-box{width:100%;max-width:340px;background:var(--bg-card);border-radius:var(--radius);padding:24px;box-shadow:0 8px 32px rgba(0,0,0,0.15)}
+.pin-change-title{font-size:1rem;font-weight:900;color:var(--sage-dark);margin-bottom:16px;text-align:center}
+.pin-change-input{width:100%;padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:inherit;font-size:1rem;outline:none;margin-bottom:10px;transition:border-color .3s}
+.pin-change-input:focus{border-color:var(--sage);box-shadow:0 0 0 3px rgba(122,158,126,0.12)}
+.pin-change-btn{width:100%;padding:12px;background:linear-gradient(135deg,var(--sage),var(--sage-dark));border:none;border-radius:10px;color:#fff;font-size:.85rem;font-weight:700;cursor:pointer;margin-top:6px;transition:all .3s}
+.pin-change-btn:disabled{opacity:.6;cursor:not-allowed}
+.pin-change-cancel{width:100%;padding:10px;background:none;border:1px solid var(--border);border-radius:10px;color:var(--text-dim);font-size:.85rem;cursor:pointer;margin-top:8px}
+.pin-change-msg{font-size:.8rem;text-align:center;margin-top:10px;min-height:1.2em}
+.pin-change-msg.error{color:#d44}
+.pin-change-msg.success{color:var(--sage-dark)}
+
+/* ── PIN変更ボタン（ダッシュボード内） ── */
+.pin-change-trigger{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:var(--cream);border:1px solid var(--border);border-radius:10px;color:var(--brown);font-size:.8rem;font-weight:700;cursor:pointer;transition:all .3s;margin-top:12px}
+.pin-change-trigger:hover{background:var(--cream-dark)}
+
+/* ── Responsive ── */
+@media (min-width: 768px) {
+  .app { max-width: 720px; }
+  .stats-grid { grid-template-columns: repeat(3, 1fr); }
+  .section-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+}
+@media (min-width: 1024px) {
+  .app { max-width: 960px; }
+}
 </style>
 </head>
 <body>
@@ -182,7 +220,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
   const token = params.get('token');
 
   if (!token) {
-    showAuth('link', 'リンクが必要です', '先生から保護者用リンクをもらってください。\nLINEやメールで届いたURLをタップしてアクセスできます。');
+    showPinLogin();
     return;
   }
 
@@ -210,6 +248,45 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
         showAuth('expired', 'リンクが無効です', 'このリンクは無効または期限切れです。\n先生に新しいリンクを発行してもらってください。');
       }
     });
+
+  // ── PINログイン画面 ──
+  function showPinLogin() {
+    app.innerHTML = `
+      <div class="pin-login-screen">
+        <div class="pin-login-box">
+          <div class="pin-login-title">TRAIL おやこダッシュボード</div>
+          <input class="pin-login-input" id="slugInput" placeholder="教室ID" autocomplete="off">
+          <input class="pin-login-input" id="nameInput" placeholder="お子さまの名前" autocomplete="off">
+          <input class="pin-login-input" id="pinInput" type="tel" maxlength="4" placeholder="0000" inputmode="numeric" autocomplete="off">
+          <button class="pin-login-btn" id="pinLoginBtn">ログイン</button>
+          <div class="pin-login-error" id="pinLoginError"></div>
+        </div>
+      </div>`;
+    const slugEl = document.getElementById('slugInput');
+    const nameEl = document.getElementById('nameInput');
+    const pinEl = document.getElementById('pinInput');
+    const btn = document.getElementById('pinLoginBtn');
+    const errEl = document.getElementById('pinLoginError');
+    btn.addEventListener('click', function() {
+      const slug = slugEl.value.trim();
+      const name = nameEl.value.trim();
+      const pin = pinEl.value.trim();
+      if (!slug || !name || !pin) { errEl.textContent = '全項目を入力してください'; return; }
+      btn.disabled = true;
+      errEl.textContent = '';
+      fetch('/api/parent-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tenant_slug: slug, student_name: name, pin: pin })
+      })
+      .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+      .then(function(res) {
+        if (!res.ok) { errEl.textContent = res.data.error || 'ログインに失敗しました'; btn.disabled = false; return; }
+        location.href = location.pathname + '?token=' + encodeURIComponent(res.data.token);
+      })
+      .catch(function() { errEl.textContent = '通信エラーが発生しました'; btn.disabled = false; });
+    });
+  }
 
   // ── 認証/エラー画面 ──
   function showAuth(type, title, msg) {
@@ -443,6 +520,9 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
         </div>`;
     }
 
+    // ⑩b PIN変更ボタン
+    html += '<div style="text-align:center"><button class="pin-change-trigger" id="pinChangeBtn">\uD83D\uDD10 PIN変更</button></div>';
+
     // ⑪ 最近のゲーム履歴
     html += `<div class="section-title"><span>\uD83C\uDFAE</span> \u6700\u8FD1\u306E\u30B2\u30FC\u30E0\u5C65\u6B74</div>`;
     html += '<div class="card">';
@@ -476,6 +556,57 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
         const s = data.stats ? data.stats[key] : {alt:0,plays:0,minutes:0};
         grid.innerHTML = renderStats(s || {alt:0,plays:0,minutes:0});
       });
+    });
+
+    // ── PIN変更ボタン ──
+    const pinChangeBtn = document.getElementById('pinChangeBtn');
+    if (pinChangeBtn) {
+      pinChangeBtn.addEventListener('click', function() { showPinChangeModal(); });
+    }
+  }
+
+  // ── PIN変更モーダル ──
+  function showPinChangeModal() {
+    const overlay = document.createElement('div');
+    overlay.className = 'pin-change-overlay';
+    overlay.innerHTML = `
+      <div class="pin-change-box">
+        <div class="pin-change-title">\uD83D\uDD10 PIN変更</div>
+        <input class="pin-change-input" id="currentPinInput" type="tel" maxlength="4" placeholder="現在のPIN" inputmode="numeric">
+        <input class="pin-change-input" id="newPinInput" type="tel" maxlength="4" placeholder="新しいPIN（4桁）" inputmode="numeric">
+        <input class="pin-change-input" id="confirmPinInput" type="tel" maxlength="4" placeholder="新しいPIN（確認）" inputmode="numeric">
+        <button class="pin-change-btn" id="changePinBtn">変更する</button>
+        <button class="pin-change-cancel" id="cancelPinBtn">キャンセル</button>
+        <div class="pin-change-msg" id="pinChangeMsg"></div>
+      </div>`;
+    document.body.appendChild(overlay);
+
+    overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+    document.getElementById('cancelPinBtn').addEventListener('click', function() { overlay.remove(); });
+    document.getElementById('changePinBtn').addEventListener('click', function() {
+      var currentPin = document.getElementById('currentPinInput').value.trim();
+      var newPin = document.getElementById('newPinInput').value.trim();
+      var confirmPin = document.getElementById('confirmPinInput').value.trim();
+      var msgEl = document.getElementById('pinChangeMsg');
+      msgEl.className = 'pin-change-msg';
+      msgEl.textContent = '';
+      if (!currentPin || !newPin || !confirmPin) { msgEl.className = 'pin-change-msg error'; msgEl.textContent = '全項目を入力してください'; return; }
+      if (!/^\d{4}$/.test(newPin)) { msgEl.className = 'pin-change-msg error'; msgEl.textContent = 'PINは4桁の数字です'; return; }
+      if (newPin !== confirmPin) { msgEl.className = 'pin-change-msg error'; msgEl.textContent = '新しいPINが一致しません'; return; }
+      var btn = document.getElementById('changePinBtn');
+      btn.disabled = true;
+      fetch('/api/parent-change-pin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ current_pin: currentPin, new_pin: newPin })
+      })
+      .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+      .then(function(res) {
+        if (!res.ok) { msgEl.className = 'pin-change-msg error'; msgEl.textContent = res.data.error || 'エラーが発生しました'; btn.disabled = false; return; }
+        msgEl.className = 'pin-change-msg success'; msgEl.textContent = 'PIN変更しました';
+        setTimeout(function() { overlay.remove(); }, 1500);
+      })
+      .catch(function() { msgEl.className = 'pin-change-msg error'; msgEl.textContent = '通信エラーが発生しました'; btn.disabled = false; });
     });
   }
 

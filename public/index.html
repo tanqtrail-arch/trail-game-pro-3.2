@@ -2,90 +2,51 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>TRAIL Game Pro 3</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>TRAIL GAME PRO 3 SaaS</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg-dark: #f4f6f9;
-  --bg-card: #ffffff;
-  --bg-card-hover: #f8faff;
-  --accent-gold: #e8a020;
-  --accent-cyan: #0090d9;
-  --accent-purple: #7c5cbf;
-  --accent-pink: #e05070;
-  --accent-green: #2cb562;
-  --accent-orange: #e87830;
-  --text-primary: #1e2030;
-  --text-dim: #8090a5;
-  --border-glow: rgba(0,144,217,0.25);
-}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Zen Kaku Gothic New',sans-serif;background:var(--bg-dark);color:var(--text-primary);min-height:100vh;overflow-x:hidden}
-body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:radial-gradient(ellipse at 20% 10%,rgba(0,144,217,0.06) 0%,transparent 50%),radial-gradient(ellipse at 80% 90%,rgba(124,92,191,0.05) 0%,transparent 50%),radial-gradient(ellipse at 50% 50%,rgba(232,160,32,0.03) 0%,transparent 50%);z-index:0;pointer-events:none}
-.stars{position:fixed;top:0;left:0;right:0;bottom:0;z-index:0;pointer-events:none}
-.star{position:absolute;width:2px;height:2px;background:rgba(0,144,217,0.15);border-radius:50%;animation:twinkle 3s ease-in-out infinite alternate}
-@keyframes twinkle{0%{opacity:.1}100%{opacity:.35}}
-.app{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:16px}
-@keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-
-/* Login */
-.login-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;animation:fadeIn .8s ease}
-.login-logo{font-family:'Orbitron',sans-serif;font-size:2.4rem;font-weight:900;background:linear-gradient(135deg,var(--accent-gold),var(--accent-cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px;letter-spacing:3px;text-align:center}
-.login-subtitle{font-family:'Press Start 2P',cursive;font-size:.5rem;color:var(--accent-cyan);margin-bottom:40px;letter-spacing:2px}
-.login-box{background:var(--bg-card);border:1px solid rgba(0,0,0,0.08);border-radius:16px;padding:32px 24px;width:100%;max-width:380px;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.06)}
-.login-box h2{font-family:'Orbitron',sans-serif;font-size:.9rem;color:var(--accent-cyan);margin-bottom:20px;letter-spacing:2px}
-.login-input{width:100%;padding:12px 16px;background:rgba(0,0,0,0.03);border:1.5px solid rgba(0,0,0,0.1);border-radius:10px;color:var(--text-primary);font-size:1rem;font-family:inherit;outline:none;transition:all .3s;text-align:center}
-.login-input:focus{border-color:var(--accent-cyan);box-shadow:0 0 0 3px rgba(0,144,217,0.1)}
-.login-input::placeholder{color:var(--text-dim)}
-.login-btn{width:100%;padding:13px;margin-top:16px;background:linear-gradient(135deg,var(--accent-cyan),var(--accent-purple));border:none;border-radius:10px;color:var(--bg-dark);font-family:'Orbitron',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;transition:all .3s;letter-spacing:2px}
-.login-btn:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,229,255,0.3)}
-.admin-link{margin-top:20px;color:var(--text-dim);font-size:.8rem;cursor:pointer;transition:color .3s}
-.admin-link:hover{color:var(--accent-gold)}
-.login-tabs{display:flex;border-bottom:1.5px solid rgba(0,0,0,0.06);margin:-32px -24px 20px;overflow:hidden;border-radius:16px 16px 0 0}
-.login-tab{flex:1;padding:12px 0;border:none;background:transparent;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .2s;color:var(--text-dim)}
-.login-tab.active{background:rgba(0,144,217,0.06);color:var(--accent-cyan);border-bottom:2px solid var(--accent-cyan)}
-
-/* Header */
-.header{display:flex;align-items:center;justify-content:space-between;padding:12px 0;margin-bottom:20px;border-bottom:1.5px solid rgba(0,0,0,0.06);gap:10px;flex-wrap:wrap}
-.header-logo{font-family:'Orbitron',sans-serif;font-size:1.2rem;font-weight:900;background:linear-gradient(135deg,var(--accent-gold),var(--accent-cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:2px}
-.header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.coin-display{display:flex;align-items:center;gap:6px;background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.3);border-radius:30px;padding:6px 14px;font-family:'Orbitron',sans-serif;font-weight:700;font-size:.85rem;color:var(--accent-gold)}
-.user-badge{display:flex;align-items:center;gap:6px;color:var(--text-dim);font-size:.8rem}
-.user-avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent-cyan),var(--accent-purple));display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--bg-dark);font-size:.75rem}
-.badge-count{font-size:.7rem;background:rgba(255,152,0,0.15);border:1px solid rgba(255,152,0,0.3);color:var(--accent-orange);padding:2px 8px;border-radius:12px;font-family:'Orbitron',sans-serif}
-.logout-btn{background:none;border:1.5px solid rgba(0,0,0,0.1);color:var(--text-dim);padding:5px 12px;border-radius:8px;cursor:pointer;font-size:.7rem;transition:all .3s;font-family:inherit}
-.logout-btn:hover{border-color:var(--accent-pink);color:var(--accent-pink)}
-
-/* Section */
-.portal,.admin-panel{animation:fadeIn .6s ease}
-.section-title{font-family:'Orbitron',sans-serif;font-size:.7rem;color:var(--accent-cyan);letter-spacing:3px;margin-bottom:16px;text-transform:uppercase}
-
-/* Category */
-.category-filter{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px}
+:root{--bg-light:#f0f2f5;--bg-card:#ffffff;--text-primary:#2d3748;--text-dim:#a0aec0;--accent-cyan:#0090d9;--accent-gold:#e8a020;--accent-green:#2cb562;--accent-purple:#7c5cbf;--accent-pink:#e05070;--accent-orange:#ff9800;--border-glow:rgba(0,229,255,0.15)}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg-light);color:var(--text-primary);min-height:100vh;overflow-x:hidden}
+.stars{position:fixed;inset:0;pointer-events:none;z-index:0;background:linear-gradient(135deg,#667eea11,#764ba211)}
+.star{position:absolute;background:#fff;border-radius:50%;animation:twinkle 3s ease-in-out infinite}
+@keyframes twinkle{0%,100%{opacity:.2;transform:scale(1)}50%{opacity:.8;transform:scale(1.5)}}
+.app{position:relative;z-index:1;max-width:480px;margin:0 auto;padding:12px;min-height:100vh}
+.login-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:90vh;padding:20px}
+.login-logo{font-family:'Orbitron',sans-serif;font-size:2.2rem;font-weight:900;background:linear-gradient(135deg,var(--accent-cyan),var(--accent-purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;margin-bottom:6px}
+.login-subtitle{font-family:'Orbitron',sans-serif;font-size:.6rem;letter-spacing:6px;color:var(--text-dim);text-align:center;margin-bottom:30px}
+.login-box{width:100%;max-width:360px;background:var(--bg-card);border-radius:16px;padding:24px;border:1.5px solid rgba(0,0,0,0.06);box-shadow:0 4px 20px rgba(0,0,0,0.04)}
+.login-box h2{font-family:'Orbitron',sans-serif;font-size:.9rem;text-align:center;margin-bottom:16px;letter-spacing:2px;color:var(--accent-cyan)}
+.login-input{width:100%;padding:12px 14px;background:rgba(0,0,0,0.02);border:1.5px solid rgba(0,0,0,0.1);border-radius:10px;color:var(--text-primary);font-family:inherit;font-size:1rem;outline:none;margin-bottom:10px;transition:border-color .3s}
+.login-input:focus{border-color:var(--accent-cyan);box-shadow:0 0 0 3px rgba(0,144,217,0.08)}
+.login-btn{width:100%;padding:14px;background:linear-gradient(135deg,var(--accent-cyan),var(--accent-purple));border:none;border-radius:10px;color:#fff;font-family:'Orbitron',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;letter-spacing:2px;transition:all .3s;margin-top:6px}
+.login-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,144,217,0.25)}
+.admin-link{margin-top:16px;color:var(--text-dim);font-size:.75rem;cursor:pointer;transition:color .3s}
+.admin-link:hover{color:var(--accent-cyan)}
+.header{display:flex;align-items:center;justify-content:space-between;padding:12px 0;margin-bottom:16px;flex-wrap:wrap;gap:8px}
+.header-logo{font-family:'Orbitron',sans-serif;font-weight:900;font-size:1rem;background:linear-gradient(135deg,var(--accent-cyan),var(--accent-purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.coin-display{font-family:'Orbitron',sans-serif;font-weight:700;color:var(--accent-gold);font-size:.85rem}
+.badge-count{font-family:'Orbitron',sans-serif;font-weight:700;color:var(--accent-orange);font-size:.75rem}
+.user-badge{display:flex;align-items:center;gap:6px;font-size:.8rem;font-weight:700}
+.user-avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent-cyan),var(--accent-purple));display:flex;align-items:center;justify-content:center;color:#fff;font-size:.7rem;font-weight:900}
+.logout-btn{padding:6px 12px;border:1.5px solid rgba(224,80,112,0.25);background:none;color:var(--accent-pink);border-radius:8px;font-size:.7rem;cursor:pointer;transition:all .3s;font-family:inherit}
+.logout-btn:hover{background:rgba(224,80,112,0.06)}
+.section-title{font-family:'Orbitron',sans-serif;font-size:.7rem;letter-spacing:2px;color:var(--text-dim);margin-bottom:12px;margin-top:20px}
+.category-filter{display:flex;gap:6px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}
 .cat-btn{padding:6px 14px;border-radius:30px;border:1.5px solid rgba(0,0,0,0.08);background:var(--bg-card);color:var(--text-dim);font-family:inherit;font-size:.8rem;cursor:pointer;transition:all .3s;white-space:nowrap}
-.cat-btn:hover{border-color:var(--accent-cyan);color:var(--text-primary)}
-.cat-btn.active{background:linear-gradient(135deg,rgba(0,144,217,0.1),rgba(124,92,191,0.1));border-color:var(--accent-cyan);color:var(--accent-cyan);font-weight:700}
-
-/* Game Grid */
-.game-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px;margin-bottom:30px}
-.game-card{background:var(--bg-card);border:1.5px solid rgba(0,0,0,0.06);border-radius:16px;padding:22px 14px 18px;text-align:center;transition:all .35s cubic-bezier(.4,0,.2,1);cursor:pointer;position:relative;overflow:hidden;text-decoration:none;display:block;box-shadow:0 2px 8px rgba(0,0,0,0.05)}
-.game-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--accent-cyan),var(--accent-purple),var(--accent-orange));opacity:.7;transition:opacity .3s}
-.game-card::after{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:conic-gradient(from 0deg,transparent 0%,rgba(0,144,217,0.04) 25%,transparent 50%,rgba(124,92,191,0.04) 75%,transparent 100%);animation:cardShimmer 6s linear infinite;pointer-events:none}
-@keyframes cardShimmer{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
-.game-card:hover{transform:translateY(-6px) scale(1.02);border-color:rgba(0,144,217,0.25);box-shadow:0 12px 32px rgba(0,144,217,0.12),0 4px 12px rgba(124,92,191,0.08);background:var(--bg-card-hover)}
-.game-card:hover::before{opacity:1;height:5px}
-.game-card:active{transform:translateY(-2px) scale(0.98)}
-.game-emoji{font-size:2.6rem;margin-bottom:10px;display:block;position:relative;z-index:1;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.1));transition:transform .3s}
-.game-card:hover .game-emoji{transform:scale(1.15) rotate(-3deg);filter:drop-shadow(0 4px 8px rgba(0,0,0,0.15))}
-.game-name{font-weight:700;font-size:.9rem;color:var(--text-primary);margin-bottom:5px;position:relative;z-index:1}
+.cat-btn:hover{border-color:var(--accent-purple);color:var(--text-primary)}
+.cat-btn.active{background:linear-gradient(135deg,rgba(124,92,191,0.12),rgba(0,144,217,0.08));border-color:var(--accent-purple);color:var(--accent-purple);font-weight:700}
+.game-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
+.game-card{display:flex;flex-direction:column;align-items:center;padding:16px 10px;background:var(--bg-card);border:1.5px solid rgba(0,0,0,0.06);border-radius:14px;cursor:pointer;transition:all .3s;text-decoration:none;color:inherit;position:relative;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.03)}
+.game-card:hover{transform:translateY(-3px);border-color:var(--border-glow);box-shadow:0 8px 25px rgba(0,0,0,0.06)}
+.game-emoji{font-size:2rem;margin-bottom:6px;position:relative;z-index:1}
+.game-name{font-weight:700;font-size:.85rem;text-align:center;position:relative;z-index:1}
 .game-category-badge{display:inline-block;font-size:.6rem;padding:2px 10px;border-radius:20px;background:linear-gradient(135deg,rgba(0,144,217,0.08),rgba(124,92,191,0.08));color:var(--accent-purple);margin-bottom:6px;border:1px solid rgba(124,92,191,0.15);position:relative;z-index:1}
 .game-coins{font-family:'Orbitron',sans-serif;font-size:.75rem;color:var(--accent-gold);position:relative;z-index:1}
 .game-link-hint{font-size:.65rem;color:var(--text-dim);margin-top:8px;position:relative;z-index:1;transition:color .3s}
 .game-card:hover .game-link-hint{color:var(--accent-cyan)}
-
-/* Ranking */
 .ranking-section{margin-bottom:30px}
 .ranking-list{display:flex;flex-direction:column;gap:8px}
 .rank-item{display:flex;align-items:center;gap:12px;background:var(--bg-card);border:1.5px solid rgba(0,0,0,0.06);border-radius:12px;padding:12px 16px;transition:all .3s;box-shadow:0 1px 4px rgba(0,0,0,0.03)}
@@ -95,15 +56,9 @@ body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:
 .rank-medal{font-size:1.8rem;width:40px;text-align:center;flex-shrink:0;line-height:1;filter:drop-shadow(0 0 4px rgba(255,215,0,0.4))}
 .rank-num{font-family:'Orbitron',sans-serif;font-weight:900;font-size:1rem;width:40px;text-align:center;flex-shrink:0;color:var(--text-dim)}
 .rank-name{flex:1;font-weight:700;font-size:.95rem;color:var(--text-primary)}
-.rank-gold .rank-name{color:#8a6500;font-size:1.05rem}
-.rank-silver .rank-name{color:#555}
-.rank-bronze .rank-name{color:#7a4a1a}
+.rank-alt{font-family:'Orbitron',sans-serif;font-weight:700;color:var(--accent-gold);font-size:.8rem;flex-shrink:0;margin-left:auto}
 .rank-badges{display:flex;gap:3px;margin-right:8px}
 .rank-badge-dot{width:14px;height:14px;border-radius:50%;background:linear-gradient(135deg,var(--accent-orange),#ff6d00);box-shadow:0 0 6px rgba(255,152,0,0.3);font-size:.5rem;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900}
-.rank-alt{font-family:'Orbitron',sans-serif;font-weight:700;color:var(--accent-gold);font-size:.8rem;flex-shrink:0;margin-left:auto}
-
-/* History / Tables */
-.history-section{margin-top:10px}
 .tbl-wrap{width:100%;background:var(--bg-card);border-radius:12px;overflow-x:auto;border:1.5px solid rgba(0,0,0,0.06);-webkit-overflow-scrolling:touch;box-shadow:0 1px 4px rgba(0,0,0,0.03)}
 .tbl-wrap table{width:100%;border-collapse:collapse;min-width:300px}
 .tbl-wrap th{background:rgba(0,144,217,0.06);padding:10px 12px;text-align:left;font-family:'Orbitron',sans-serif;font-size:.6rem;color:var(--accent-cyan);letter-spacing:1px;white-space:nowrap}
@@ -111,42 +66,29 @@ body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:
 .tbl-wrap tr:hover td{background:rgba(0,144,217,0.02)}
 .coin-plus{color:var(--accent-gold);font-family:'Orbitron',sans-serif;font-weight:700}
 .no-data{text-align:center;color:var(--text-dim);padding:30px;font-size:.85rem}
-
-/* Admin tabs */
 .admin-tabs{display:flex;gap:3px;margin-bottom:20px;background:var(--bg-card);border-radius:12px;padding:3px;border:1.5px solid rgba(0,0,0,0.06);overflow-x:auto;-webkit-overflow-scrolling:touch;box-shadow:0 1px 4px rgba(0,0,0,0.03)}
 .admin-tab{flex:1;padding:10px 6px;background:none;border:none;color:var(--text-dim);font-family:'Orbitron',sans-serif;font-size:.55rem;letter-spacing:.5px;cursor:pointer;border-radius:10px;transition:all .3s;white-space:nowrap;min-width:0}
 .admin-tab.active{background:rgba(0,144,217,0.1);color:var(--accent-cyan)}
 .admin-tab:hover:not(.active){color:var(--text-primary)}
-
-/* Admin forms */
 .admin-form,.game-manage-form,.cat-manage-form,.badge-manage-form{background:var(--bg-card);border:1.5px solid rgba(0,0,0,0.06);border-radius:14px;padding:20px;margin-bottom:20px;box-shadow:0 1px 4px rgba(0,0,0,0.03)}
 .admin-form h3,.game-manage-form h3,.cat-manage-form h3,.badge-manage-form h3{font-family:'Orbitron',sans-serif;font-size:.75rem;margin-bottom:16px;letter-spacing:2px}
 .admin-form h3{color:var(--accent-gold)}
 .game-manage-form h3{color:var(--accent-green)}
 .cat-manage-form h3{color:var(--accent-purple)}
 .badge-manage-form h3{color:var(--accent-orange)}
-
 .form-stack{display:flex;flex-direction:column;gap:12px;margin-bottom:12px}
 .form-group{display:flex;flex-direction:column;gap:5px}
 .form-group label{font-size:.7rem;color:var(--text-dim);letter-spacing:.5px}
 .form-group select,.form-group input{padding:10px 12px;background:rgba(0,0,0,0.02);border:1.5px solid rgba(0,0,0,0.1);border-radius:8px;color:var(--text-primary);font-family:inherit;font-size:.9rem;outline:none;transition:border-color .3s;width:100%}
 .form-group select:focus,.form-group input:focus{border-color:var(--accent-cyan);box-shadow:0 0 0 3px rgba(0,144,217,0.08)}
-.form-group select option{background:var(--bg-card)}
 .form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-
-.btn-primary{width:100%;padding:12px;border:none;border-radius:10px;font-family:'Orbitron',sans-serif;font-size:.7rem;font-weight:700;cursor:pointer;transition:all .3s;letter-spacing:1px;color:var(--bg-dark)}
+.btn-primary{width:100%;padding:12px;border:none;border-radius:10px;font-family:'Orbitron',sans-serif;font-size:.7rem;font-weight:700;cursor:pointer;transition:all .3s;letter-spacing:1px;color:#fff}
 .btn-primary:hover{transform:translateY(-2px)}
 .btn-gold{background:linear-gradient(135deg,var(--accent-gold),#ff9800)}
-.btn-gold:hover{box-shadow:0 6px 20px rgba(255,215,0,0.3)}
 .btn-green{background:linear-gradient(135deg,var(--accent-green),#00c853)}
-.btn-green:hover{box-shadow:0 6px 20px rgba(0,230,118,0.3)}
 .btn-purple{background:linear-gradient(135deg,var(--accent-purple),var(--accent-cyan))}
-.btn-purple:hover{box-shadow:0 6px 20px rgba(179,136,255,0.3)}
 .btn-orange{background:linear-gradient(135deg,var(--accent-orange),#ff6d00)}
-.btn-orange:hover{box-shadow:0 6px 20px rgba(255,152,0,0.3)}
-
-/* Game list */
 .game-list-admin{margin-top:16px;display:flex;flex-direction:column;gap:8px}
 .game-list-item{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(0,0,0,0.015);border-radius:10px;border:1px solid rgba(0,0,0,0.05);gap:10px}
 .game-list-item-info{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
@@ -154,62 +96,29 @@ body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:
 .game-list-item-info div{min-width:0}
 .game-list-item-info strong{display:block;font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .game-item-cat{font-size:.6rem;padding:2px 6px;border-radius:12px;background:rgba(179,136,255,0.1);color:var(--accent-purple);margin-left:6px}
-.game-item-url{font-size:.65rem;color:var(--text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
 .delete-btn{background:none;border:1.5px solid rgba(224,80,112,0.2);color:var(--accent-pink);padding:4px 10px;border-radius:6px;cursor:pointer;font-size:.7rem;transition:all .3s;flex-shrink:0;font-family:inherit}
 .delete-btn:hover{background:rgba(224,80,112,0.06)}
-
-/* Cat list */
 .cat-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
 .cat-tag{display:flex;align-items:center;gap:4px;padding:5px 12px;background:rgba(179,136,255,0.1);border:1px solid rgba(179,136,255,0.25);border-radius:20px;color:var(--accent-purple);font-size:.8rem}
 .cat-tag .cat-del{background:none;border:none;color:var(--accent-pink);cursor:pointer;font-size:.75rem;padding:0 2px;opacity:.6;transition:opacity .3s}
 .cat-tag .cat-del:hover{opacity:1}
-
-/* Summary table */
 .summary-th{background:rgba(179,136,255,0.08)!important}
 .summary-th th{color:var(--accent-purple)!important}
 .total-coins{font-family:'Orbitron',sans-serif;font-weight:700;color:var(--accent-gold)}
-
-/* Game Ranking Tab */
 .game-rank-tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px}
 .game-rank-tab{padding:6px 14px;border-radius:30px;border:1.5px solid rgba(0,0,0,0.08);background:var(--bg-card);color:var(--text-dim);font-family:inherit;font-size:.8rem;cursor:pointer;transition:all .3s;white-space:nowrap}
-.game-rank-tab:hover{border-color:var(--accent-gold);color:var(--text-primary)}
 .game-rank-tab.active{background:linear-gradient(135deg,rgba(232,160,32,0.12),rgba(232,120,48,0.1));border-color:var(--accent-gold);color:var(--accent-gold);font-weight:700}
 .game-rank-table .rank-score{font-family:'Orbitron',sans-serif;font-weight:700;color:var(--accent-cyan);font-size:.85rem}
 .game-rank-table .score-label{font-size:.65rem;color:var(--text-dim);margin-left:2px}
 .portal-tabs{display:flex;gap:3px;margin-bottom:20px;background:var(--bg-card);border-radius:12px;padding:3px;border:1.5px solid rgba(0,0,0,0.06);overflow-x:auto;-webkit-overflow-scrolling:touch;box-shadow:0 1px 4px rgba(0,0,0,0.03)}
 .portal-tab{flex:1;padding:10px 6px;background:none;border:none;color:var(--text-dim);font-family:'Orbitron',sans-serif;font-size:.55rem;letter-spacing:.5px;cursor:pointer;border-radius:10px;transition:all .3s;white-space:nowrap;min-width:0}
 .portal-tab.active{background:rgba(0,144,217,0.1);color:var(--accent-cyan)}
-.portal-tab:hover:not(.active){color:var(--text-primary)}
-
-/* Toast */
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--accent-green);color:#fff;padding:10px 24px;border-radius:30px;font-weight:700;font-size:.85rem;z-index:999;transition:transform .4s ease;box-shadow:0 4px 20px rgba(44,181,98,0.25);white-space:nowrap}
 .toast.show{transform:translateX(-50%) translateY(0)}
-
-/* Class & login select */
 .class-select-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
 .class-select-btn{padding:14px 12px;background:rgba(0,0,0,0.02);border:1.5px solid rgba(0,0,0,0.08);border-radius:12px;color:var(--text-primary);font-family:inherit;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .25s;text-align:center}
 .class-select-btn:hover{border-color:var(--accent-cyan);background:rgba(0,144,217,0.05)}
 .class-select-btn.active{border-color:var(--accent-cyan);background:rgba(0,144,217,0.1);color:var(--accent-cyan);box-shadow:0 0 0 3px rgba(0,144,217,0.1)}
-
-.admin-pass-box{text-align:center}
-.admin-pass-box p{color:var(--text-dim);margin-bottom:14px;font-size:.8rem}
-
-/* Lockout warning */
-.lockout-msg{background:rgba(224,80,112,0.08);border:1.5px solid rgba(224,80,112,0.25);border-radius:10px;padding:12px 16px;color:var(--accent-pink);font-size:.8rem;margin-top:12px;text-align:center;animation:fadeIn .4s ease}
-.lockout-msg strong{font-family:'Orbitron',sans-serif;font-size:.7rem}
-.validation-error{border-color:var(--accent-pink)!important;box-shadow:0 0 0 3px rgba(224,80,112,0.1)!important}
-.validation-hint{font-size:.65rem;color:var(--accent-pink);margin-top:2px;display:none}
-.validation-hint.show{display:block}
-
-/* Activity Dashboard */
-.activity-feed{display:flex;flex-direction:column;gap:8px;max-height:500px;overflow-y:auto}
-.activity-item{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg-card);border:1.5px solid rgba(0,0,0,0.06);border-radius:12px;transition:all .3s;box-shadow:0 1px 4px rgba(0,0,0,0.03)}
-.activity-item:hover{border-color:var(--border-glow)}
-.activity-icon{font-size:1.3rem;flex-shrink:0;width:32px;text-align:center}
-.activity-body{flex:1;min-width:0}
-.activity-body strong{font-size:.85rem;color:var(--text-primary)}
-.activity-body p{font-size:.75rem;color:var(--text-dim);margin-top:2px}
-.activity-time{font-size:.65rem;color:var(--text-dim);flex-shrink:0;white-space:nowrap;font-family:'Orbitron',sans-serif}
 .activity-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px}
 .stat-card{background:var(--bg-card);border:1.5px solid rgba(0,0,0,0.06);border-radius:14px;padding:16px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,0.03)}
 .stat-card .stat-value{font-family:'Orbitron',sans-serif;font-size:1.4rem;font-weight:900;margin-bottom:4px}
@@ -219,884 +128,707 @@ body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:
 .stat-purple .stat-value{color:var(--accent-purple)}
 .stat-green .stat-value{color:var(--accent-green)}
 .stat-orange .stat-value{color:var(--accent-orange)}
-.alert-card{background:rgba(224,80,112,0.05);border:1.5px solid rgba(224,80,112,0.2);border-radius:12px;padding:12px 16px;margin-bottom:12px;font-size:.8rem;color:var(--accent-pink)}
-
-/* Login Log */
 .online-list{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
 .online-chip{display:flex;align-items:center;gap:6px;padding:6px 14px;background:rgba(44,181,98,0.08);border:1.5px solid rgba(44,181,98,0.25);border-radius:30px;font-size:.8rem;color:var(--accent-green)}
 .online-chip .online-dot{width:8px;height:8px;border-radius:50%;background:var(--accent-green);animation:pulse-dot 1.5s ease-in-out infinite}
 @keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.4}}
-.online-chip .online-dur{font-family:'Orbitron',sans-serif;font-size:.65rem;color:var(--text-dim);margin-left:4px}
 .duration-badge{font-family:'Orbitron',sans-serif;font-size:.75rem;color:var(--accent-purple)}
-.usage-card{background:var(--bg-card);border:1.5px solid rgba(0,0,0,0.06);border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,0.03)}
-.usage-card h4{font-size:.85rem;margin-bottom:10px;display:flex;align-items:center;gap:8px}
-.usage-game-bars{display:flex;flex-direction:column;gap:6px}
+.activity-feed{display:flex;flex-direction:column;gap:8px;max-height:500px;overflow-y:auto}
+.activity-item{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg-card);border:1.5px solid rgba(0,0,0,0.06);border-radius:12px;transition:all .3s;box-shadow:0 1px 4px rgba(0,0,0,0.03)}
+.activity-icon{font-size:1.3rem;flex-shrink:0;width:32px;text-align:center}
+.activity-body{flex:1;min-width:0}
+.activity-body strong{font-size:.85rem;color:var(--text-primary)}
+.activity-body p{font-size:.75rem;color:var(--text-dim);margin-top:2px}
+.activity-time{font-size:.65rem;color:var(--text-dim);flex-shrink:0;white-space:nowrap;font-family:'Orbitron',sans-serif}
 .usage-bar-row{display:flex;align-items:center;gap:8px;font-size:.8rem}
 .usage-bar-label{min-width:90px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0}
 .usage-bar-track{flex:1;height:18px;background:rgba(0,0,0,0.04);border-radius:9px;overflow:hidden;position:relative}
 .usage-bar-fill{height:100%;border-radius:9px;background:linear-gradient(90deg,var(--accent-cyan),var(--accent-purple));transition:width .3s}
 .usage-bar-val{font-family:'Orbitron',sans-serif;font-size:.65rem;color:var(--text-dim);min-width:50px;text-align:right;flex-shrink:0}
+.alert-card{background:rgba(224,80,112,0.05);border:1.5px solid rgba(224,80,112,0.2);border-radius:12px;padding:12px 16px;margin-bottom:12px;font-size:.8rem;color:var(--accent-pink)}
+.lockout-msg{background:rgba(224,80,112,0.08);border:1.5px solid rgba(224,80,112,0.25);border-radius:10px;padding:12px 16px;color:var(--accent-pink);font-size:.8rem;margin-top:12px;text-align:center}
 
-/* Desktop enhancements */
-@media(min-width:600px){
-  .app{padding:20px}
-  .login-logo{font-size:3rem}
-  .game-grid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:18px}
-  .form-row-2{grid-template-columns:1fr 1fr}
-  .form-row-3{grid-template-columns:1fr 1fr 1fr}
-}
+/* ===== 0-15 追加CSS ===== */
+/* ─── ストリークウィジェット ─── */
+.streak-widget{display:flex;align-items:center;gap:10px;background:rgba(255,149,0,0.07);border:1.5px solid rgba(255,149,0,0.2);border-radius:14px;padding:12px 16px;margin-bottom:14px}
+.streak-widget .sw-flame{font-size:1.8rem;animation:sw-flicker 1.5s infinite alternate}
+@keyframes sw-flicker{from{transform:scale(1) rotate(-2deg)}to{transform:scale(1.06) rotate(2deg)}}
+.streak-widget .sw-info{flex:1}
+.streak-widget .sw-current{font-family:'Orbitron',sans-serif;font-weight:900;font-size:1.2rem;color:#ff9500;line-height:1}
+.streak-widget .sw-label{font-size:.65rem;color:var(--text-dim);margin-top:2px}
+.streak-widget .sw-dots{display:flex;gap:4px;align-items:center}
+.streak-widget .sw-dot{width:20px;height:20px;border-radius:50%;background:rgba(255,149,0,0.12);border:1.5px solid rgba(255,149,0,0.2);display:flex;align-items:center;justify-content:center;font-size:.65rem}
+.streak-widget .sw-dot.played{background:rgba(255,149,0,0.25);border-color:rgba(255,149,0,0.6)}
+/* ─── ALT獲得ポップアップ ─── */
+#alt-popup{position:fixed;top:0;left:50%;transform:translateX(-50%) translateY(-160px);z-index:10000;transition:transform .45s cubic-bezier(0.34,1.56,0.64,1);pointer-events:none}
+#alt-popup.show{transform:translateX(-50%) translateY(16px)}
+.alt-popup-inner{background:linear-gradient(135deg,#1a1a2e,#16213e);border:1.5px solid rgba(255,149,0,0.5);border-radius:20px;padding:16px 28px;text-align:center;box-shadow:0 8px 32px rgba(255,149,0,0.3);min-width:200px}
+.alt-popup-label{font-size:.65rem;color:rgba(255,149,0,0.6);letter-spacing:2px;font-family:'Orbitron',sans-serif;margin-bottom:4px}
+.alt-popup-total{font-family:'Orbitron',sans-serif;font-size:2rem;font-weight:900;color:#ff9500;text-shadow:0 0 16px rgba(255,149,0,0.5)}
+.alt-popup-awards{display:flex;flex-direction:column;gap:3px;margin-top:8px}
+.alt-popup-award{display:flex;justify-content:space-between;font-size:.72rem;gap:16px}
+.alt-popup-award-lbl{color:rgba(255,255,255,0.55)}
+.alt-popup-award-amt{color:#ff9500;font-weight:700}
+
+/* ─── 生徒ダッシュボード ─── */
+.dash-section{background:var(--bg-card);border:1.5px solid rgba(0,0,0,0.06);border-radius:14px;padding:16px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,0.03)}
+.dash-section-title{font-family:'Orbitron',sans-serif;font-size:.65rem;letter-spacing:1.5px;color:var(--text-dim);margin-bottom:10px}
+.dash-level-box{text-align:center;padding:14px 0}
+.dash-rank-label{font-family:'Orbitron',sans-serif;font-size:1.5rem;font-weight:900;background:linear-gradient(135deg,var(--accent-gold),var(--accent-orange));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.dash-rank-name{font-size:.85rem;color:var(--text-primary);font-weight:700;margin-top:2px}
+.dash-progress-wrap{margin:10px 0 4px;position:relative}
+.dash-progress-track{width:100%;height:14px;background:rgba(0,0,0,0.06);border-radius:7px;overflow:hidden}
+.dash-progress-fill{height:100%;border-radius:7px;background:linear-gradient(90deg,var(--accent-gold),var(--accent-orange));transition:width .5s ease;position:relative}
+.dash-progress-fill::after{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.3),transparent);animation:dash-shimmer 2s infinite}
+@keyframes dash-shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.dash-progress-text{font-family:'Orbitron',sans-serif;font-size:.6rem;color:var(--text-dim);display:flex;justify-content:space-between;margin-top:3px}
+.dash-streak-row{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:8px;font-weight:700;color:var(--accent-orange)}
+.dash-mission-card{position:relative;overflow:hidden}
+.dash-mission-card.completed{border-color:rgba(44,181,98,0.3);background:rgba(44,181,98,0.04)}
+.dash-mission-desc{font-size:.9rem;font-weight:700;margin-bottom:8px}
+.dash-mission-btn{display:inline-block;padding:8px 18px;border:none;border-radius:8px;font-family:'Orbitron',sans-serif;font-size:.65rem;font-weight:700;cursor:pointer;color:#fff;background:linear-gradient(135deg,var(--accent-cyan),var(--accent-purple));letter-spacing:1px;transition:all .3s}
+.dash-mission-btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,144,217,0.25)}
+.dash-stat-tabs{display:flex;gap:3px;margin-bottom:10px;background:rgba(0,0,0,0.03);border-radius:8px;padding:2px}
+.dash-stat-tab{flex:1;padding:7px 4px;background:none;border:none;font-family:'Orbitron',sans-serif;font-size:.55rem;color:var(--text-dim);cursor:pointer;border-radius:6px;transition:all .2s;letter-spacing:.5px}
+.dash-stat-tab.active{background:var(--bg-card);color:var(--accent-cyan);box-shadow:0 1px 3px rgba(0,0,0,0.08)}
+.dash-stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.dash-stat-item{text-align:center;padding:8px 4px}
+.dash-stat-val{font-family:'Orbitron',sans-serif;font-size:1.3rem;font-weight:900}
+.dash-stat-lbl{font-size:.6rem;color:var(--text-dim);margin-top:2px}
+.dash-cat-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.04)}
+.dash-cat-row:last-child{border-bottom:none}
+.dash-cat-emoji{font-size:1.2rem;width:28px;text-align:center;flex-shrink:0}
+.dash-cat-name{font-size:.8rem;font-weight:700;min-width:44px;flex-shrink:0}
+.dash-cat-bar-wrap{flex:1;height:10px;background:rgba(0,0,0,0.05);border-radius:5px;overflow:hidden}
+.dash-cat-bar{height:100%;border-radius:5px;background:linear-gradient(90deg,var(--accent-cyan),var(--accent-purple));transition:width .4s}
+.dash-cat-pct{font-family:'Orbitron',sans-serif;font-size:.65rem;color:var(--text-dim);min-width:36px;text-align:right;flex-shrink:0}
+.dash-cat-badge{font-size:.55rem;padding:1px 6px;border-radius:10px;background:rgba(232,160,32,0.15);color:var(--accent-gold);font-weight:700;flex-shrink:0}
+.dash-badge-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.dash-badge-item{text-align:center;padding:10px 4px;border-radius:10px;border:1.5px solid rgba(0,0,0,0.06);transition:all .3s}
+.dash-badge-item.earned{background:linear-gradient(135deg,rgba(232,160,32,0.08),rgba(255,152,0,0.06));border-color:rgba(232,160,32,0.25);box-shadow:0 0 8px rgba(232,160,32,0.1)}
+.dash-badge-item.locked{opacity:.45;filter:grayscale(.8)}
+.dash-badge-emoji{font-size:1.6rem;margin-bottom:2px}
+.dash-badge-name{font-size:.6rem;font-weight:700;color:var(--text-primary)}
+.dash-score-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+.dash-score-card{text-align:center;padding:12px 8px;border-radius:10px;background:rgba(0,0,0,0.015);border:1px solid rgba(0,0,0,0.05)}
+.dash-score-emoji{font-size:1.5rem}
+.dash-score-name{font-size:.7rem;font-weight:700;margin:2px 0}
+.dash-score-val{font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:900;color:var(--accent-cyan)}
+.dash-score-lbl{font-size:.55rem;color:var(--text-dim)}
+.dash-weekly-list{display:flex;flex-direction:column;gap:4px}
+.dash-weekly-row{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:8px;font-size:.85rem}
+.dash-weekly-row.me{background:rgba(0,144,217,0.08);border:1px solid rgba(0,144,217,0.2)}
+.dash-weekly-rank{font-family:'Orbitron',sans-serif;font-weight:900;width:22px;text-align:center;color:var(--text-dim);font-size:.75rem}
+.dash-weekly-name{flex:1;font-weight:700}
+.dash-weekly-alt{font-family:'Orbitron',sans-serif;font-weight:700;color:var(--accent-gold);font-size:.8rem}
+.dash-cal{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;text-align:center}
+.dash-cal-head{font-size:.55rem;color:var(--text-dim);padding:2px 0;font-weight:700}
+.dash-cal-day{width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:.65rem;border-radius:6px;color:var(--text-dim);position:relative}
+.dash-cal-day.has-play{background:rgba(0,144,217,0.12);color:var(--accent-cyan);font-weight:700}
+.dash-cal-day.has-play.hot{background:rgba(232,160,32,0.2);color:var(--accent-gold)}
+.dash-cal-day.has-play.fire{background:rgba(255,106,0,0.25);color:var(--accent-orange)}
+.dash-cal-day.today{box-shadow:inset 0 0 0 2px var(--accent-cyan)}
+.dash-cal-day.empty{visibility:hidden}
+.game-card .new-badge{position:absolute;top:6px;right:6px;font-family:'Orbitron',sans-serif;font-size:.5rem;font-weight:900;padding:2px 8px;border-radius:6px;background:linear-gradient(135deg,var(--accent-pink),var(--accent-orange));color:#fff;letter-spacing:1px;z-index:2;animation:new-pulse 2s infinite}
+@keyframes new-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.85;transform:scale(1.05)}}
+
+@media(min-width:600px){.app{padding:20px}.login-logo{font-size:3rem}.game-grid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:18px}}
+@media(min-width:768px){.app{max-width:720px;margin:0 auto}.game-grid{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:1024px){.app{max-width:960px}.game-grid{grid-template-columns:repeat(4,1fr)}}
 </style>
 </head>
 <body>
 <div class="stars" id="stars"></div>
 <div class="toast" id="toast"></div>
+<!-- ★ 0-15: ALT獲得ポップアップ -->
+<div id="alt-popup">
+  <div class="alt-popup-inner">
+    <div class="alt-popup-label">ALT 獲得！</div>
+    <div class="alt-popup-total" id="alt-popup-total">+0 ALT</div>
+    <div class="alt-popup-awards" id="alt-popup-awards"></div>
+  </div>
+</div>
 <div class="app" id="app"></div>
-
 <script>
-const CATEGORIES = ['算数','地理','歴史','理科','国語','社会','その他'];
-
-// ★★★ GASデプロイURLをここに貼る ★★★
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbzKUyiUHIMp9JRFX0LEa88plEoavkbrjTQ5oHf9T-FDd6b4fhqfTCBVBy5rWUZPUQbY/exec';
-
-// ═══ セキュリティ: XSSエスケープ ═══
-function escHtml(str){
-  if(str==null) return '';
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-}
-
-// ═══ セキュリティ: 入力バリデーション ═══
-const VALIDATION = {
-  MAX_NAME_LENGTH: 20,
-  MAX_CLASS_LENGTH: 30,
-  MAX_GAME_NAME_LENGTH: 40,
-  MAX_URL_LENGTH: 500,
-  HIRAGANA_PATTERN: /^[\u3040-\u309F\u30FC\u3000\s]+$/,
-  URL_PATTERN: /^https?:\/\/.+/,
-};
-function validateName(name){
-  if(!name || name.length===0) return '名前を入力してください';
-  if(name.length > VALIDATION.MAX_NAME_LENGTH) return `${VALIDATION.MAX_NAME_LENGTH}文字以内で入力してください`;
-  if(!VALIDATION.HIRAGANA_PATTERN.test(name)) return 'ひらがなで入力してください';
-  return null;
-}
-function validateClassName(name){
-  if(!name || name.length===0) return 'クラス名を入力してください';
-  if(name.length > VALIDATION.MAX_CLASS_LENGTH) return `${VALIDATION.MAX_CLASS_LENGTH}文字以内で入力してください`;
-  return null;
-}
-function validateUrl(url){
-  if(!url) return null; // URL is optional
-  if(url.length > VALIDATION.MAX_URL_LENGTH) return 'URLが長すぎます';
-  if(!VALIDATION.URL_PATTERN.test(url)) return 'https:// で始まるURLを入力してください';
-  return null;
-}
-// レンダリング時URLプロトコル検証（javascript: URI防御）
-function isSafeUrl(url){
-  if(!url) return false;
-  const trimmed = url.trim().toLowerCase();
-  return trimmed.startsWith('https://') || trimmed.startsWith('http://');
-}
-
-// ═══ セキュリティ: 管理者トークン管理 ═══
-const ADMIN_TOKEN = {
-  KEY: 'trail_gp3_admin_token',
-  get(){
-    try {
-      const d=JSON.parse(sessionStorage.getItem(this.KEY));
-      if(d&&d.token&&Date.now()<d.expiresAt) return d.token;
-      this.clear();
-    } catch(e){}
-    return null;
-  },
-  set(token, expiresIn){
-    try {
-      sessionStorage.setItem(this.KEY, JSON.stringify({token, expiresAt:Date.now()+(expiresIn||3600000)}));
-    } catch(e){}
-  },
-  clear(){
-    try { sessionStorage.removeItem(this.KEY); } catch(e){}
-  }
-};
-
-// ═══ セキュリティ: 管理者ログインレート制限（クライアント側の補助。サーバー側でも制限される） ═══
-const LOGIN_SECURITY = {
-  maxAttempts: 5,
-  lockoutDuration: 60000, // 60秒
-  attempts: 0,
-  lockedUntil: 0,
-  isLocked(){ return Date.now() < this.lockedUntil },
-  getRemainingSeconds(){ return Math.ceil((this.lockedUntil - Date.now()) / 1000) },
-  recordFailure(){
-    this.attempts++;
-    if(this.attempts >= this.maxAttempts){
-      this.lockedUntil = Date.now() + this.lockoutDuration;
-      activityLog.add('security', '管理者ログイン', `${this.maxAttempts}回連続失敗 — ロックアウト発動`);
-    }
-  },
-  reset(){ this.attempts = 0; this.lockedUntil = 0; }
-};
-
-// ═══ セキュリティ: セッション管理 ═══
-const SESSION = {
-  KEY: 'trail_gp3_session',
-  save(screen, user, loginClass){
-    try {
-      sessionStorage.setItem(this.KEY, JSON.stringify({screen, user, loginClass, ts: Date.now()}));
-    } catch(e){}
-  },
-  load(){
-    try {
-      const d = JSON.parse(sessionStorage.getItem(this.KEY));
-      if(d && Date.now() - d.ts < 3600000) return d; // 1時間有効
-    } catch(e){}
-    return null;
-  },
-  clear(){
-    try { sessionStorage.removeItem(this.KEY); } catch(e){}
-  }
-};
-
-// ═══ アクティビティログ ═══
-const activityLog = {
-  items: [],
-  add(type, actor, detail){
-    const now = new Date();
-    const time = `${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
-    this.items.unshift({type, actor, detail, time, ts: Date.now()});
-    if(this.items.length > 200) this.items.length = 200; // 上限200件
-  },
-  getRecent(n){ return this.items.slice(0, n||50); },
-  getAlerts(){
-    // 短時間に大量コイン付与があった場合の異常検知
-    const alerts = [];
-    const recent = this.items.filter(i=>i.type==='coin' && Date.now()-i.ts < 300000);
-    if(recent.length >= 10){
-      alerts.push(`⚠️ 直近5分間に${recent.length}件のALT付与がありました`);
-    }
-    return alerts;
-  }
-};
-
-// ═══ ログイン履歴トラッカー ═══
-const loginTracker = {
-  KEY: 'trail_gp3_loginlog',
-  sessions: [],
-  load(){
-    try{const d=JSON.parse(localStorage.getItem(this.KEY));if(d&&Array.isArray(d))this.sessions=d}catch(e){}
-  },
-  save(){
-    try{localStorage.setItem(this.KEY,JSON.stringify(this.sessions.slice(0,500)))}catch(e){}
-  },
-  startSession(user, className){
-    const now=new Date();
-    const time=`${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
-    this.sessions.unshift({user, className, loginTime:time, loginTs:Date.now(), logoutTime:null, logoutTs:null});
-    if(this.sessions.length>500) this.sessions.length=500;
-    this.save();
-    apiPost({action:'logLogin', user, className, loginTime:time}).catch(()=>{});
-  },
-  endSession(user){
-    const s=this.sessions.find(s=>s.user===user&&!s.logoutTs);
-    if(s){
-      const now=new Date();
-      s.logoutTime=`${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
-      s.logoutTs=Date.now();
-      this.save();
-      apiPost({action:'logLogout', user, logoutTime:s.logoutTime, duration:this.formatDuration(s.loginTs,s.logoutTs)}).catch(()=>{});
-    }
-  },
-  getActive(){ return this.sessions.filter(s=>!s.logoutTs) },
-  getRecent(n){ return this.sessions.slice(0, n||100) },
-  formatDuration(loginTs, logoutTs){
-    const ms=(logoutTs||Date.now())-loginTs;
-    const mins=Math.floor(ms/60000);
-    if(mins<1) return '1分未満';
-    const h=Math.floor(mins/60);const m=mins%60;
-    return h>0?`${h}時間${m}分`:`${m}分`;
-  }
-};
-loginTracker.load();
-
-// ═══ ゲームプレイトラッカー ═══
-const gamePlayTracker = {
-  KEY: 'trail_gp3_gameplay',
-  sessions: [],
-  currentPlay: null,
-  load(){
-    try{const d=JSON.parse(localStorage.getItem(this.KEY));if(d&&Array.isArray(d))this.sessions=d}catch(e){}
-  },
-  save(){
-    try{localStorage.setItem(this.KEY,JSON.stringify(this.sessions.slice(0,1000)))}catch(e){}
-  },
-  startPlay(user, gameId, gameName){
-    if(this.currentPlay) this.endPlay();
-    this.currentPlay={user, gameId, gameName, startTs:Date.now()};
-  },
-  endPlay(){
-    if(!this.currentPlay) return;
-    const s=this.currentPlay;
-    const dur=Date.now()-s.startTs;
-    this.currentPlay=null;
-    if(dur<3000) return; // 3秒未満は無視
-    const now=new Date();
-    const time=`${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
-    this.sessions.unshift({user:s.user, gameId:s.gameId, gameName:s.gameName, startTs:s.startTs, duration:dur, date:time});
-    if(this.sessions.length>1000) this.sessions.length=1000;
-    this.save();
-    apiPost({action:'logGamePlay', user:s.user, gameId:s.gameId, gameName:s.gameName, duration:dur, date:time}).catch(()=>{});
-  },
-  getPlayerStats(){
-    const map={};
-    this.sessions.forEach(s=>{
-      const k=s.user;
-      if(!map[k]) map[k]={user:k, games:{}, totalPlays:0, totalDuration:0};
-      if(!map[k].games[s.gameId]) map[k].games[s.gameId]={gameId:s.gameId, gameName:s.gameName, plays:0, duration:0};
-      map[k].games[s.gameId].plays++;
-      map[k].games[s.gameId].duration+=s.duration;
-      map[k].totalPlays++;
-      map[k].totalDuration+=s.duration;
-    });
-    return Object.values(map).sort((a,b)=>b.totalPlays-a.totalPlays);
-  },
-  getGameStats(){
-    const map={};
-    this.sessions.forEach(s=>{
-      const k=s.gameId;
-      if(!map[k]) map[k]={gameId:s.gameId, gameName:s.gameName, players:new Set(), plays:0, totalDuration:0};
-      map[k].players.add(s.user);
-      map[k].plays++;
-      map[k].totalDuration+=s.duration;
-    });
-    return Object.values(map).map(g=>({...g, uniquePlayers:g.players.size})).sort((a,b)=>b.plays-a.plays);
-  },
-  formatDuration(ms){
-    const secs=Math.floor(ms/1000);
-    if(secs<60) return `${secs}秒`;
-    const mins=Math.floor(secs/60);
-    if(mins<60) return `${mins}分`;
-    const h=Math.floor(mins/60);const m=mins%60;
-    return `${h}時間${m}分`;
-  }
-};
+const CATEGORIES=['算数','地理','歴史','理科','国語','その他'];
+const CAT_EMOJI={'算数':'🔢','地理':'🗾','歴史':'🏯','理科':'🔬','国語':'📖','その他':'🎮'};
+function esc(s){if(s==null)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
+const AUTH={KEY:'trail_saas_auth',save(data){try{sessionStorage.setItem(this.KEY,JSON.stringify(data))}catch(e){}},load(){try{return JSON.parse(sessionStorage.getItem(this.KEY))}catch(e){return null}},clear(){try{sessionStorage.removeItem(this.KEY)}catch(e){}},getToken(){const d=this.load();return d?d.token:null}};
+const API_BASE='/api';
+async function api(method,path,body){const opts={method,headers:{'Content-Type':'application/json'}};const tk=AUTH.getToken();if(tk)opts.headers['Authorization']='Bearer '+tk;if(body)opts.body=JSON.stringify(body);const res=await fetch(API_BASE+path,opts);const json=await res.json();if(!res.ok)throw new Error(json.error||'API Error');return json}
+function apiGet(p){return api('GET',p)}
+function apiPost(p,b){return api('POST',p,b)}
+function apiPut(p,b){return api('PUT',p,b)}
+function apiDel(p){return api('DELETE',p)}
+const VALIDATION={MAX_NAME_LENGTH:20,MAX_CLASS_LENGTH:30,MAX_GAME_NAME_LENGTH:40,MAX_URL_LENGTH:500,HIRAGANA_PATTERN:/^[\u3040-\u309F\u30FC\u3000\s]+$/,URL_PATTERN:/^https?:\/\/.+/};
+function validateName(name){if(!name||name.length===0)return'名前を入力してください';if(name.length>VALIDATION.MAX_NAME_LENGTH)return`${VALIDATION.MAX_NAME_LENGTH}文字以内で入力してください`;return null}
+function validateHiragana(name){if(!name)return'名前を入力してください';if(!VALIDATION.HIRAGANA_PATTERN.test(name))return'ひらがなで入力してください';return null}
+function validateUrl(url){if(!url)return null;if(url.length>VALIDATION.MAX_URL_LENGTH)return'URLが長すぎます';if(!VALIDATION.URL_PATTERN.test(url))return'https:// で始まるURLを入力してください';return null}
+const LOGIN_SECURITY={maxAttempts:5,lockoutDuration:60000,attempts:0,lockedUntil:0,isLocked(){return Date.now()<this.lockedUntil},getRemainingSeconds(){return Math.ceil((this.lockedUntil-Date.now())/1000)},recordFailure(){this.attempts++;if(this.attempts>=this.maxAttempts){this.lockedUntil=Date.now()+this.lockoutDuration}},reset(){this.attempts=0;this.lockedUntil=0}};
+const gamePlayTracker={KEY:'trail_saas_gameplay',sessions:[],currentPlay:null,load(){try{const d=JSON.parse(localStorage.getItem(this.KEY));if(d&&Array.isArray(d))this.sessions=d}catch(e){}},save(){try{localStorage.setItem(this.KEY,JSON.stringify(this.sessions.slice(0,1000)))}catch(e){}},startPlay(user,gameId,gameName){if(this.currentPlay)this.endPlay();this.currentPlay={user,gameId,gameName,startTs:Date.now()}},endPlay(){if(!this.currentPlay)return;const s=this.currentPlay;const dur=Date.now()-s.startTs;this.currentPlay=null;if(dur<3000)return;const now=new Date();const time=`${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;this.sessions.unshift({user:s.user,gameId:s.gameId,gameName:s.gameName,startTs:s.startTs,duration:dur,date:time});if(this.sessions.length>1000)this.sessions.length=1000;this.save();if(S.token&&S.tenant){apiPost('/t/'+S.tenant.slug+'/analytics/gameplay',{studentId:S.user?S.user.id:0,gameId:s.gameId,durationSeconds:Math.round(dur/1000)}).catch(()=>{})}},getPlayerStats(){const map={};this.sessions.forEach(s=>{const k=s.user;if(!map[k])map[k]={user:k,games:{},totalPlays:0,totalDuration:0};if(!map[k].games[s.gameId])map[k].games[s.gameId]={gameId:s.gameId,gameName:s.gameName,plays:0,duration:0};map[k].games[s.gameId].plays++;map[k].games[s.gameId].duration+=s.duration;map[k].totalPlays++;map[k].totalDuration+=s.duration});return Object.values(map).sort((a,b)=>b.totalPlays-a.totalPlays)},getGameStats(){const map={};this.sessions.forEach(s=>{const k=s.gameId;if(!map[k])map[k]={gameId:s.gameId,gameName:s.gameName,players:new Set(),plays:0,totalDuration:0};map[k].players.add(s.user);map[k].plays++;map[k].totalDuration+=s.duration});return Object.values(map).map(g=>({...g,uniquePlayers:g.players.size})).sort((a,b)=>b.plays-a.plays)},formatDuration(ms){const secs=Math.floor(ms/1000);if(secs<60)return`${secs}秒`;const mins=Math.floor(secs/60);if(mins<60)return`${mins}分`;const h=Math.floor(mins/60);const m=mins%60;return`${h}時間${m}分`}};
 gamePlayTracker.load();
-// ゲームプレイ時間トラッキング（visibilitychange + beforeunload）
-// visible: ゲームタブから戻ったとき → プレイ終了記録
-// hidden: タブ切り替え・ブラウザ最小化時 → ログイン滞在時間更新
-// beforeunload: ブラウザ閉じるとき → セッション保存
-document.addEventListener('visibilitychange',()=>{
-  if(document.visibilityState==='visible'){
-    gamePlayTracker.endPlay();
-  }
-});
-window.addEventListener('focus',()=>gamePlayTracker.endPlay());
-window.addEventListener('beforeunload',()=>{
-  gamePlayTracker.endPlay();
-  // ログインセッションも保存（ブラウザ閉じ対策）
-  if(state.user && state.user!=='__guest__'){
-    loginTracker.endSession(state.user);
-  }
-});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&gamePlayTracker.currentPlay)gamePlayTracker.endPlay()});
+window.addEventListener('beforeunload',()=>gamePlayTracker.endPlay());
 
-let state = {
-  screen:'login', user:null, loginClass:null, loginTab:'student', adminTab:'coins', selectedCategory:'すべて',
-  portalTab:'home', selectedRankGame:null, // ★ 追加
-  loading:false,
-  games:[
-    {id:1,name:'分数融合',emoji:'🧬',url:'',category:'算数'},
-    {id:2,name:'分数ガンマン',emoji:'🔫',url:'',category:'算数'},
-    {id:3,name:'どっちがおおきい',emoji:'⚖️',url:'',category:'算数'},
-    {id:4,name:'約分工房',emoji:'🔧',url:'',category:'算数'},
-    {id:5,name:'分数テトリス',emoji:'🧱',url:'',category:'算数'},
-    {id:6,name:'暗算パネル',emoji:'🧠',url:'',category:'算数'},
-    {id:7,name:'特産品マッチング',emoji:'🍎',url:'',category:'地理'},
-    {id:8,name:'都道府県シルエットクイズ',emoji:'🗾',url:'',category:'地理'},
-    {id:9,name:'気候バトルカード',emoji:'🌦️',url:'',category:'理科'},
-    {id:10,name:'絵画クイズ',emoji:'🎨',url:'',category:'その他'},
-    {id:11,name:'元素クエスト',emoji:'⚗️',url:'',category:'理科'},
-    {id:12,name:'迷路アタック',emoji:'🏃',url:'',category:'その他'},
-    {id:13,name:'お土産暗算',emoji:'🛍️',url:'',category:'算数'},
-    {id:14,name:'江戸時代迷路クイズ',emoji:'🏯',url:'',category:'歴史'},
-    {id:15,name:'文明ビルダー',emoji:'🏛️',url:'',category:'歴史'},
-    {id:16,name:'ビルビルタウン',emoji:'🏙️',url:'https://tanqtrail-arch.github.io/building-town/',category:'算数'},
-  ],
-  classes:['探究キッズ','探究スターター','探究ベーシック','探究アドバンス','探究リミットレス','探究個別'],
-  players:[],  // {name, className}
-  coinLog:[], // {id, player, gameId, gameName, amount, date}
-  badges:{},  // { playerName: number }
-  rankings:[], // ★ 追加: [{gameId,gameName,player,score,scoreLabel,date}]
-};
+let S={screen:'landing',tenant:null,user:null,token:null,games:[],classes:[],students:[],coinLogs:[],badges:[],rankings:[],adminTab:'activity',portalTab:'home',selectedCategory:'すべて',selectedRankGame:null,loginClass:null,loginTab:'student',loading:false,dashboard:null,loginLogs:[],gameplay:null,parentTokens:null,streak:null,studentDashboard:null,dashStatPeriod:'today'};
+(function restore(){const d=AUTH.load();if(!d)return;S.token=d.token;S.tenant=d.tenant;S.user=d.user;S.screen=d.screen||'landing'})();
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
+function createStars(){const c=document.getElementById('stars');for(let i=0;i<50;i++){const s=document.createElement('div');s.className='star';s.style.left=Math.random()*100+'%';s.style.top=Math.random()*100+'%';s.style.animationDelay=Math.random()*3+'s';s.style.animationDuration=(2+Math.random()*3)+'s';s.style.width=s.style.height=(1+Math.random()*2)+'px';c.appendChild(s)}}
 
-// ═══ API通信 ═══
-async function apiGet(action){
-  if(!GAS_URL){return null}
-  const res=await fetch(GAS_URL+'?action='+encodeURIComponent(action));
-  if(!res.ok) throw new Error('API error: '+res.status);
-  return res.json();
-}
-async function apiPost(body){
-  if(!GAS_URL){return null}
-  const res=await fetch(GAS_URL,{method:'POST',body:JSON.stringify(body)});
-  if(!res.ok) throw new Error('API error: '+res.status);
-  const data=await res.json();
-  // サーバー側認証エラー時はトークンを破棄して再ログイン要求
-  if(data&&data.error==='AUTH_REQUIRED'){
-    ADMIN_TOKEN.clear();
-    showToast('🔒 セッション切れです。再ログインしてください');
-    state.screen='admin-login';render();
-    return null;
-  }
-  return data;
-}
-// 管理者API: トークンを自動付与してPOST
-async function adminApiPost(body){
-  const token=ADMIN_TOKEN.get();
-  if(!token){
-    showToast('🔒 再ログインが必要です');
-    state.screen='admin-login';render();
-    return null;
-  }
-  return apiPost({...body, token});
-}
-
-// ═══ Analytics API ═══
-// REST-like endpoints for analytics data (GET /api/t/:slug/analytics/...)
-// Falls back to local tracker data when REST API is not configured
-const ANALYTICS_API = {
-  baseUrl: '', // Set to REST API base URL when available (e.g., '/api/t/my-slug')
-  async getLogins(){
-    if(this.baseUrl){
-      try{
-        const res=await fetch(`${this.baseUrl}/analytics/logins`);
-        if(res.ok) return res.json();
-      }catch(e){console.warn('Analytics logins API unavailable, using local data')}
-    }
-    // GAS fallback: try dedicated action, else use local data
-    if(GAS_URL){
-      try{const d=await apiGet('analyticsLogins');if(d&&!d.error)return d}catch(e){}
-    }
-    return {active:loginTracker.getActive(),recent:loginTracker.getRecent(100)};
-  },
-  async getGameplay(){
-    if(this.baseUrl){
-      try{
-        const res=await fetch(`${this.baseUrl}/analytics/gameplay`);
-        if(res.ok) return res.json();
-      }catch(e){console.warn('Analytics gameplay API unavailable, using local data')}
-    }
-    if(GAS_URL){
-      try{const d=await apiGet('analyticsGameplay');if(d&&!d.error)return d}catch(e){}
-    }
-    return {gameStats:gamePlayTracker.getGameStats(),playerStats:gamePlayTracker.getPlayerStats(),sessions:gamePlayTracker.sessions.slice(0,30)};
-  }
-};
-
-// ═══ データ読み込み（起動時） ═══
-async function loadData(){
-  state.loading=true;render();
-  try{
-    if(GAS_URL){
-      const d=await apiGet('all');
-      if(d&&!d.error){
-        if(d.players)state.players=d.players;
-        if(d.classes&&d.classes.length)state.classes=d.classes;
-        if(d.coinLog)state.coinLog=d.coinLog;
-        if(d.badges)state.badges=d.badges;
-        if(d.games&&d.games.length)state.games=d.games;
-        if(d.rankings)state.rankings=d.rankings; // ★ 追加
-        // GASからログイン履歴をマージ（GAS側対応後に有効）
-        if(d.loginLog&&Array.isArray(d.loginLog)){
-          const localTs=new Set(loginTracker.sessions.map(s=>s.loginTs));
-          d.loginLog.forEach(s=>{if(!localTs.has(s.loginTs))loginTracker.sessions.push(s)});
-          loginTracker.sessions.sort((a,b)=>b.loginTs-a.loginTs);
-          loginTracker.save();
-        }
-        if(d.gamePlayLog&&Array.isArray(d.gamePlayLog)){
-          const localTs=new Set(gamePlayTracker.sessions.map(s=>s.startTs));
-          d.gamePlayLog.forEach(s=>{if(!localTs.has(s.startTs))gamePlayTracker.sessions.push(s)});
-          gamePlayTracker.sessions.sort((a,b)=>b.startTs-a.startTs);
-          gamePlayTracker.save();
-        }
-      }
-    }
-  }catch(e){console.error('loadData error:',e)}
-  state.loading=false;render();
-}
-
-// ═══ ヘルパー関数 ═══
-function getPlayerNames(){return state.players.map(p=>p.name)}
-function findPlayerByName(name){return state.players.find(p=>p.name===name)}
-function playerExists(name){return state.players.some(p=>p.name===name)}
-function getPlayerClass(name){const p=findPlayerByName(name);return p?p.className:''}
-function getPlayerCoins(p){return state.coinLog.filter(l=>l.player===p).reduce((s,l)=>s+l.amount,0)}
-function getPlayerGameCoins(p,gid){return state.coinLog.filter(l=>l.player===p&&l.gameId===gid).reduce((s,l)=>s+l.amount,0)}
-function getGameName(gid){const g=state.games.find(g=>g.id===gid);return g?g.name:'不明'}
-function getGameEmoji(gid){const g=state.games.find(g=>g.id===gid);return g?g.emoji:'❓'}
-function getPlayerBadges(p){return state.badges[p]||0}
-
-// ★ ゲーム別ランキング（最高スコア上位）
-function getGameRanking(gameId){
-  const map={};
-  state.rankings.filter(r=>r.gameId===gameId).forEach(r=>{
-    if(map[r.player]===undefined||r.score>map[r.player].score) map[r.player]=r;
-  });
-  return Object.values(map).sort((a,b)=>b.score-a.score);
-}
-// ★ スコアのあるゲーム一覧
-function getGamesWithRanking(){
-  const ids=new Set(state.rankings.map(r=>r.gameId));
-  return state.games.filter(g=>ids.has(g.id));
-}
-
-function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
-function getUsedCategories(){return CATEGORIES.filter(c=>state.games.some(g=>g.category===c))}
-
-// ═══ URLパラメータ管理 ═══
-function getUrlParam(key){
-  try{return new URLSearchParams(window.location.search).get(key)}catch(e){return null}
-}
-function setUrlParam(key,value){
-  try{
-    const url=new URL(window.location);
-    if(value!=null) url.searchParams.set(key,value); else url.searchParams.delete(key);
-    history.replaceState(null,'',url);
-  }catch(e){}
-}
-function applyUrlParams(){
-  const gid=getUrlParam('gameId');
-  if(gid){
-    state.selectedRankGame=parseInt(gid);
-    state.portalTab='ranking';
-  }
-}
-
-function getRanking(){
-  return state.players.map(p=>({name:p.name,alt:getPlayerCoins(p.name),badges:getPlayerBadges(p.name)})).sort((a,b)=>b.alt-a.alt);
-}
-
-// ============ RENDER ============
-function render(){
-  const app=document.getElementById('app');
-  if(state.loading){app.innerHTML='<div class="login-screen"><div class="login-logo">TRAIL GAME PRO 3</div><div style="color:var(--text-dim);margin-top:20px;font-size:.9rem">⏳ よみこみちゅう...</div></div>';return}
-  switch(state.screen){
-    case'login':app.innerHTML=renderLogin();break;
-    case'portal':app.innerHTML=renderPortal();break;
-    case'guest':app.innerHTML=renderGuest();break;
-    case'admin-login':app.innerHTML=renderAdminLogin();break;
-    case'admin':app.innerHTML=renderAdmin();break;
-  }
-  bindEvents();
-}
-
-function renderLogin(){
-  const classBtns=state.classes.map(c=>
-    `<button class="class-select-btn${state.loginClass===c?' active':''}" data-cls="${escHtml(c)}">${escHtml(c)}</button>`
+// ★ 0-15: ALTポップアップ
+let _altTimer=null;
+function showAltPopup(alt){
+  if(!alt||!alt.total||alt.total<=0)return;
+  const el=document.getElementById('alt-popup');if(!el)return;
+  document.getElementById('alt-popup-total').textContent='+'+alt.total+' ALT';
+  document.getElementById('alt-popup-awards').innerHTML=(alt.awards||[]).map(a=>
+    `<div class="alt-popup-award"><span class="alt-popup-award-lbl">${esc(a.label)}</span><span class="alt-popup-award-amt">+${a.amount}</span></div>`
   ).join('');
-  const showNameInput=state.loginClass?`
-    <div style="margin-top:20px">
-      <div style="font-size:.75rem;color:var(--text-dim);margin-bottom:8px;letter-spacing:1px">「${escHtml(state.loginClass)}」のなまえをひらがなでいれてね</div>
-      <input class="login-input" id="nameInput" placeholder="なまえ（ひらがな）" autocomplete="off" maxlength="${VALIDATION.MAX_NAME_LENGTH}" style="ime-mode:active"/>
-      <button class="login-btn" id="loginBtn">にゅうしつ ▶</button>
-    </div>`:'<div style="margin-top:16px;font-size:.8rem;color:var(--text-dim)">↑ クラスをえらんでね</div>';
-  const parentTab=`
-    <div style="margin-top:4px">
-      <div style="font-size:.8rem;color:var(--text-dim);margin-bottom:14px">お子さまの情報を入力してください</div>
-      <input class="login-input" id="parentNameInput" placeholder="お子さまのなまえ" autocomplete="off" style="margin-bottom:12px"/>
-      <input class="login-input" id="parentPinInput" type="tel" placeholder="PIN（4けた）" maxlength="4" inputmode="numeric" style="letter-spacing:8px"/>
-      <button class="login-btn" id="parentLoginBtn">保護者ログイン ▶</button>
+  el.classList.add('show');
+  clearTimeout(_altTimer);
+  _altTimer=setTimeout(()=>{el.classList.remove('show');if(S.tenant)loadTenantData()},3500);
+}
+
+// ★ 0-15: ストリーク取得
+async function loadStreak(){
+  if(!S.tenant||!S.user||!S.user.id)return;
+  try{const r=await apiGet('/streaks/'+S.user.id+'?tenant_id='+encodeURIComponent(S.tenant.id));S.streak=r;render()}catch(e){}
+}
+
+// ★ 生徒ダッシュボード取得
+async function loadStudentDashboard(){
+  if(!S.tenant||!S.user)return;
+  try{S.studentDashboard=await apiGet('/t/'+S.tenant.slug+'/student-dashboard')}catch(e){S.studentDashboard={}}
+  render();
+}
+
+// ★ 0-15: ストリークウィジェット描画
+function renderStreakWidget(){
+  if(!S.streak)return'';
+  const sk=S.streak.streak||S.streak;
+  const current=sk.current_streak||0;
+  const max=sk.max_streak||0;
+  const alive=sk.isAlive||false;
+  const cal=S.streak.calendar||[];
+  const dots=cal.slice(0,7).map(d=>`<div class="sw-dot${d.played?' played':''}">${d.played?'🔥':''}</div>`).join('');
+  const flame=current>=7?'🔥':current>=3?'🔶':'🔸';
+  const status=alive
+    ?`<span style="color:#4CAF50">継続中✅</span>`
+    :`<span style="color:#E57373">${current>0?'途切れた...':'未プレイ'}</span>`;
+  return`<div class="streak-widget"><div class="sw-flame">${flame}</div><div class="sw-info"><div class="sw-current">${current}<span style="font-size:.7rem;opacity:.7;font-family:inherit"> 日連続</span></div><div class="sw-label">最長: ${max}日 &nbsp;${status}</div></div><div class="sw-dots">${dots}</div></div>`;
+}
+
+async function loadTenantData(){if(!S.tenant)return;const slug=S.tenant.slug;S.loading=true;render();try{const[gRes,cRes]=await Promise.all([apiGet('/t/'+slug+'/games'),apiGet('/t/'+slug+'/classes')]);S.games=gRes.games||[];S.classes=cRes.classes||[];try{const rRes=await apiGet('/t/'+slug+'/rankings');S.rankings=rRes.rankings||[]}catch(e){}if(S.user&&S.user.role&&S.user.role!=='student'){try{const[sRes,coRes,bRes]=await Promise.all([apiGet('/t/'+slug+'/students'),apiGet('/t/'+slug+'/coins'),apiGet('/t/'+slug+'/badges')]);S.students=sRes.students||[];S.coinLogs=coRes.logs||[];S.badges=bRes.summary||[]}catch(e){console.error(e)}}else if(S.user&&S.user.role==='student'){try{const coRes=await apiGet('/t/'+slug+'/coins');S.coinLogs=coRes.logs||[]}catch(e){}}}catch(e){console.error('loadData:',e);toast('データ読み込みエラー')}S.loading=false;render();
+  // ★ 0-15: ストリーク非同期取得
+  if(S.user&&S.user.role==='student'){loadStreak();loadStudentDashboard()}
+}
+async function loadDashboard(){if(!S.tenant)return;try{S.dashboard=await apiGet('/t/'+S.tenant.slug+'/analytics/dashboard')}catch(e){}}
+async function loadLoginLogs(){if(!S.tenant)return;try{const r=await apiGet('/t/'+S.tenant.slug+'/analytics/logins');S.loginLogs=r.logs||[]}catch(e){}}
+async function loadGameplay(){if(!S.tenant)return;try{S.gameplay=await apiGet('/t/'+S.tenant.slug+'/analytics/gameplay')}catch(e){}}
+async function loadParentTokens(){if(!S.tenant)return;try{const tokens=await apiGet('/parent-tokens?tenant_id='+encodeURIComponent(S.tenant.id));S.parentTokens=Array.isArray(tokens)?tokens:[]}catch(e){S.parentTokens=[]}render()}
+function getStudentCoins(name){return S.coinLogs.filter(l=>l.student_name===name).reduce((s,l)=>s+l.amount,0)}
+function getStudentBadges(name){const b=S.badges.find(b=>b.student_name===name);return b?b.badge_count:0}
+function render(){const app=document.getElementById('app');if(S.loading){app.innerHTML='<div class="login-screen"><div class="login-logo">TRAIL GAME PRO 3</div><div style="color:var(--text-dim);margin-top:20px;font-size:.9rem">読み込み中...</div></div>';return}switch(S.screen){case'landing':app.innerHTML=renderLanding();break;case'register':app.innerHTML=renderRegister();break;case'student-login':app.innerHTML=renderStudentLogin();break;case'admin-login':app.innerHTML=renderAdminLogin();break;case'portal':app.innerHTML=renderPortal();break;case'guest':app.innerHTML=renderGuest();break;case'admin':app.innerHTML=renderAdmin();break}bindEvents()}
+function renderLanding(){return`<div class="login-screen"><div class="login-logo">TRAIL GAME PRO 3</div><div class="login-subtitle">EXPLORE • PLAY • GROW</div><div class="login-box"><h2>教室にアクセス</h2><div class="form-group" style="margin-bottom:12px"><label>教室ID（スラッグ）</label><input class="login-input" id="slugInput" placeholder="例: my-school" autocomplete="off"/></div><button class="login-btn" id="goTenantBtn">アクセス ▶</button></div><div class="admin-link" id="registerLink" style="margin-top:20px">🆕 新しい教室を作成（無料）</div></div>`}
+function renderRegister(){return`<div class="login-screen"><div class="login-logo">TRAIL GAME PRO 3</div><div class="login-subtitle">新規登録</div><div class="login-box" style="max-width:400px"><h2>🏫 教室を作成</h2><div class="form-stack"><div class="form-group"><label>教室名</label><input class="login-input" id="regName" placeholder="例: 探究学習教室"/></div><div class="form-group"><label>スラッグ（URL用ID・英小文字/数字/ハイフン）</label><input class="login-input" id="regSlug" placeholder="例: my-school"/></div><div class="form-group"><label>管理者メールアドレス</label><input class="login-input" id="regEmail" type="email" placeholder="teacher@example.com"/></div><div class="form-group"><label>パスワード</label><input class="login-input" id="regPass" type="password" placeholder="8文字以上"/></div><div class="form-group"><label>表示名</label><input class="login-input" id="regDisplay" placeholder="先生の名前"/></div><button class="login-btn" id="registerBtn">登録 ▶</button></div></div><div class="admin-link" id="backToLanding">← 戻る</div></div>`}
+function renderStudentLogin(){const classBtns=(S.classes||[]).map(c=>`<button class="class-select-btn${S.loginClass===c.name?' active':''}" data-cls="${esc(c.name)}">${esc(c.name)}</button>`).join('');const nameSection=S.loginClass?`<div style="margin-top:20px"><div style="font-size:.75rem;color:var(--text-dim);margin-bottom:8px">「${esc(S.loginClass)}」のなまえをいれてね</div><input class="login-input" id="nameInput" placeholder="なまえ（ひらがな）" maxlength="20" autocomplete="off"/><button class="login-btn" id="loginBtn">にゅうしつ ▶</button></div>`:'<div style="margin-top:16px;font-size:.8rem;color:var(--text-dim)">↑ クラスをえらんでね</div>';return`<div class="login-screen"><div class="login-logo">TRAIL GAME PRO 3</div><div class="login-subtitle">EXPLORE • PLAY • GROW</div><div style="font-size:.75rem;color:var(--accent-purple);margin-bottom:16px;font-weight:700">${esc(S.tenant?S.tenant.name:'')}</div><div class="login-box" style="max-width:420px"><h2>にゅうしつ</h2><div style="font-size:.8rem;color:var(--text-dim);margin-bottom:14px">クラスをえらんでね</div><div class="class-select-grid">${classBtns}</div>${nameSection}</div><div class="admin-link" id="guestLink" style="margin-top:20px;color:var(--accent-purple)">🎮 なまえなしであそぶ</div><div class="admin-link" id="adminLink">🔧 管理者ログイン</div><div class="admin-link" id="backToLanding" style="margin-top:8px">← 教室選択に戻る</div></div>`}
+function renderAdminLogin(){const locked=LOGIN_SECURITY.isLocked();const lockMsg=locked?`<div class="lockout-msg"><strong>🔒 LOCKED</strong><br>ログイン試行回数が上限に達しました。<br><span id="lockCountdown">${LOGIN_SECURITY.getRemainingSeconds()}</span>秒後に再試行してください。</div>`:'';const attemptsLeft=LOGIN_SECURITY.maxAttempts-LOGIN_SECURITY.attempts;const attemptsMsg=LOGIN_SECURITY.attempts>0&&!locked?`<div style="font-size:.7rem;color:var(--accent-pink);margin-top:8px">残り${attemptsLeft}回</div>`:'';return`<div class="login-screen"><div class="login-box" style="text-align:center"><h2>🔒 ADMIN</h2><p style="color:var(--text-dim);margin-bottom:14px;font-size:.8rem">管理者アカウントでログイン</p><input class="login-input" id="adminEmail" type="email" placeholder="メールアドレス" ${locked?'disabled':''}/><input class="login-input" id="adminPass" type="password" placeholder="パスワード" ${locked?'disabled':''}/><button class="login-btn" id="adminLoginBtn" ${locked?'disabled style="opacity:.5;cursor:not-allowed"':''}>LOGIN</button>${lockMsg}${attemptsMsg}</div><div class="admin-link" id="backToStudentLogin">← プレイヤーログインに戻る</div></div>`}
+function renderGuest(){const cards=S.games.map(g=>{const hasUrl=g.url&&g.url.trim();const tag=hasUrl?'a':'div';const href=hasUrl?` href="${esc(g.url)}" target="_blank" rel="noopener"`:'';return`<${tag} class="game-card"${href}><span class="game-emoji">${esc(g.emoji)}</span><div class="game-name">${esc(g.name)}</div>${g.category?`<span class="game-category-badge">${esc(g.category)}</span>`:''}<div class="game-link-hint">${hasUrl?'▶ タップでプレイ':'準備中...'}</div></${tag}>`}).join('');return`<div class="portal"><div class="header"><div class="header-logo">TRAIL GP3</div><div class="header-right"><span style="font-size:.75rem;color:var(--text-dim)">🎮 おためしモード</span><button class="logout-btn" id="logoutBtn">もどる</button></div></div><div style="padding:10px 14px;margin-bottom:16px;background:rgba(124,92,191,0.06);border:1px solid rgba(124,92,191,0.15);border-radius:10px;font-size:.8rem;color:var(--text-dim);text-align:center">おためしモード：ALTはたまりません</div><div class="section-title">🎮 GAMES</div><div class="game-grid">${cards}</div></div>`}
+function renderPortal(){const name=S.user?S.user.name:'';const total=getStudentCoins(name);const badges=getStudentBadges(name);const tabs=`<div class="portal-tabs"><button class="portal-tab ${S.portalTab==='home'?'active':''}" data-ptab="home">🏠 HOME</button><button class="portal-tab ${S.portalTab==='dashboard'?'active':''}" data-ptab="dashboard">📈 ダッシュボード</button><button class="portal-tab ${S.portalTab==='ranking'?'active':''}" data-ptab="ranking">🏆 ランキング</button><button class="portal-tab ${S.portalTab==='games'?'active':''}" data-ptab="games">🎮 ゲーム</button><button class="portal-tab ${S.portalTab==='history'?'active':''}" data-ptab="history">📊 ALT履歴</button></div>`;let content='';if(S.portalTab==='home')content=renderPortalHome();else if(S.portalTab==='dashboard')content=renderPortalDashboard();else if(S.portalTab==='ranking')content=renderPortalRanking();else if(S.portalTab==='games')content=renderPortalGames();else content=renderPortalHistory();return`<div class="portal"><div class="header"><div class="header-logo">TRAIL GP3</div><div class="header-right"><div class="coin-display">🪙 ${total}</div>${badges>0?`<div class="badge-count">🏅${badges}</div>`:''}<div class="user-badge"><div class="user-avatar">${esc(name.charAt(0))}</div>${esc(name)}</div><span style="font-size:.65rem;color:var(--text-dim);background:rgba(0,0,0,0.04);padding:2px 8px;border-radius:10px">${esc(S.user?S.user.className:'')}</span><button class="logout-btn" id="logoutBtn">ログアウト</button></div></div>${tabs}${content}</div>`}
+
+// ★ 0-15: ストリークウィジェットをホームタブに組み込み
+function renderPortalHome(){const cards=S.games.slice().reverse().map(g=>{const hasUrl=g.url&&g.url.trim();const tag=hasUrl?'a':'div';const playerParam=S.user&&S.user.name?'?player='+encodeURIComponent(S.user.name):'';const href=hasUrl?` href="${esc(g.url)}${playerParam}" target="_blank" rel="noopener"`:'';return`<${tag} class="game-card" data-gid="${g.id}"${href}><span class="game-emoji">${esc(g.emoji)}</span><div class="game-name">${esc(g.name)}</div>${g.category?`<span class="game-category-badge">${esc(g.category)}</span>`:''}<div class="game-link-hint">${hasUrl?'▶ タップでプレイ':'準備中...'}</div></${tag}>`}).join('');return`${renderStreakWidget()}<div class="section-title">🆕 NEW GAMES</div><div class="game-grid">${cards||'<div class="no-data">ゲームがまだありません</div>'}</div>`}
+
+// ★ 生徒ダッシュボード描画
+function renderPortalDashboard(){
+  const d=S.studentDashboard;
+  if(!d||!d.stats){if(!S.studentDashboard)loadStudentDashboard();return'<div class="no-data">読み込み中...</div>'}
+
+  // ① レベル・ストリーク
+  const rk=d.rank||{};
+  const pct=rk.nextAlt?Math.min(100,Math.round((rk.currentAlt||0)/(rk.nextAlt)*100)):100;
+  const levelSection=`<div class="dash-section"><div class="dash-level-box">
+    <div class="dash-rank-label">${esc(rk.label||'Fランク')}</div>
+    <div class="dash-rank-name">${esc(rk.name||'見習い探究者')}</div>
+    <div class="dash-progress-wrap"><div class="dash-progress-track"><div class="dash-progress-fill" style="width:${pct}%"></div></div>
+    <div class="dash-progress-text"><span>${rk.currentAlt||0} ALT</span><span>${rk.nextAlt?rk.nextAlt+' ALT':'MAX'}</span></div></div>
+    <div class="dash-streak-row">🔥 ${d.streak||0}日連続ログイン！</div>
+  </div></div>`;
+
+  // ② 今日のミッション
+  const ms=d.todayMission||{};
+  const missionSection=`<div class="dash-section dash-mission-card${ms.completed?' completed':''}">
+    <div class="dash-section-title">🎯 TODAY'S MISSION</div>
+    <div class="dash-mission-desc">${ms.completed?'✅ ':''}${esc(ms.description||'ミッションなし')}</div>
+    ${ms.completed?'<div style="font-size:.75rem;color:var(--accent-green);font-weight:700">クリア済み！おめでとう！🎉</div>':'<button class="dash-mission-btn" data-dash-go-games>挑戦する ▶</button>'}
+  </div>`;
+
+  // ③ 統計タブ（今日/今週/累計）
+  const period=S.dashStatPeriod||'today';
+  const periodData=d.stats[period]||{alt:0,plays:0,minutes:0};
+  const statsSection=`<div class="dash-section">
+    <div class="dash-section-title">📊 STATS</div>
+    <div class="dash-stat-tabs">
+      <button class="dash-stat-tab${period==='today'?' active':''}" data-dash-period="today">今日</button>
+      <button class="dash-stat-tab${period==='week'?' active':''}" data-dash-period="week">今週</button>
+      <button class="dash-stat-tab${period==='total'?' active':''}" data-dash-period="total">累計</button>
+    </div>
+    <div class="dash-stat-grid">
+      <div class="dash-stat-item"><div class="dash-stat-val" style="color:var(--accent-gold)">${periodData.alt}</div><div class="dash-stat-lbl">ALT獲得</div></div>
+      <div class="dash-stat-item"><div class="dash-stat-val" style="color:var(--accent-cyan)">${periodData.plays}</div><div class="dash-stat-lbl">プレイ数</div></div>
+      <div class="dash-stat-item"><div class="dash-stat-val" style="color:var(--accent-purple)">${periodData.minutes}</div><div class="dash-stat-lbl">分</div></div>
+    </div>
+  </div>`;
+
+  // ④ カテゴリ別能力値
+  const cats=d.categoryStats||[];
+  const maxPlays=cats.length?Math.max(...cats.map(c=>c.plays),1):1;
+  const bestCat=cats.length?cats.reduce((a,b)=>((a.plays>0&&(a.correct/a.plays)>=(b.plays>0?(b.correct/b.plays):0))?a:b),cats[0]):null;
+  const catRows=cats.length?cats.map(c=>{
+    const pctVal=c.plays>0?Math.round(c.correct/c.plays*100):0;
+    const isBest=bestCat&&c.category===bestCat.category&&c.plays>0;
+    return`<div class="dash-cat-row">
+      <div class="dash-cat-emoji">${esc(c.emoji)}</div>
+      <div class="dash-cat-name">${esc(c.category)}</div>
+      <div class="dash-cat-bar-wrap"><div class="dash-cat-bar" style="width:${pctVal}%"></div></div>
+      <div class="dash-cat-pct">${pctVal}%</div>
+      ${isBest?'<div class="dash-cat-badge">得意！</div>':''}
     </div>`;
+  }).join(''):'<div style="color:var(--text-dim);font-size:.8rem;text-align:center;padding:12px">まだプレイ記録がありません</div>';
+  const catSection=`<div class="dash-section"><div class="dash-section-title">📚 SKILLS</div>${catRows}</div>`;
 
-  const studentTab=`
-    <h2>にゅうしつ</h2>
-    <div style="font-size:.8rem;color:var(--text-dim);margin-bottom:14px">クラスをえらんでね</div>
-    <div class="class-select-grid">${classBtns}</div>
-    ${showNameInput}`;
+  // ⑤ バッジコレクション
+  const bdgs=d.badges||[];
+  const badgeItems=bdgs.map(b=>`<div class="dash-badge-item ${b.earned?'earned':'locked'}">
+    <div class="dash-badge-emoji">${b.earned?esc(b.emoji):'❓'}</div>
+    <div class="dash-badge-name">${b.earned?esc(b.name):'???'}</div>
+  </div>`).join('');
+  const earnedCount=bdgs.filter(b=>b.earned).length;
+  const badgeSection=`<div class="dash-section"><div class="dash-section-title">🏅 BADGES (${earnedCount}/${bdgs.length})</div><div class="dash-badge-grid">${badgeItems||'<div style="color:var(--text-dim);font-size:.8rem">バッジなし</div>'}</div></div>`;
 
-  const tabContent=state.loginTab==='parent'?parentTab:studentTab;
+  // ⑥ ゲーム別ベストスコア
+  const scores=d.bestScores||[];
+  const scoreCards=scores.length?scores.map(s=>`<div class="dash-score-card">
+    <div class="dash-score-emoji">${esc(s.game_emoji||'🎮')}</div>
+    <div class="dash-score-name">${esc(s.game_name)}</div>
+    <div class="dash-score-val">${esc(s.score)}</div>
+    <div class="dash-score-lbl">${esc(s.score_label||'点')}</div>
+  </div>`).join(''):'<div style="color:var(--text-dim);font-size:.8rem;text-align:center;padding:12px">まだスコアがありません</div>';
+  const scoreSection=`<div class="dash-section"><div class="dash-section-title">🏆 BEST SCORES</div><div class="dash-score-cards">${scoreCards}</div></div>`;
+
+  // ⑦ 今週のランキング
+  const wr=d.weeklyRanking||[];
+  const myName=S.user?S.user.name:'';
+  const weeklyRows=wr.length?wr.slice(0,5).map(r=>{
+    const isMe=r.student_name===myName;
+    const medal=r.rank===1?'👑':r.rank===2?'🥈':r.rank===3?'🥉':'';
+    return`<div class="dash-weekly-row${isMe?' me':''}">
+      <div class="dash-weekly-rank">${medal||r.rank}</div>
+      <div class="dash-weekly-name">${esc(r.student_name)}${isMe?' ← 自分':''}</div>
+      <div class="dash-weekly-alt">${r.total_coins} ALT</div>
+    </div>`;
+  }).join(''):'<div style="color:var(--text-dim);font-size:.8rem;text-align:center;padding:12px">まだデータがありません</div>';
+  const weeklySection=`<div class="dash-section"><div class="dash-section-title">🏅 WEEKLY RANKING</div><div class="dash-weekly-list">${weeklyRows}</div></div>`;
+
+  // ⑧ 学習カレンダー（今月）
+  const cal=d.calendar||[];
+  const calMap={};cal.forEach(c=>{calMap[c.date]={plays:c.plays,alt:c.alt}});
+  const now=new Date(Date.now()+9*60*60*1000);
+  const year=now.getUTCFullYear();const month=now.getUTCMonth();
+  const firstDay=new Date(Date.UTC(year,month,1));
+  const daysInMonth=new Date(Date.UTC(year,month+1,0)).getUTCDate();
+  const startDow=firstDay.getUTCDay();
+  const todayStr=now.toISOString().slice(0,10);
+  const heads=['日','月','火','水','木','金','土'].map(d=>`<div class="dash-cal-head">${d}</div>`).join('');
+  let calCells='';
+  for(let i=0;i<startDow;i++)calCells+='<div class="dash-cal-day empty"></div>';
+  for(let d=1;d<=daysInMonth;d++){
+    const ds=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const info=calMap[ds];
+    const isToday=ds===todayStr;
+    let cls='dash-cal-day';
+    if(info&&info.plays>0){cls+=' has-play';if(info.alt>=20)cls+=' fire';else if(info.alt>=10)cls+=' hot'}
+    if(isToday)cls+=' today';
+    calCells+=`<div class="${cls}">${d}</div>`;
+  }
+  const monthNames=['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  const calSection=`<div class="dash-section"><div class="dash-section-title">📅 ${monthNames[month]} CALENDAR</div><div class="dash-cal">${heads}${calCells}</div></div>`;
+
+  return levelSection+missionSection+statsSection+catSection+badgeSection+scoreSection+weeklySection+calSection;
+}
+
+function renderPortalRanking(){const ranking=S.rankings||[];const globalHtml=ranking.slice(0,10).map((r,i)=>{const cls=i===0?' rank-gold':i===1?' rank-silver':i===2?' rank-bronze':'';const num=i<3?'<div class="rank-medal">'+(i===0?'👑':i===1?'🥈':'🥉')+'</div>':'<div class="rank-num">'+(i+1)+'</div>';const isMe=S.user&&r.student_name===S.user.name&&i>=3?' style="border-color:rgba(0,229,255,0.25)"':'';return`<div class="rank-item${cls}"${isMe}>${num}<div class="rank-name">${esc(r.student_name||r.name||'')}<span style="font-size:.65rem;color:var(--text-dim);margin-left:6px">${esc(r.class_name||'')}</span></div><div class="rank-alt">${r.total_coins||0} ALT</div></div>`}).join('');const byGame={};(S.rankings||[]).forEach(r=>{if(r.game_name){const k=r.game_name;if(!byGame[k])byGame[k]={name:k,emoji:r.game_emoji||'🎮',id:r.game_id,entries:[]};byGame[k].entries.push(r)}});const gamesWithRank=Object.values(byGame);if(!S.selectedRankGame&&gamesWithRank.length>0)S.selectedRankGame=gamesWithRank[0].id;const gameTabsHtml=gamesWithRank.map(g=>`<button class="game-rank-tab ${S.selectedRankGame===g.id?'active':''}" data-rgid="${g.id}">${g.emoji} ${esc(g.name)}</button>`).join('');let gameRankContent='<div style="color:var(--text-dim);font-size:.85rem;text-align:center;padding:20px">まだゲームの記録がありません</div>';if(S.selectedRankGame){const selGame=gamesWithRank.find(g=>g.id===S.selectedRankGame);if(selGame&&selGame.entries.length>0){const rows=selGame.entries.slice(0,10).map((r,i)=>{const medal=i===0?'👑':i===1?'🥈':i===2?'🥉':'';const numStr=medal?`<span style="font-size:1.1rem">${medal}</span>`:`<span style="font-family:'Orbitron';font-size:.8rem;color:var(--text-dim)">${i+1}</span>`;const isMe=S.user&&r.student_name===S.user.name?'style="background:rgba(0,144,217,0.05);border-color:rgba(0,229,255,0.2)"':'';return`<tr ${isMe}><td style="width:40px;text-align:center">${numStr}</td><td><strong>${esc(r.student_name)}</strong></td><td class="game-rank-table"><span class="rank-score">${esc(r.score)}</span><span class="score-label">${esc(r.score_label||'')}</span></td></tr>`}).join('');gameRankContent=`<div class="tbl-wrap game-rank-table"><table><tr><th>#</th><th>プレイヤー</th><th>スコア</th></tr>${rows}</table></div>`}}return`<div class="section-title">🏆 総合ランキング</div><div class="ranking-section"><div class="ranking-list">${globalHtml||'<div class="no-data">まだ記録がありません</div>'}</div></div><div class="section-title" style="margin-top:10px">🎮 ゲーム別ランキング</div>${gamesWithRank.length?`<div class="game-rank-tabs">${gameTabsHtml}</div>${gameRankContent}`:'<div style="color:var(--text-dim);font-size:.85rem;padding:16px;background:var(--bg-card);border-radius:12px;text-align:center">まだゲームの記録がありません</div>'}`}
+function renderPortalGames(){const usedCats=[...new Set(S.games.map(g=>g.category||'その他'))];const catBtns=['すべて',...CATEGORIES.filter(c=>usedCats.includes(c))].map(c=>{const count=c==='すべて'?S.games.length:S.games.filter(g=>g.category===c).length;return`<button class="cat-btn ${S.selectedCategory===c?'active':''}" data-cat="${c}">${c}${c!=='すべて'?` (${count})`:''}</button>`}).join('');const filtered=S.selectedCategory==='すべて'?S.games:S.games.filter(g=>g.category===S.selectedCategory);const cards=filtered.map(g=>{const hasUrl=g.url&&g.url.trim();const tag=hasUrl?'a':'div';const playerParam=S.user&&S.user.name?'?player='+encodeURIComponent(S.user.name):'';const href=hasUrl?` href="${esc(g.url)}${playerParam}" target="_blank" rel="noopener"`:'';return`<${tag} class="game-card" data-gid="${g.id}"${href}><span class="game-emoji">${esc(g.emoji)}</span><div class="game-name">${esc(g.name)}</div><div class="game-link-hint">${hasUrl?'▶ タップでプレイ':'準備中...'}</div></${tag}>`}).join('');return`<div class="category-filter">${catBtns}</div><div class="game-grid">${cards}</div>`}
+function renderPortalHistory(){const name=S.user?S.user.name:'';const logs=S.coinLogs.filter(l=>l.student_name===name);const rows=logs.length?logs.slice(0,30).map(l=>`<tr><td>${esc(l.game_emoji||'🎮')} ${esc(l.game_name||'—')}</td><td class="coin-plus">+${l.amount}</td><td style="color:var(--text-dim);font-size:.75rem">${esc(l.created_at||'')}</td></tr>`).join(''):'<tr><td colspan="3" class="no-data">まだ記録がありません</td></tr>';return`<div class="tbl-wrap"><table><tr><th>ゲーム</th><th>ALT</th><th>日付</th></tr>${rows}</table></div>`}
+function renderAdmin(){const tabs=`<div class="admin-tabs"><button class="admin-tab ${S.adminTab==='activity'?'active':''}" data-tab="activity">📡 監視</button><button class="admin-tab ${S.adminTab==='loginlog'?'active':''}" data-tab="loginlog">🚪 入退室</button><button class="admin-tab ${S.adminTab==='coins'?'active':''}" data-tab="coins">💰 ALT付与</button><button class="admin-tab ${S.adminTab==='badges'?'active':''}" data-tab="badges">🏅 バッジ</button><button class="admin-tab ${S.adminTab==='games'?'active':''}" data-tab="games">🎮 ゲーム</button><button class="admin-tab ${S.adminTab==='rankings'?'active':''}" data-tab="rankings">🏆 ランキング</button><button class="admin-tab ${S.adminTab==='usage'?'active':''}" data-tab="usage">🕹️ 利用状況</button><button class="admin-tab ${S.adminTab==='summary'?'active':''}" data-tab="summary">📊 一覧</button></div>`;let content='';if(S.adminTab==='activity')content=renderAdminActivity();else if(S.adminTab==='loginlog')content=renderAdminLoginLog();else if(S.adminTab==='coins')content=renderAdminCoins();else if(S.adminTab==='badges')content=renderAdminBadges();else if(S.adminTab==='games')content=renderAdminGames();else if(S.adminTab==='rankings')content=renderAdminRankings();else if(S.adminTab==='usage')content=renderAdminGameUsage();else content=renderAdminSummary();return`<div class="admin-panel"><div class="header"><div class="header-logo">TRAIL GP3</div><div class="header-right"><div class="user-badge"><div class="user-avatar" style="background:linear-gradient(135deg,var(--accent-gold),var(--accent-pink))">★</div>${esc(S.user?S.user.displayName:'管理者')}</div><button class="logout-btn" id="refreshBtn" style="border-color:var(--accent-cyan);color:var(--accent-cyan)">🔄 更新</button><button class="logout-btn" id="logoutBtn">ログアウト</button></div></div>${tabs}${content}</div>`}
+function renderAdminActivity(){const d=S.dashboard;if(!d){loadDashboard().then(()=>render());return'<div class="no-data">読み込み中...</div>'}const st=d.stats||{};return`<div class="activity-stats"><div class="stat-card stat-gold"><div class="stat-value">${st.totalCoins||0}</div><div class="stat-label">総ALT発行数</div></div><div class="stat-card stat-cyan"><div class="stat-value">${st.totalStudents||0}</div><div class="stat-label">登録生徒数</div></div><div class="stat-card stat-green"><div class="stat-value">${st.totalGames||0}</div><div class="stat-label">ゲーム数</div></div><div class="stat-card stat-orange"><div class="stat-value">${st.totalBadges||0}</div><div class="stat-label">総バッジ数</div></div><div class="stat-card stat-purple"><div class="stat-value">${st.todayActive||0}</div><div class="stat-label">今日のアクティブ</div></div></div><div class="section-title">🏫 クラス別統計</div><div class="game-list-admin">${(d.classStats||[]).map(c=>`<div class="game-list-item"><div class="game-list-item-info"><div><strong>${esc(c.name)}</strong><div style="font-size:.7rem;color:var(--text-dim);margin-top:2px">${c.student_count}名</div></div></div><div style="text-align:right"><div class="total-coins">${c.total_coins} ALT</div></div></div>`).join('')}</div><div class="section-title" style="margin-top:16px">🎮 ゲーム利用ランキング</div><div class="tbl-wrap"><table><tr><th>ゲーム</th><th>回数</th><th>利用者</th></tr>${(d.gameUsage||[]).map(g=>`<tr><td>${esc(g.emoji)} ${esc(g.name)}</td><td style="font-family:'Orbitron';color:var(--accent-cyan)">${g.play_count}</td><td>${g.unique_players}人</td></tr>`).join('')||'<tr><td colspan="3" class="no-data">データなし</td></tr>'}</table></div><div class="section-title" style="margin-top:16px">📡 最近のアクティビティ</div><div class="activity-feed">${(d.recentActivity||[]).map(a=>{const icons={coin:'💰',badge:'🏅',player:'👤',game:'🎮',security:'🔒',login:'🚪'};return`<div class="activity-item"><div class="activity-icon">${icons[a.type]||'📋'}</div><div class="activity-body"><strong>${esc(a.actor)}</strong><p>${esc(a.detail)}</p></div><div class="activity-time">${esc(a.created_at||'')}</div></div>`}).join('')||'<div class="no-data">まだアクティビティがありません</div>'}</div>`}
+function renderAdminCoins(){const sOpts=S.students.map(s=>`<option value="${s.id}">${esc(s.name)}（${esc(s.className)}）</option>`).join('');const gOpts=S.games.map(g=>`<option value="${g.id}">${esc(g.emoji)} ${esc(g.name)}</option>`).join('');const rows=S.coinLogs.slice(0,30).map(l=>`<tr><td>${esc(l.student_name)}</td><td>${esc(l.game_emoji||'🎮')} ${esc(l.game_name||'—')}</td><td class="coin-plus">+${l.amount}</td><td style="color:var(--text-dim);font-size:.75rem">${esc(l.created_at)}</td></tr>`).join('');return`<div class="admin-form"><h3>💰 ALT ADD</h3><div class="form-stack"><div class="form-row-2"><div class="form-group"><label>生徒</label><select id="coinStudent">${sOpts}</select></div><div class="form-group"><label>ゲーム</label><select id="coinGame">${gOpts}</select></div></div><div class="form-group"><label>ALT数</label><input type="number" id="coinAmount" value="10" min="1"/></div><button class="btn-primary btn-gold" id="addCoinBtn">付与</button></div><hr style="border:none;border-top:1px solid rgba(0,0,0,0.06);margin:16px 0"><div class="form-stack"><div class="form-row-2"><div class="form-group"><label>新しい生徒</label><input type="text" id="newStudentName" placeholder="なまえ"/></div><div class="form-group"><label>クラス</label><select id="newStudentClass">${S.classes.map(c=>`<option value="${esc(c.name)}">${esc(c.name)}</option>`).join('')}</select></div></div><button class="btn-primary btn-purple" id="addStudentBtn">追加</button></div></div><div class="section-title">最近の付与ログ</div><div class="tbl-wrap"><table><tr><th>生徒</th><th>ゲーム</th><th>ALT</th><th>日付</th></tr>${rows||'<tr><td colspan="4" class="no-data">まだ記録がありません</td></tr>'}</table></div>`}
+function renderAdminBadges(){const sOpts=S.students.map(s=>{const b=getStudentBadges(s.name);return`<option value="${s.id}">${esc(s.name)}（🏅${b}）</option>`}).join('');const list=S.badges.map(b=>`<div class="game-list-item"><div class="game-list-item-info"><div><strong>${esc(b.student_name)}</strong><div style="font-size:.7rem;color:var(--text-dim)">${esc(b.class_name)}</div></div></div><div style="font-family:'Orbitron';font-weight:700;color:var(--accent-orange);font-size:1.1rem">${b.badge_count}</div></div>`).join('');return`<div class="badge-manage-form"><h3>🏅 景品交換バッジ</h3><div class="form-stack"><div class="form-group"><label>生徒</label><select id="badgeStudent">${sOpts}</select></div><button class="btn-primary btn-orange" id="addBadgeBtn">🏅 バッジを付与</button></div></div><div class="section-title">バッジ一覧</div><div class="game-list-admin">${list||'<div class="no-data">バッジなし</div>'}</div>`}
+function renderAdminGames(){const catOpts=CATEGORIES.map(c=>`<option value="${c}">${c}</option>`).join('');const items=S.games.map(g=>`<div class="game-list-item" style="flex-wrap:wrap"><div class="game-list-item-info"><span>${esc(g.emoji)}</span><div><strong>${esc(g.name)}</strong>${g.category?`<span class="game-item-cat">${esc(g.category)}</span>`:''}</div></div><button class="delete-btn" data-del-game="${g.id}">削除</button><div style="width:100%;display:flex;gap:6px;margin-top:6px;align-items:center"><input class="url-edit" data-url-game="${g.id}" value="${esc(g.url||'')}" placeholder="URLを入力..." style="flex:1;padding:6px 10px;background:rgba(0,0,0,0.02);border:1.5px solid rgba(0,0,0,0.08);border-radius:6px;font-size:.75rem;font-family:inherit;color:var(--text-primary);outline:none"/><button class="url-save-btn" data-save-game="${g.id}" style="padding:6px 12px;background:var(--accent-cyan);border:none;border-radius:6px;color:#fff;font-size:.7rem;font-weight:700;cursor:pointer;white-space:nowrap">保存</button></div></div>`).join('');return`<div class="game-manage-form"><h3>🎮 ADD GAME</h3><div class="form-stack"><div class="form-row-2"><div class="form-group"><label>ゲーム名</label><input type="text" id="newGameName" placeholder="ゲーム名"/></div><div class="form-group"><label>カテゴリ</label><select id="newGameCat">${catOpts}</select></div></div><div class="form-group"><label>リンクURL</label><input type="text" id="newGameUrl" placeholder="https://..."/></div><div class="form-group"><label>絵文字</label><input type="text" id="newGameEmoji" placeholder="🎲" maxlength="2" style="text-align:center"/></div><button class="btn-primary btn-green" id="addGameBtn">追加</button></div></div><div class="section-title">登録済みゲーム</div><div class="game-list-admin">${items}</div>`}
+function renderAdminRankings(){if(!S.rankings||S.rankings.length===0){return`<div class="no-data" style="background:var(--bg-card);border-radius:12px;padding:30px"><div style="font-size:2rem;margin-bottom:10px">🎮</div>まだゲームランキングの記録がありません。</div>`}const byGame={};S.rankings.forEach(r=>{const k=r.game_name||'unknown';if(!byGame[k])byGame[k]={name:k,emoji:r.game_emoji||'🎮',entries:[]};byGame[k].entries.push(r)});const sections=Object.values(byGame).map(g=>{const rows=g.entries.slice(0,20).map((r,i)=>{const medal=i===0?'👑':i===1?'🥈':i===2?'🥉':'';return`<tr><td style="text-align:center">${medal||(i+1)}</td><td><strong>${esc(r.student_name)}</strong></td><td><span class="rank-score">${esc(r.score)}</span><span class="score-label">${esc(r.score_label||'')}</span></td><td><button class="delete-btn" data-del-rank="${r.id}" style="font-size:.6rem;padding:2px 8px">削除</button></td></tr>`}).join('');return`<div style="margin-bottom:20px"><div class="section-title">${g.emoji} ${esc(g.name)}（${g.entries.length}人）</div><div class="tbl-wrap"><table><tr><th>#</th><th>プレイヤー</th><th>スコア</th><th></th></tr>${rows}</table></div></div>`}).join('');return`<div class="game-manage-form"><h3 style="color:var(--accent-cyan)">🏆 GAME RANKINGS</h3></div>${sections}`}
+function renderAdminSummary(){const sorted=[...S.students].sort((a,b)=>(b.totalCoins||0)-(a.totalCoins||0));const rows=sorted.map(s=>`<tr><td><strong>${esc(s.name)}</strong></td><td style="font-size:.7rem;color:var(--text-dim)">${esc(s.className)}</td><td class="total-coins">${s.totalCoins||0}</td><td style="text-align:center;color:var(--accent-orange)">${(s.totalBadges||0)>0?'🏅'+s.totalBadges:'—'}</td><td style="text-align:center"><button class="delete-btn" style="border-color:rgba(0,144,217,0.3);color:var(--accent-cyan);font-size:.6rem;padding:3px 8px" data-parent-link="${s.id}" data-sname="${esc(s.name)}">📩 発行</button></td></tr>`).join('');const clsTags=S.classes.map(c=>`<span class="cat-tag">${esc(c.name)}<button class="cat-del" data-del-cls="${c.id}">✕</button></span>`).join('');const commentStuOpts=S.students.map(s=>`<option value="${s.id}">${esc(s.name)}（${esc(s.className)}）</option>`).join('');const templates=['最近○○に夢中で、自分から質問する場面が増えました','前回から△△が大きく伸びました！ぜひ褒めてあげてください','来月は□□に挑戦する予定です','着実に成長しています。焦らず見守ってあげてください'];const tplBtns=templates.map(t=>`<button class="cat-btn comment-tpl" style="font-size:.7rem;padding:4px 10px" data-tpl="${esc(t)}">${esc(t.substring(0,15))}...</button>`).join('');return`<div class="section-title">📊 全生徒一覧</div><div class="tbl-wrap"><table><tr class="summary-th"><th>生徒</th><th>クラス</th><th>ALT</th><th>🏅</th><th>保護者</th></tr>${rows||'<tr><td colspan="5" class="no-data">生徒がいません</td></tr>'}</table></div><div class="cat-manage-form" style="margin-top:20px"><h3>🏫 クラス管理</h3><div class="form-stack"><div class="form-group"><label>新しいクラス</label><input type="text" id="newClassName" placeholder="クラス名"/></div><button class="btn-primary btn-purple" id="addClassBtn">追加</button></div><div class="cat-list">${clsTags}</div></div><div class="badge-manage-form" style="margin-top:20px"><h3 style="color:var(--accent-cyan)">✉️ 先生コメント（保護者ページ用）</h3><div class="form-stack"><div class="form-group"><label>生徒</label><select id="commentStudent">${commentStuOpts}</select></div><div class="form-group"><label>コメント</label><input type="text" id="commentText" placeholder="最近○○に夢中で、自分から質問する場面が増えました" maxlength="200"/></div><button class="btn-primary btn-purple" id="saveCommentBtn">💬 コメント保存</button></div><div style="margin-top:10px;font-size:.7rem;color:var(--text-dim)">テンプレート（タップで入力）：</div><div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px">${tplBtns}</div></div>${renderTokenList()}`}
+function renderTokenList(){if(S.parentTokens===null){loadParentTokens();return`<div style="margin-top:20px;padding:16px;background:var(--bg-card);border:1.5px solid rgba(0,0,0,0.06);border-radius:14px"><div style="font-family:'Orbitron',sans-serif;font-size:.7rem;color:var(--accent-cyan);margin-bottom:8px">📩 発行済み保護者リンク</div><div style="color:var(--text-dim);font-size:.8rem;text-align:center;padding:12px">読み込み中...</div></div>`}const tokens=S.parentTokens;const rows=tokens.length?tokens.map(t=>{const url=location.origin+'/parent.html?token='+t.token;const created=t.created_at?new Date(t.created_at).toLocaleDateString('ja-JP'):'—';const expires=t.expires_at?new Date(t.expires_at).toLocaleDateString('ja-JP'):'無期限';return`<div style="display:grid;grid-template-columns:1fr auto auto auto;gap:6px;align-items:center;padding:8px 10px;background:rgba(0,0,0,0.02);border-radius:8px;margin-bottom:6px;font-size:.8rem"><div><span style="font-weight:700;color:var(--text-primary)">${esc(t.student_name||'ID:'+t.student_id)}</span><span style="font-size:.65rem;color:var(--text-dim);margin-left:6px">${created}発行 / ${expires}</span></div><button data-copy-token="${esc(url)}" style="background:rgba(0,144,217,0.08);color:var(--accent-cyan);border:1px solid rgba(0,144,217,0.2);border-radius:4px;padding:3px 8px;font-size:.65rem;cursor:pointer">📋</button><a href="${esc(url)}" target="_blank" style="background:rgba(44,181,98,0.08);color:var(--accent-green);border:1px solid rgba(44,181,98,0.2);border-radius:4px;padding:3px 8px;font-size:.65rem;text-decoration:none">👁</a><button data-revoke-token="${t.id}" data-sname="${esc(t.student_name||'')}" style="background:rgba(224,80,112,0.06);color:var(--accent-pink);border:1px solid rgba(224,80,112,0.2);border-radius:4px;padding:3px 8px;font-size:.65rem;cursor:pointer">🗑</button></div>`}).join(''):`<div style="color:var(--text-dim);font-size:.8rem;text-align:center;padding:12px">発行済みリンクはありません</div>`;return`<div style="margin-top:20px;padding:16px;background:var(--bg-card);border:1.5px solid rgba(0,0,0,0.06);border-radius:14px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><div style="font-family:'Orbitron',sans-serif;font-size:.7rem;color:var(--accent-cyan)">📩 発行済み保護者リンク（${tokens.length}件）</div><button id="refreshTokensBtn" style="background:none;color:var(--text-dim);border:1px solid rgba(0,0,0,0.08);border-radius:6px;padding:3px 10px;font-size:.65rem;cursor:pointer">🔄 更新</button></div>${rows}</div>`}
+function renderAdminLoginLog(){if(!S.loginLogs.length){loadLoginLogs().then(()=>render());return'<div class="no-data">読み込み中...</div>'}const active=S.loginLogs.filter(l=>!l.logout_at);const onlineHtml=active.length?active.map(s=>{const dur=formatDurationFromDate(s.login_at);return`<div class="online-chip"><span class="online-dot"></span>${esc(s.student_name)}<span style="font-size:.65rem;color:var(--text-dim)">${esc(s.class_name)}</span><span class="duration-badge">${dur}</span></div>`}).join(''):'<div style="color:var(--text-dim);font-size:.85rem">現在オンラインのユーザーはいません</div>';const rows=S.loginLogs.slice(0,100).map(s=>{const dur=s.duration_seconds?formatSeconds(s.duration_seconds):(s.logout_at?'—':`<span style="color:var(--accent-green)">滞在中</span>`);return`<tr><td>${esc(s.student_name)}</td><td><span style="font-size:.75rem;color:var(--text-dim)">${esc(s.class_name)}</span></td><td style="font-size:.8rem">${esc(s.login_at||'')}</td><td style="font-size:.8rem">${s.logout_at?esc(s.logout_at):'—'}</td><td class="duration-badge">${dur}</td></tr>`}).join('');return`<div class="section-title">🟢 現在オンライン（${active.length}名）</div><div class="online-list">${onlineHtml}</div><div class="section-title">📋 入退室ログ</div><div class="tbl-wrap"><table><tr><th>名前</th><th>クラス</th><th>入室</th><th>退室</th><th>滞在時間</th></tr>${rows||'<tr><td colspan="5" class="no-data">まだログイン記録がありません</td></tr>'}</table></div>`}
+function formatSeconds(sec){if(!sec||sec<60)return'1分未満';const h=Math.floor(sec/3600);const m=Math.floor((sec%3600)/60);return h>0?`${h}時間${m}分`:`${m}分`}
+function formatDurationFromDate(dateStr){if(!dateStr)return'';try{const ms=Date.now()-new Date(dateStr).getTime();return formatSeconds(Math.floor(ms/1000))}catch(e){return''}}
+function renderAdminGameUsage(){if(!S.gameplay){loadGameplay().then(()=>render());return'<div class="no-data">読み込み中...</div>'}const perGame=S.gameplay.perGame||[];const perPlayer=S.gameplay.perPlayer||[];const maxPlays=perGame.length?Math.max(...perGame.map(g=>g.total_plays)):1;const gameRows=perGame.length?perGame.map(g=>{const pct=Math.round(g.total_plays/maxPlays*100);return`<div class="usage-bar-row"><div class="usage-bar-label">${esc(g.emoji)} ${esc(g.game_name)}</div><div class="usage-bar-track"><div class="usage-bar-fill" style="width:${pct}%"></div></div><div class="usage-bar-val">${g.total_plays}回 / ${g.unique_players}人${g.total_duration?'<br>'+formatSeconds(g.total_duration):''}</div></div>`}).join(''):'<div class="no-data">まだプレイ記録がありません</div>';const playerCards=perPlayer.length?perPlayer.map(ps=>{return`<div style="background:var(--bg-card);border:1.5px solid rgba(0,0,0,0.06);border-radius:14px;padding:16px;margin-bottom:10px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><div class="user-avatar" style="width:24px;height:24px;font-size:.7rem">${esc(ps.student_name.charAt(0))}</div><strong>${esc(ps.student_name)}</strong><span style="font-size:.65rem;color:var(--text-dim);background:rgba(0,0,0,0.04);padding:1px 8px;border-radius:10px">${esc(ps.class_name)}</span><span style="margin-left:auto;font-family:'Orbitron';font-size:.7rem;color:var(--accent-cyan)">${ps.total_plays}回${ps.total_duration?' / '+formatSeconds(ps.total_duration):''}</span></div></div>`}).join(''):'<div class="no-data">まだプレイ記録がありません</div>';return`<div class="section-title">🎮 ゲーム別プレイ回数・時間</div><div style="background:var(--bg-card);border:1.5px solid rgba(0,0,0,0.06);border-radius:14px;padding:16px;margin-bottom:20px">${gameRows}</div><div class="section-title">👤 生徒別ゲーム利用状況</div>${playerCards}`}
+
+// ═══ Register ═══
+function renderRegister(){
+  return`<div class="login-screen">
+    <div class="login-logo">TRAIL GAME PRO 3</div>
+    <div class="login-subtitle">新規登録</div>
+    <div class="login-box" style="max-width:400px">
+      <h2>🏫 教室を作成</h2>
+      <div class="form-stack">
+        <div class="form-group"><label>教室名</label><input class="login-input" id="regName" placeholder="例: 探究学習教室"/></div>
+        <div class="form-group"><label>スラッグ（URL用ID・英小文字/数字/ハイフン）</label><input class="login-input" id="regSlug" placeholder="例: my-school"/></div>
+        <div class="form-group"><label>管理者メールアドレス</label><input class="login-input" id="regEmail" type="email" placeholder="teacher@example.com"/></div>
+        <div class="form-group"><label>パスワード</label><input class="login-input" id="regPass" type="password" placeholder="8文字以上"/></div>
+        <div class="form-group"><label>表示名</label><input class="login-input" id="regDisplay" placeholder="先生の名前"/></div>
+        <button class="login-btn" id="registerBtn">登録 ▶</button>
+      </div>
+    </div>
+    <div class="admin-link" id="backToLanding">← 戻る</div>
+  </div>`;
+}
+
+// ═══ Student Login ═══
+function renderStudentLogin(){
+  const isStudent=S.loginTab==='student';
+  const tabStyle='display:flex;gap:3px;margin-bottom:16px;background:rgba(0,0,0,0.03);border-radius:10px;padding:3px';
+  const tabBtnBase='flex:1;padding:8px 6px;border:none;border-radius:8px;font-family:inherit;font-size:.8rem;font-weight:700;cursor:pointer;transition:all .3s';
+  const tabBtnActive='background:var(--accent-cyan);color:#fff';
+  const tabBtnInactive='background:none;color:var(--text-dim)';
+  const loginTabs=`<div style="${tabStyle}">
+    <button id="tabStudent" style="${tabBtnBase};${isStudent?tabBtnActive:tabBtnInactive}">🎮 せいと</button>
+    <button id="tabParent" style="${tabBtnBase};${!isStudent?tabBtnActive:tabBtnInactive}">👨‍👩‍👧 ほごしゃ</button>
+  </div>`;
+
+  let formContent='';
+  if(isStudent){
+    const classBtns=(S.classes||[]).map(c=>
+      `<button class="class-select-btn${S.loginClass===c.name?' active':''}" data-cls="${esc(c.name)}">${esc(c.name)}</button>`
+    ).join('');
+    const nameSection=S.loginClass?`
+      <div style="margin-top:20px">
+        <div style="font-size:.75rem;color:var(--text-dim);margin-bottom:8px">「${esc(S.loginClass)}」のなまえをいれてね</div>
+        <input class="login-input" id="nameInput" placeholder="なまえ（ひらがな）" maxlength="20" autocomplete="off"/>
+        <button class="login-btn" id="loginBtn">にゅうしつ ▶</button>
+      </div>`:'<div style="margin-top:16px;font-size:.8rem;color:var(--text-dim)">↑ クラスをえらんでね</div>';
+    formContent=`<div style="font-size:.8rem;color:var(--text-dim);margin-bottom:14px">クラスをえらんでね</div>
+      <div class="class-select-grid">${classBtns}</div>
+      ${nameSection}`;
+  } else {
+    formContent=`<div style="font-size:.8rem;color:var(--text-dim);margin-bottom:14px">おこさまの名前とPINを入力してください</div>
+      <input class="login-input" id="parentStudentName" placeholder="おこさまのなまえ" maxlength="20" autocomplete="off"/>
+      <input class="login-input" id="parentPin" type="tel" placeholder="4桁PIN" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" autocomplete="off" style="letter-spacing:8px;text-align:center;font-family:'Orbitron',sans-serif;font-size:1.2rem"/>
+      <button class="login-btn" id="parentLoginBtn">ログイン ▶</button>`;
+  }
 
   return`<div class="login-screen">
     <div class="login-logo">TRAIL GAME PRO 3</div>
     <div class="login-subtitle">EXPLORE • PLAY • GROW</div>
+    <div style="font-size:.75rem;color:var(--accent-purple);margin-bottom:16px;font-weight:700">${esc(S.tenant?S.tenant.name:'')}</div>
     <div class="login-box" style="max-width:420px">
-      <div class="login-tabs">
-        <button class="login-tab${state.loginTab==='student'?' active':''}" id="tabStudent">🧒 生徒</button>
-        <button class="login-tab${state.loginTab==='parent'?' active':''}" id="tabParent">👨‍👩‍👧 保護者</button>
-      </div>
-      ${tabContent}
+      <h2>${isStudent?'にゅうしつ':'ほごしゃログイン'}</h2>
+      ${loginTabs}
+      ${formContent}
     </div>
-    <div class="admin-link" id="guestLink" style="margin-top:20px;color:var(--accent-purple);font-size:.85rem;cursor:pointer">🎮 なまえなしであそぶ</div>
+    <div class="admin-link" id="guestLink" style="margin-top:20px;color:var(--accent-purple)">🎮 なまえなしであそぶ</div>
     <div class="admin-link" id="adminLink">🔧 管理者ログイン</div>
-    <div style="margin-top:24px;padding:10px 18px;background:rgba(0,144,217,0.06);border:1px solid rgba(0,144,217,0.15);border-radius:10px;font-size:.75rem;color:var(--text-dim);max-width:380px;text-align:center;line-height:1.6">📱 LINEで開いたときは右上の<strong style="color:var(--accent-cyan)"> ⋮ </strong>から<br><strong style="color:var(--accent-cyan)">「ブラウザで開く」</strong>をタップしてね</div>
+    <div class="admin-link" id="backToLanding" style="margin-top:8px">← 教室選択に戻る</div>
   </div>`;
 }
 
-function renderGuest(){
-  const cards=state.games.map(g=>{
-    const hasUrl=g.url&&isSafeUrl(g.url);const tag=hasUrl?'a':'div';const href=hasUrl?` href="${escHtml(g.url)}" target="_blank" rel="noopener"`:'';
-    return`<${tag} class="game-card" data-gid="${g.id}"${href}><span class="game-emoji">${escHtml(g.emoji)}</span><div class="game-name">${escHtml(g.name)}</div>${g.category?`<span class="game-category-badge">${escHtml(g.category)}</span>`:''}<div class="game-link-hint">${hasUrl?'▶ タップでプレイ':'準備中...'}</div></${tag}>`;
-  }).join('');
-
-  return`<div class="portal">
-    <div class="header">
-      <div class="header-logo">TRAIL GP3</div>
-      <div class="header-right">
-        <span style="font-size:.75rem;color:var(--text-dim)">🎮 おためしモード</span>
-        <button class="logout-btn" id="logoutBtn">もどる</button>
-      </div>
+// ═══ Admin Login ═══
+function renderAdminLogin(){
+  const locked=LOGIN_SECURITY.isLocked();
+  const lockMsg=locked?`<div class="lockout-msg"><strong>🔒 LOCKED</strong><br>ログイン試行回数が上限に達しました。<br><span id="lockCountdown">${LOGIN_SECURITY.getRemainingSeconds()}</span>秒後に再試行してください。</div>`:'';
+  const attemptsLeft=LOGIN_SECURITY.maxAttempts-LOGIN_SECURITY.attempts;
+  const attemptsMsg=LOGIN_SECURITY.attempts>0&&!locked?`<div style="font-size:.7rem;color:var(--accent-pink);margin-top:8px">残り${attemptsLeft}回</div>`:'';
+  return`<div class="login-screen">
+    <div class="login-box" style="text-align:center">
+      <h2>🔒 ADMIN</h2>
+      <p style="color:var(--text-dim);margin-bottom:14px;font-size:.8rem">管理者アカウントでログイン</p>
+      <input class="login-input" id="adminEmail" type="email" placeholder="メールアドレス" ${locked?'disabled':''}/>
+      <input class="login-input" id="adminPass" type="password" placeholder="パスワード" ${locked?'disabled':''}/>
+      <button class="login-btn" id="adminLoginBtn" ${locked?'disabled style="opacity:.5;cursor:not-allowed"':''}>LOGIN</button>
+      ${lockMsg}${attemptsMsg}
     </div>
-    <div style="padding:10px 14px;margin-bottom:16px;background:rgba(124,92,191,0.06);border:1px solid rgba(124,92,191,0.15);border-radius:10px;font-size:.8rem;color:var(--text-dim);text-align:center">おためしモード：ALTはたまりません。なまえを入力してログインするとALTがもらえるよ！</div>
+    <div class="admin-link" id="backToStudentLogin">← プレイヤーログインに戻る</div>
+  </div>`;
+}
+
+// ═══ Guest Mode ═══
+function renderGuest(){
+  const cards=S.games.map(g=>{
+    const hasUrl=g.url&&g.url.trim();const tag=hasUrl?'a':'div';const href=hasUrl?` href="${esc(g.url)}" target="_blank" rel="noopener"`:'';
+    return`<${tag} class="game-card"${href}><span class="game-emoji">${esc(g.emoji)}</span><div class="game-name">${esc(g.name)}</div>${g.category?`<span class="game-category-badge">${esc(g.category)}</span>`:''}<div class="game-link-hint">${hasUrl?'▶ タップでプレイ':'準備中...'}</div></${tag}>`;
+  }).join('');
+  return`<div class="portal">
+    <div class="header"><div class="header-logo">TRAIL GP3</div><div class="header-right">
+      <span style="font-size:.75rem;color:var(--text-dim)">🎮 おためしモード</span>
+      <button class="logout-btn" id="logoutBtn">もどる</button>
+    </div></div>
+    <div style="padding:10px 14px;margin-bottom:16px;background:rgba(124,92,191,0.06);border:1px solid rgba(124,92,191,0.15);border-radius:10px;font-size:.8rem;color:var(--text-dim);text-align:center">おためしモード：ALTはたまりません</div>
     <div class="section-title">🎮 GAMES</div>
     <div class="game-grid">${cards}</div>
   </div>`;
 }
 
+// ═══ Portal (Student) ═══
 function renderPortal(){
-  const total=getPlayerCoins(state.user);
-  const myBadges=getPlayerBadges(state.user);
-
-  // ポータルタブ
-  const portalTabsHtml=`<div class="portal-tabs">
-    <button class="portal-tab ${state.portalTab==='home'?'active':''}" data-ptab="home">🏠 HOME</button>
-    <button class="portal-tab ${state.portalTab==='ranking'?'active':''}" data-ptab="ranking">🏆 ランキング</button>
-    <button class="portal-tab ${state.portalTab==='games'?'active':''}" data-ptab="games">🎮 ゲーム</button>
-    <button class="portal-tab ${state.portalTab==='history'?'active':''}" data-ptab="history">📊 ALT履歴</button>
+  const name=S.user?S.user.name:'';
+  const total=getStudentCoins(name);
+  const badges=getStudentBadges(name);
+  const tabs=`<div class="portal-tabs">
+    <button class="portal-tab ${S.portalTab==='home'?'active':''}" data-ptab="home">🏠 HOME</button>
+    <button class="portal-tab ${S.portalTab==='dashboard'?'active':''}" data-ptab="dashboard">📈 ダッシュボード</button>
+    <button class="portal-tab ${S.portalTab==='ranking'?'active':''}" data-ptab="ranking">🏆 ランキング</button>
+    <button class="portal-tab ${S.portalTab==='games'?'active':''}" data-ptab="games">🎮 ゲーム</button>
+    <button class="portal-tab ${S.portalTab==='history'?'active':''}" data-ptab="history">📊 ALT履歴</button>
   </div>`;
-
-  let tabContent='';
-  if(state.portalTab==='home') tabContent=renderPortalHome();
-  else if(state.portalTab==='ranking') tabContent=renderPortalRanking();
-  else if(state.portalTab==='games') tabContent=renderPortalGames();
-  else tabContent=renderPortalHistory();
-
+  let content='';
+  if(S.portalTab==='home')content=renderPortalHome();
+  else if(S.portalTab==='dashboard'){if(!S.studentDashboard)loadStudentDashboard();content=renderPortalDashboard();}
+  else if(S.portalTab==='ranking')content=renderPortalRanking();
+  else if(S.portalTab==='games')content=renderPortalGames();
+  else content=renderPortalHistory();
   return`<div class="portal">
-    <div class="header">
-      <div class="header-logo">TRAIL GP3</div>
-      <div class="header-right">
-        <div class="coin-display">🪙 ${total}</div>
-        ${myBadges>0?`<div class="badge-count">🏅${myBadges}</div>`:''}
-        <div class="user-badge"><div class="user-avatar">${escHtml(state.user.charAt(0))}</div>${escHtml(state.user)}</div>
-        <span style="font-size:.65rem;color:var(--text-dim);background:rgba(0,0,0,0.04);padding:2px 8px;border-radius:10px">${escHtml(getPlayerClass(state.user))}</span>
-        <button class="logout-btn" id="logoutBtn">ログアウト</button>
-      </div>
-    </div>
-    ${portalTabsHtml}
-    ${tabContent}
-  </div>`;
-}
-
-function renderPortalHome(){
-  // 新着ゲーム：URLが設定済みのものを登録順（id降順）で表示、なければ全ゲーム
-  const available=state.games.filter(g=>g.url&&g.url.trim());
-  const newGames=(available.length?available:[...state.games]).slice().reverse();
-  const cards=newGames.map(g=>{
-    const hasUrl=g.url&&isSafeUrl(g.url);const tag=hasUrl?'a':'div';const href=hasUrl?` href="${escHtml(g.url)}" target="_blank" rel="noopener"`:'';
-    const c=getPlayerGameCoins(state.user,g.id);
-    return`<${tag} class="game-card" data-gid="${g.id}"${href}><span class="game-emoji">${escHtml(g.emoji)}</span><div class="game-name">${escHtml(g.name)}</div>${g.category?`<span class="game-category-badge">${escHtml(g.category)}</span>`:''}<div class="game-coins">🪙 ${c} ALT</div>${hasUrl?'<div class="game-link-hint">▶ タップでプレイ</div>':'<div class="game-link-hint">準備中...</div>'}</${tag}>`;
-  }).join('');
-  return`
-    <div class="section-title">🆕 NEW GAMES</div>
-    <div class="game-grid">${cards||'<div class="no-data">ゲームがまだありません</div>'}</div>
-  `;
-}
-
-function renderPortalRanking(){
-  // 総合ランキング（フル）
-  const ranking=getRanking();
-  const rankHtml=ranking.slice(0,10).map((r,i)=>{
-    const itemCls=i===0?' rank-gold':i===1?' rank-silver':i===2?' rank-bronze':'';
-    const numHtml=i<3
-      ?'<div class="rank-medal">'+(i===0?'👑':i===1?'🥈':'🥉')+'</div>'
-      :'<div class="rank-num">'+(i+1)+'</div>';
-    let badgeDots='';
-    if(r.badges>0){
-      badgeDots='<div class="rank-badges">'+Array(Math.min(r.badges,10)).fill('<div class="rank-badge-dot">★</div>').join('');
-      if(r.badges>10) badgeDots+='<span style="color:var(--accent-orange);font-size:.7rem;margin-left:2px">+'+(r.badges-10)+'</span>';
-      badgeDots+='</div>';
-    }
-    const isMe=r.name===state.user&&i>=3?' style="border-color:rgba(0,229,255,0.25)"':'';
-    const cls=getPlayerClass(r.name);
-    const clsTag=cls?'<span style="font-size:.65rem;color:var(--text-dim);margin-left:6px;font-weight:400;background:rgba(0,0,0,0.04);padding:1px 8px;border-radius:10px">'+escHtml(cls)+'</span>':'';
-    return'<div class="rank-item'+itemCls+'"'+isMe+'>'+numHtml+'<div class="rank-name">'+escHtml(r.name)+clsTag+'</div>'+badgeDots+'<div class="rank-alt">'+r.alt+' ALT</div></div>';
-  }).join('');
-
-  // ゲーム別ランキング
-  const gamesWithRank=getGamesWithRanking();
-  if(!state.selectedRankGame&&gamesWithRank.length>0) state.selectedRankGame=gamesWithRank[0].id;
-  const gameTabsHtml=gamesWithRank.map(g=>
-    `<button class="game-rank-tab ${state.selectedRankGame===g.id?'active':''}" data-rgid="${g.id}">${escHtml(g.emoji)} ${escHtml(g.name)}</button>`
-  ).join('');
-
-  let gameRankContent='<div style="color:var(--text-dim);font-size:.85rem;text-align:center;padding:20px">まだゲームの記録がありません。<br>各ゲームで遊んでスコアを記録しよう！</div>';
-  if(state.selectedRankGame){
-    const gr=getGameRanking(state.selectedRankGame);
-    const g=state.games.find(g=>g.id===state.selectedRankGame);
-    if(gr.length>0){
-      const rows=gr.slice(0,10).map((r,i)=>{
-        const medal=i===0?'👑':i===1?'🥈':i===2?'🥉':'';
-        const numStr=medal?`<span style="font-size:1.1rem">${medal}</span>`:`<span style="font-family:'Orbitron';font-size:.8rem;color:var(--text-dim)">${i+1}</span>`;
-        const isMe=r.player===state.user?'style="background:rgba(0,144,217,0.05);border-color:rgba(0,229,255,0.2)"':'';
-        return`<tr ${isMe}><td style="width:40px;text-align:center">${numStr}</td><td><strong>${escHtml(r.player)}</strong><span style="font-size:.65rem;color:var(--text-dim);margin-left:6px">${escHtml(getPlayerClass(r.player))}</span></td><td class="game-rank-table"><span class="rank-score">${escHtml(r.score)}</span><span class="score-label">${escHtml(r.scoreLabel)}</span></td><td style="font-size:.65rem;color:var(--text-dim)">${escHtml(r.date)}</td></tr>`;
-      }).join('');
-      gameRankContent=`<div class="tbl-wrap game-rank-table"><table><tr><th>#</th><th>プレイヤー</th><th>${g?escHtml(g.name):'スコア'}</th><th>記録日</th></tr>${rows}</table></div>`;
-    } else {
-      gameRankContent=`<div style="color:var(--text-dim);font-size:.85rem;text-align:center;padding:20px">このゲームの記録はまだありません</div>`;
-    }
-  }
-
-  return`
-    <div class="section-title">🏆 総合ランキング</div>
-    <div class="ranking-section"><div class="ranking-list">${rankHtml||'<div class="no-data">まだ記録がありません</div>'}</div></div>
-    <div class="section-title" style="margin-top:10px">🎮 ゲーム別ランキング</div>
-    ${gamesWithRank.length?`<div class="game-rank-tabs">${gameTabsHtml}</div>${gameRankContent}`:`<div style="color:var(--text-dim);font-size:.85rem;padding:16px;background:var(--bg-card);border-radius:12px;text-align:center">まだゲームの記録がありません</div>`}
-  `;
-}
-
-function renderPortalGames(){
-  const usedCats=[...new Set(state.games.map(g=>g.category||'その他'))];
-  // カテゴリフィルターボタン
-  const catBtns=['すべて',...CATEGORIES.filter(c=>usedCats.includes(c))].map(c=>{
-    const count=c==='すべて'?state.games.length:state.games.filter(g=>g.category===c).length;
-    return`<button class="cat-btn ${state.selectedCategory===c?'active':''}" data-cat="${escHtml(c)}">${escHtml(c)}${c!=='すべて'?` (${count})`:''}</button>`;
-  }).join('');
-
-  const filtered=state.selectedCategory==='すべて'?state.games:state.games.filter(g=>g.category===state.selectedCategory);
-
-  let content='';
-  if(state.selectedCategory==='すべて'){
-    // カテゴリ別セクション表示
-    const catsToShow=CATEGORIES.filter(c=>filtered.some(g=>g.category===c));
-    const uncategorized=filtered.filter(g=>!g.category);
-    content=catsToShow.map(cat=>{
-      const games=filtered.filter(g=>g.category===cat);
-      const cards=games.map(g=>makeGameCard(g)).join('');
-      return`<div class="section-title" style="margin-top:8px">${getCatEmoji(cat)} ${escHtml(cat)}</div><div class="game-grid" style="margin-bottom:24px">${cards}</div>`;
-    }).join('');
-    if(uncategorized.length){
-      content+=`<div class="section-title" style="margin-top:8px">🎮 その他</div><div class="game-grid" style="margin-bottom:24px">${uncategorized.map(g=>makeGameCard(g)).join('')}</div>`;
-    }
-  } else {
-    content=`<div class="game-grid">${filtered.map(g=>makeGameCard(g)).join('')}</div>`;
-  }
-  return`<div class="category-filter">${catBtns}</div>${content}`;
-}
-
-function getCatEmoji(cat){
-  const map={'算数':'🔢','地理':'🗾','歴史':'🏯','理科':'🔬','国語':'📖','その他':'🎮'};
-  return map[cat]||'🎮';
-}
-
-function makeGameCard(g){
-  const c=getPlayerGameCoins(state.user,g.id);
-  const hasUrl=g.url&&isSafeUrl(g.url);const tag=hasUrl?'a':'div';const href=hasUrl?` href="${escHtml(g.url)}" target="_blank" rel="noopener"`:'';
-  const gr=getGameRanking(g.id);const myRank=gr.findIndex(r=>r.player===state.user);
-  const myRankTag=myRank>=0?`<div style="font-size:.6rem;color:var(--accent-cyan);margin-top:3px">#${myRank+1} / ${gr.length}人</div>`:'';
-  return`<${tag} class="game-card" data-gid="${g.id}"${href}><span class="game-emoji">${escHtml(g.emoji)}</span><div class="game-name">${escHtml(g.name)}</div><div class="game-coins">🪙 ${c} ALT</div>${myRankTag}${hasUrl?'<div class="game-link-hint">▶ タップでプレイ</div>':'<div class="game-link-hint">準備中...</div>'}</${tag}>`;
-}
-
-function renderPortalHistory(){
-  const logs=state.coinLog.filter(l=>l.player===state.user).sort((a,b)=>b.id-a.id);
-  const histRows=logs.length?logs.slice(0,30).map(l=>`<tr><td>${escHtml(getGameEmoji(l.gameId))} ${escHtml(getGameName(l.gameId))}</td><td class="coin-plus">+${parseInt(l.amount)||0}</td><td style="color:var(--text-dim);font-size:.75rem">${escHtml(l.date)}</td></tr>`).join(''):`<tr><td colspan="3" class="no-data">まだ記録がありません</td></tr>`;
-  return`<div class="tbl-wrap"><table><tr><th>ゲーム</th><th>ALT</th><th>日付</th></tr>${histRows}</table></div>`;
-}
-function renderAdminLogin(){
-  const locked = LOGIN_SECURITY.isLocked();
-  const lockMsg = locked ? `<div class="lockout-msg"><strong>🔒 LOCKED</strong><br>ログイン試行回数が上限に達しました。<br>${LOGIN_SECURITY.getRemainingSeconds()}秒後に再試行してください。</div>` : '';
-  const attemptsLeft = LOGIN_SECURITY.maxAttempts - LOGIN_SECURITY.attempts;
-  const attemptsMsg = LOGIN_SECURITY.attempts > 0 && !locked ? `<div style="font-size:.7rem;color:var(--accent-pink);margin-top:8px">残り${attemptsLeft}回</div>` : '';
-  return`<div class="login-screen">
-    <div class="login-box admin-pass-box">
-      <h2>🔒 ADMIN</h2>
-      <p>管理者パスワードを入力</p>
-      <input class="login-input" id="adminPassInput" type="password" placeholder="パスワード" ${locked?'disabled':''}/>
-      <button class="login-btn" id="adminPassBtn" ${locked?'disabled style="opacity:.5;cursor:not-allowed"':''}>LOGIN</button>
-      ${lockMsg}${attemptsMsg}
-    </div>
-    <div class="admin-link" id="backToLogin">← プレイヤーログインに戻る</div>
-  </div>`;
-}
-
-function renderAdmin(){
-  const tabs=`<div class="admin-tabs">
-    <button class="admin-tab ${state.adminTab==='activity'?'active':''}" data-tab="activity">📡 監視</button>
-    <button class="admin-tab ${state.adminTab==='loginlog'?'active':''}" data-tab="loginlog">🚪 入退室</button>
-    <button class="admin-tab ${state.adminTab==='coins'?'active':''}" data-tab="coins">💰 ALT付与</button>
-    <button class="admin-tab ${state.adminTab==='badges'?'active':''}" data-tab="badges">🏅 景品交換</button>
-    <button class="admin-tab ${state.adminTab==='games'?'active':''}" data-tab="games">🎮 ゲーム</button>
-    <button class="admin-tab ${state.adminTab==='rankings'?'active':''}" data-tab="rankings">🏆 ランキング</button>
-    <button class="admin-tab ${state.adminTab==='usage'?'active':''}" data-tab="usage">🕹️ 利用状況</button>
-    <button class="admin-tab ${state.adminTab==='summary'?'active':''}" data-tab="summary">📊 一覧</button>
-  </div>`;
-  let content='';
-  if(state.adminTab==='activity')content=renderAdminActivity();
-  else if(state.adminTab==='loginlog')content=renderAdminLoginLog();
-  else if(state.adminTab==='coins')content=renderAdminCoins();
-  else if(state.adminTab==='badges')content=renderAdminBadges();
-  else if(state.adminTab==='games')content=renderAdminGames();
-  else if(state.adminTab==='rankings')content=renderAdminRankings();
-  else if(state.adminTab==='usage')content=renderAdminGameUsage();
-  else content=renderAdminSummary();
-  return`<div class="admin-panel">
-    <div class="header">
-      <div class="header-logo">TRAIL GP3</div>
-      <div class="header-right">
-        <div class="user-badge"><div class="user-avatar" style="background:linear-gradient(135deg,var(--accent-gold),var(--accent-pink))">★</div>管理者</div>
-        <button class="logout-btn" id="refreshBtn" style="border-color:var(--accent-cyan);color:var(--accent-cyan)">🔄 更新</button>
-        <button class="logout-btn" id="logoutBtn">ログアウト</button>
-      </div>
-    </div>
+    <div class="header"><div class="header-logo">TRAIL GP3</div><div class="header-right">
+      <div class="coin-display">🪙 ${total}</div>
+      ${badges>0?`<div class="badge-count">🏅${badges}</div>`:''}
+      <div class="user-badge"><div class="user-avatar">${esc(name.charAt(0))}</div>${esc(name)}</div>
+      <span style="font-size:.65rem;color:var(--text-dim);background:rgba(0,0,0,0.04);padding:2px 8px;border-radius:10px">${esc(S.user?S.user.className:'')}</span>
+      <button class="logout-btn" id="logoutBtn">ログアウト</button>
+    </div></div>
     ${tabs}${content}
   </div>`;
 }
 
+function renderPortalHome(){
+  const cards=S.games.slice().reverse().map(g=>{
+    const hasUrl=g.url&&g.url.trim();const tag=hasUrl?'a':'div';
+    const playerParam=S.user&&S.user.name?'?player='+encodeURIComponent(S.user.name):'';
+    const href=hasUrl?` href="${esc(g.url)}${playerParam}" target="_blank" rel="noopener"`:'';
+    return`<${tag} class="game-card" data-gid="${g.id}"${href}><span class="game-emoji">${esc(g.emoji)}</span><div class="game-name">${esc(g.name)}</div>${g.category?`<span class="game-category-badge">${esc(g.category)}</span>`:''}<div class="game-link-hint">${hasUrl?'▶ タップでプレイ':'準備中...'}</div></${tag}>`;
+  }).join('');
+  return`<div class="section-title">🆕 NEW GAMES</div><div class="game-grid">${cards||'<div class="no-data">ゲームがまだありません</div>'}</div>`;
+}
+
+function renderPortalRanking(){
+  const ranking=S.rankings||[];
+  // Global ranking
+  const globalHtml=ranking.slice(0,10).map((r,i)=>{
+    const cls=i===0?' rank-gold':i===1?' rank-silver':i===2?' rank-bronze':'';
+    const num=i<3?'<div class="rank-medal">'+(i===0?'👑':i===1?'🥈':'🥉')+'</div>':'<div class="rank-num">'+(i+1)+'</div>';
+    const isMe=S.user&&r.student_name===S.user.name&&i>=3?' style="border-color:rgba(0,229,255,0.25)"':'';
+    return`<div class="rank-item${cls}"${isMe}>${num}<div class="rank-name">${esc(r.student_name||r.name||'')}<span style="font-size:.65rem;color:var(--text-dim);margin-left:6px">${esc(r.class_name||'')}</span></div><div class="rank-alt">${r.total_coins||0} ALT</div></div>`;
+  }).join('');
+
+  // Game-specific rankings - group by game
+  const byGame={};
+  (S.rankings||[]).forEach(r=>{if(r.game_name){const k=r.game_name;if(!byGame[k])byGame[k]={name:k,emoji:r.game_emoji||'🎮',id:r.game_id,entries:[]};byGame[k].entries.push(r)}});
+  const gamesWithRank=Object.values(byGame);
+  if(!S.selectedRankGame&&gamesWithRank.length>0)S.selectedRankGame=gamesWithRank[0].id;
+  const gameTabsHtml=gamesWithRank.map(g=>
+    `<button class="game-rank-tab ${S.selectedRankGame===g.id?'active':''}" data-rgid="${g.id}">${g.emoji} ${esc(g.name)}</button>`
+  ).join('');
+
+  let gameRankContent='<div style="color:var(--text-dim);font-size:.85rem;text-align:center;padding:20px">まだゲームの記録がありません</div>';
+  if(S.selectedRankGame){
+    const selGame=gamesWithRank.find(g=>g.id===S.selectedRankGame);
+    if(selGame&&selGame.entries.length>0){
+      const rows=selGame.entries.slice(0,10).map((r,i)=>{
+        const medal=i===0?'👑':i===1?'🥈':i===2?'🥉':'';
+        const numStr=medal?`<span style="font-size:1.1rem">${medal}</span>`:`<span style="font-family:'Orbitron';font-size:.8rem;color:var(--text-dim)">${i+1}</span>`;
+        const isMe=S.user&&r.student_name===S.user.name?'style="background:rgba(0,144,217,0.05);border-color:rgba(0,229,255,0.2)"':'';
+        return`<tr ${isMe}><td style="width:40px;text-align:center">${numStr}</td><td><strong>${esc(r.student_name)}</strong></td><td class="game-rank-table"><span class="rank-score">${esc(r.score)}</span><span class="score-label">${esc(r.score_label||'')}</span></td></tr>`;
+      }).join('');
+      gameRankContent=`<div class="tbl-wrap game-rank-table"><table><tr><th>#</th><th>プレイヤー</th><th>スコア</th></tr>${rows}</table></div>`;
+    }
+  }
+
+  return`<div class="section-title">🏆 総合ランキング</div>
+    <div class="ranking-section"><div class="ranking-list">${globalHtml||'<div class="no-data">まだ記録がありません</div>'}</div></div>
+    <div class="section-title" style="margin-top:10px">🎮 ゲーム別ランキング</div>
+    ${gamesWithRank.length?`<div class="game-rank-tabs">${gameTabsHtml}</div>${gameRankContent}`:'<div style="color:var(--text-dim);font-size:.85rem;padding:16px;background:var(--bg-card);border-radius:12px;text-align:center">まだゲームの記録がありません</div>'}`;
+}
+
+function renderPortalGames(){
+  const usedCats=[...new Set(S.games.map(g=>g.category||'その他'))];
+  const catBtns=['すべて',...CATEGORIES.filter(c=>usedCats.includes(c))].map(c=>{
+    const count=c==='すべて'?S.games.length:S.games.filter(g=>g.category===c).length;
+    return`<button class="cat-btn ${S.selectedCategory===c?'active':''}" data-cat="${c}">${c}${c!=='すべて'?` (${count})`:''}</button>`;
+  }).join('');
+  const filtered=S.selectedCategory==='すべて'?S.games:S.games.filter(g=>g.category===S.selectedCategory);
+  const cards=filtered.map(g=>{
+    const hasUrl=g.url&&g.url.trim();const tag=hasUrl?'a':'div';
+    const playerParam=S.user&&S.user.name?'?player='+encodeURIComponent(S.user.name):'';
+    const href=hasUrl?` href="${esc(g.url)}${playerParam}" target="_blank" rel="noopener"`:'';
+    const unplayed=S.studentDashboard&&S.studentDashboard.unplayedGames||[];
+    const isNew=unplayed.includes(g.id);
+    return`<${tag} class="game-card" data-gid="${g.id}"${href}>${isNew?'<div class="new-badge">NEW</div>':''}<span class="game-emoji">${esc(g.emoji)}</span><div class="game-name">${esc(g.name)}</div><div class="game-link-hint">${hasUrl?'▶ タップでプレイ':'準備中...'}</div></${tag}>`;
+  }).join('');
+  return`<div class="category-filter">${catBtns}</div><div class="game-grid">${cards}</div>`;
+}
+
+function renderPortalHistory(){
+  const name=S.user?S.user.name:'';
+  const logs=S.coinLogs.filter(l=>l.student_name===name);
+  const rows=logs.length?logs.slice(0,30).map(l=>`<tr><td>${esc(l.game_emoji||'🎮')} ${esc(l.game_name||'—')}</td><td class="coin-plus">+${l.amount}</td><td style="color:var(--text-dim);font-size:.75rem">${esc(l.created_at||'')}</td></tr>`).join(''):'<tr><td colspan="3" class="no-data">まだ記録がありません</td></tr>';
+  return`<div class="tbl-wrap"><table><tr><th>ゲーム</th><th>ALT</th><th>日付</th></tr>${rows}</table></div>`;
+}
+
+// ═══ Admin Panel ═══
+function renderAdmin(){
+  const tabs=`<div class="admin-tabs">
+    <button class="admin-tab ${S.adminTab==='activity'?'active':''}" data-tab="activity">📡 監視</button>
+    <button class="admin-tab ${S.adminTab==='loginlog'?'active':''}" data-tab="loginlog">🚪 入退室</button>
+    <button class="admin-tab ${S.adminTab==='coins'?'active':''}" data-tab="coins">💰 ALT付与</button>
+    <button class="admin-tab ${S.adminTab==='badges'?'active':''}" data-tab="badges">🏅 バッジ</button>
+    <button class="admin-tab ${S.adminTab==='games'?'active':''}" data-tab="games">🎮 ゲーム</button>
+    <button class="admin-tab ${S.adminTab==='rankings'?'active':''}" data-tab="rankings">🏆 ランキング</button>
+    <button class="admin-tab ${S.adminTab==='usage'?'active':''}" data-tab="usage">🕹️ 利用状況</button>
+    <button class="admin-tab ${S.adminTab==='parent'?'active':''}" data-tab="parent">📩 保護者PIN</button>
+    <button class="admin-tab ${S.adminTab==='summary'?'active':''}" data-tab="summary">📊 一覧</button>
+  </div>`;
+  let content='';
+  if(S.adminTab==='activity')content=renderAdminActivity();
+  else if(S.adminTab==='loginlog')content=renderAdminLoginLog();
+  else if(S.adminTab==='coins')content=renderAdminCoins();
+  else if(S.adminTab==='badges')content=renderAdminBadges();
+  else if(S.adminTab==='games')content=renderAdminGames();
+  else if(S.adminTab==='rankings')content=renderAdminRankings();
+  else if(S.adminTab==='usage')content=renderAdminGameUsage();
+  else if(S.adminTab==='parent')content=renderAdminParentPin();
+  else content=renderAdminSummary();
+  return`<div class="admin-panel">
+    <div class="header"><div class="header-logo">TRAIL GP3</div><div class="header-right">
+      <div class="user-badge"><div class="user-avatar" style="background:linear-gradient(135deg,var(--accent-gold),var(--accent-pink))">★</div>${esc(S.user?S.user.displayName:'管理者')}</div>
+      <button class="logout-btn" id="refreshBtn" style="border-color:var(--accent-cyan);color:var(--accent-cyan)">🔄 更新</button>
+      <button class="logout-btn" id="logoutBtn">ログアウト</button>
+    </div></div>
+    ${tabs}${content}
+  </div>`;
+}
+
+function renderAdminActivity(){
+  const d=S.dashboard;
+  if(!d){loadDashboard().then(()=>render());return'<div class="no-data">読み込み中...</div>'}
+  const st=d.stats||{};
+  return`<div class="activity-stats">
+    <div class="stat-card stat-gold"><div class="stat-value">${st.totalCoins||0}</div><div class="stat-label">総ALT発行数</div></div>
+    <div class="stat-card stat-cyan"><div class="stat-value">${st.totalStudents||0}</div><div class="stat-label">登録生徒数</div></div>
+    <div class="stat-card stat-green"><div class="stat-value">${st.totalGames||0}</div><div class="stat-label">ゲーム数</div></div>
+    <div class="stat-card stat-orange"><div class="stat-value">${st.totalBadges||0}</div><div class="stat-label">総バッジ数</div></div>
+    <div class="stat-card stat-purple"><div class="stat-value">${st.todayActive||0}</div><div class="stat-label">今日のアクティブ</div></div>
+  </div>
+  <div class="section-title">🏫 クラス別統計</div>
+  <div class="game-list-admin">${(d.classStats||[]).map(c=>`<div class="game-list-item"><div class="game-list-item-info"><div><strong>${esc(c.name)}</strong><div style="font-size:.7rem;color:var(--text-dim);margin-top:2px">${c.student_count}名</div></div></div><div style="text-align:right"><div class="total-coins">${c.total_coins} ALT</div></div></div>`).join('')}</div>
+  <div class="section-title" style="margin-top:16px">🎮 ゲーム利用ランキング</div>
+  <div class="tbl-wrap"><table><tr><th>ゲーム</th><th>回数</th><th>利用者</th></tr>${(d.gameUsage||[]).map(g=>`<tr><td>${esc(g.emoji)} ${esc(g.name)}</td><td style="font-family:'Orbitron';color:var(--accent-cyan)">${g.play_count}</td><td>${g.unique_players}人</td></tr>`).join('')||'<tr><td colspan="3" class="no-data">データなし</td></tr>'}</table></div>
+  <div class="section-title" style="margin-top:16px">📡 最近のアクティビティ</div>
+  <div class="activity-feed">${(d.recentActivity||[]).map(a=>{
+    const icons={coin:'💰',badge:'🏅',player:'👤',game:'🎮',security:'🔒',login:'🚪'};
+    return`<div class="activity-item"><div class="activity-icon">${icons[a.type]||'📋'}</div><div class="activity-body"><strong>${esc(a.actor)}</strong><p>${esc(a.detail)}</p></div><div class="activity-time">${esc(a.created_at||'')}</div></div>`;
+  }).join('')||'<div class="no-data">まだアクティビティがありません</div>'}</div>`;
+}
+
 function renderAdminCoins(){
-  const pOpts=state.players.map(p=>`<option value="${escHtml(p.name)}">${escHtml(p.name)}</option>`).join('');
-  const gOpts=state.games.map(g=>`<option value="${g.id}">${escHtml(g.emoji)} ${escHtml(g.name)}</option>`).join('');
-  const logs=[...state.coinLog].sort((a,b)=>b.id-a.id).slice(0,30);
-  const rows=logs.length?logs.map(l=>`<tr><td>${escHtml(l.player)}</td><td>${escHtml(getGameEmoji(l.gameId))} ${escHtml(getGameName(l.gameId))}</td><td class="coin-plus">+${parseInt(l.amount)||0}</td><td style="color:var(--text-dim);font-size:.75rem">${escHtml(l.date)}</td></tr>`).join(''):`<tr><td colspan="4" class="no-data">まだ記録がありません</td></tr>`;
-  return`
-    <div class="admin-form">
-      <h3>💰 ALT ADD</h3>
-      <div class="form-stack">
-        <div class="form-row-2">
-          <div class="form-group"><label>生徒</label><select id="coinPlayer">${pOpts}</select></div>
-          <div class="form-group"><label>ゲーム</label><select id="coinGame">${gOpts}</select></div>
-        </div>
-        <div class="form-group"><label>ALT数</label><input type="number" id="coinAmount" value="10" min="1"/></div>
-        <button class="btn-primary btn-gold" id="addCoinBtn">付与</button>
+  const sOpts=S.students.map(s=>`<option value="${s.id}">${esc(s.name)}（${esc(s.className)}）</option>`).join('');
+  const gOpts=S.games.map(g=>`<option value="${g.id}">${esc(g.emoji)} ${esc(g.name)}</option>`).join('');
+  const rows=S.coinLogs.slice(0,30).map(l=>`<tr><td>${esc(l.student_name)}</td><td>${esc(l.game_emoji||'🎮')} ${esc(l.game_name||'—')}</td><td class="coin-plus">+${l.amount}</td><td style="color:var(--text-dim);font-size:.75rem">${esc(l.created_at)}</td></tr>`).join('');
+  return`<div class="admin-form">
+    <h3>💰 ALT ADD</h3>
+    <div class="form-stack">
+      <div class="form-row-2">
+        <div class="form-group"><label>生徒</label><select id="coinStudent">${sOpts}</select></div>
+        <div class="form-group"><label>ゲーム</label><select id="coinGame">${gOpts}</select></div>
       </div>
-      <hr style="border:none;border-top:1px solid rgba(0,0,0,0.06);margin:16px 0">
-      <div class="form-stack">
-        <div class="form-row-2">
-          <div class="form-group"><label>新しい生徒を追加</label><input type="text" id="newPlayerName" placeholder="なまえ（ひらがな）"/></div>
-          <div class="form-group"><label>クラス</label><select id="newPlayerClass">${state.classes.map(c=>`<option value="${escHtml(c)}">${escHtml(c)}</option>`).join('')}</select></div>
-        </div>
-        <button class="btn-primary btn-purple" id="addPlayerBtn">追加</button>
-      </div>
+      <div class="form-group"><label>ALT数</label><input type="number" id="coinAmount" value="10" min="1"/></div>
+      <button class="btn-primary btn-gold" id="addCoinBtn">付与</button>
     </div>
-    <div class="section-title">最近の付与ログ</div>
-    <div class="tbl-wrap"><table><tr><th>生徒</th><th>ゲーム</th><th>ALT</th><th>日付</th></tr>${rows}</table></div>`;
+    <hr style="border:none;border-top:1px solid rgba(0,0,0,0.06);margin:16px 0">
+    <div class="form-stack">
+      <div class="form-row-2">
+        <div class="form-group"><label>新しい生徒</label><input type="text" id="newStudentName" placeholder="なまえ"/></div>
+        <div class="form-group"><label>クラス</label><select id="newStudentClass">${S.classes.map(c=>`<option value="${esc(c.name)}">${esc(c.name)}</option>`).join('')}</select></div>
+      </div>
+      <button class="btn-primary btn-purple" id="addStudentBtn">追加</button>
+    </div>
+  </div>
+  <div class="section-title">最近の付与ログ</div>
+  <div class="tbl-wrap"><table><tr><th>生徒</th><th>ゲーム</th><th>ALT</th><th>日付</th></tr>${rows||'<tr><td colspan="4" class="no-data">まだ記録がありません</td></tr>'}</table></div>`;
 }
 
 function renderAdminBadges(){
-  const pOpts=state.players.map(p=>{
-    const b=getPlayerBadges(p.name);
-    return`<option value="${escHtml(p.name)}">${escHtml(p.name)}（🏅${b}）</option>`;
+  const sOpts=S.students.map(s=>{
+    const b=getStudentBadges(s.name);
+    return`<option value="${s.id}">${esc(s.name)}（🏅${b}）</option>`;
   }).join('');
-
-  // Badge summary
-  const badgeList=state.players.map(p=>{
-    const b=getPlayerBadges(p.name);
-    const dots=b>0?Array(Math.min(b,15)).fill('🏅').join('')+(b>15?` +${b-15}`:''):'—';
-    return`<div class="game-list-item"><div class="game-list-item-info"><div><strong>${escHtml(p.name)}</strong><div style="font-size:.75rem;margin-top:4px">${dots}</div></div></div><div style="font-family:'Orbitron';font-weight:700;color:var(--accent-orange);font-size:1.1rem">${b}</div></div>`;
-  }).join('');
-
-  return`
-    <div class="badge-manage-form">
-      <h3>🏅 景品交換バッジ</h3>
-      <p style="color:var(--text-dim);font-size:.8rem;margin-bottom:16px">景品を交換するたびにバッジを1つ付与します</p>
-      <div class="form-stack">
-        <div class="form-group"><label>生徒</label><select id="badgePlayer">${pOpts}</select></div>
-        <button class="btn-primary btn-orange" id="addBadgeBtn">🏅 バッジを付与</button>
-      </div>
+  const list=S.badges.map(b=>`<div class="game-list-item"><div class="game-list-item-info"><div><strong>${esc(b.student_name)}</strong><div style="font-size:.7rem;color:var(--text-dim)">${esc(b.class_name)}</div></div></div><div style="font-family:'Orbitron';font-weight:700;color:var(--accent-orange);font-size:1.1rem">${b.badge_count}</div></div>`).join('');
+  return`<div class="badge-manage-form">
+    <h3>🏅 景品交換バッジ</h3>
+    <div class="form-stack">
+      <div class="form-group"><label>生徒</label><select id="badgeStudent">${sOpts}</select></div>
+      <button class="btn-primary btn-orange" id="addBadgeBtn">🏅 バッジを付与</button>
     </div>
-    <div class="section-title">バッジ一覧</div>
-    <div class="game-list-admin">${badgeList}</div>`;
+  </div>
+  <div class="section-title">バッジ一覧</div>
+  <div class="game-list-admin">${list||'<div class="no-data">バッジなし</div>'}</div>`;
 }
 
 function renderAdminGames(){
   const catOpts=CATEGORIES.map(c=>`<option value="${c}">${c}</option>`).join('');
-  const items=state.games.map(g=>`<div class="game-list-item" style="flex-wrap:wrap"><div class="game-list-item-info"><span>${escHtml(g.emoji)}</span><div><strong>${escHtml(g.name)}</strong>${g.category?`<span class="game-item-cat">${escHtml(g.category)}</span>`:''}</div></div><button class="delete-btn" data-gameid="${g.id}">削除</button>
-    <div style="width:100%;display:flex;gap:6px;margin-top:6px;align-items:center"><input class="url-edit" data-gameid="${g.id}" value="${escHtml(g.url||'')}" placeholder="URLを入力..." maxlength="${VALIDATION.MAX_URL_LENGTH}" style="flex:1;padding:6px 10px;background:rgba(0,0,0,0.02);border:1.5px solid rgba(0,0,0,0.08);border-radius:6px;font-size:.75rem;font-family:inherit;color:var(--text-primary);outline:none"/><button class="url-save-btn" data-gameid="${g.id}" style="padding:6px 12px;background:var(--accent-cyan);border:none;border-radius:6px;color:#fff;font-size:.7rem;font-weight:700;cursor:pointer;white-space:nowrap">保存</button></div>
-  </div>`).join('');
-
-  return`
-    <div class="game-manage-form">
-      <h3>🎮 ADD GAME</h3>
-      <div class="form-stack">
-        <div class="form-row-2">
-          <div class="form-group"><label>ゲーム名</label><input type="text" id="newGameName" placeholder="ゲーム名"/></div>
-          <div class="form-group"><label>カテゴリ</label><select id="newGameCat">${catOpts}</select></div>
-        </div>
-        <div class="form-group"><label>リンクURL</label><input type="text" id="newGameUrl" placeholder="https://..."/></div>
-        <div class="form-group"><label>絵文字</label><input type="text" id="newGameEmoji" placeholder="🎲" maxlength="2" style="text-align:center"/></div>
-        <button class="btn-primary btn-green" id="addGameBtn">追加</button>
-      </div>
+  const items=S.games.map(g=>`<div class="game-list-item" style="flex-wrap:wrap">
+    <div class="game-list-item-info"><span>${esc(g.emoji)}</span><div><strong>${esc(g.name)}</strong>${g.category?`<span class="game-item-cat">${esc(g.category)}</span>`:''}</div></div>
+    <button class="delete-btn" data-del-game="${g.id}">削除</button>
+    <div style="width:100%;display:flex;gap:6px;margin-top:6px;align-items:center">
+      <input class="url-edit" data-url-game="${g.id}" value="${esc(g.url||'')}" placeholder="URLを入力..." style="flex:1;padding:6px 10px;background:rgba(0,0,0,0.02);border:1.5px solid rgba(0,0,0,0.08);border-radius:6px;font-size:.75rem;font-family:inherit;color:var(--text-primary);outline:none"/>
+      <button class="url-save-btn" data-save-game="${g.id}" style="padding:6px 12px;background:var(--accent-cyan);border:none;border-radius:6px;color:#fff;font-size:.7rem;font-weight:700;cursor:pointer;white-space:nowrap">保存</button>
     </div>
-    <div class="section-title">登録済みゲーム</div>
-    <div class="game-list-admin">${items}</div>`;
+  </div>`).join('');
+  return`<div class="game-manage-form">
+    <h3>🎮 ADD GAME</h3>
+    <div class="form-stack">
+      <div class="form-row-2">
+        <div class="form-group"><label>ゲーム名</label><input type="text" id="newGameName" placeholder="ゲーム名"/></div>
+        <div class="form-group"><label>カテゴリ</label><select id="newGameCat">${catOpts}</select></div>
+      </div>
+      <div class="form-group"><label>リンクURL</label><input type="text" id="newGameUrl" placeholder="https://..."/></div>
+      <div class="form-group"><label>絵文字</label><input type="text" id="newGameEmoji" placeholder="🎲" maxlength="2" style="text-align:center"/></div>
+      <button class="btn-primary btn-green" id="addGameBtn">追加</button>
+    </div>
+  </div>
+  <div class="section-title">登録済みゲーム</div>
+  <div class="game-list-admin">${items}</div>`;
 }
 
 function renderAdminRankings(){
-  // ゲーム別にまとめて表示
-  const gameIds=[...new Set(state.rankings.map(r=>r.gameId))];
-  if(gameIds.length===0){
-    return`<div style="color:var(--text-dim);padding:30px;text-align:center;background:var(--bg-card);border-radius:12px">
-      <div style="font-size:2rem;margin-bottom:10px">🎮</div>
-      <div>まだゲームランキングの記録がありません。</div>
-      <div style="font-size:.8rem;margin-top:8px">各ゲームHTMLに saveRanking() 送信処理を追加すると記録されます。</div>
-    </div>
-    <div class="game-manage-form" style="margin-top:16px">
-      <h3>📋 API 連携メモ</h3>
-      <div style="font-size:.8rem;color:var(--text-dim);line-height:1.8">
-        <div>各ゲームの結果画面から以下を POST してください：</div>
-        <pre style="background:rgba(0,0,0,0.03);border-radius:8px;padding:12px;margin-top:8px;font-size:.75rem;overflow-x:auto">fetch(GAS_URL, &#123;
-  method: 'POST',
-  body: JSON.stringify(&#123;
-    action: 'saveRanking',
-    gameId: 1,          // ゲームID（シートのゲームIDと合わせる）
-    gameName: '分数融合',
-    player: 'プレイヤー名',
-    score: 850,          // 数値（高いほど上位）
-    scoreLabel: '点'     // 単位（'点','秒','コンボ' など）
-  &#125;)
-&#125;)</pre>
-      </div>
-    </div>`;
+  if(!S.rankings||S.rankings.length===0){
+    return`<div class="no-data" style="background:var(--bg-card);border-radius:12px;padding:30px"><div style="font-size:2rem;margin-bottom:10px">🎮</div>まだゲームランキングの記録がありません。</div>`;
   }
-
-  const sections=gameIds.map(gid=>{
-    const g=state.games.find(g=>g.id===gid);
-    const name=g?g.name:'ID:'+gid;
-    const emoji=g?g.emoji:'🎮';
-    const entries=getGameRanking(gid);
-    const rows=entries.slice(0,20).map((r,i)=>{
+  // Group by game
+  const byGame={};
+  S.rankings.forEach(r=>{const k=r.game_name||'unknown';if(!byGame[k])byGame[k]={name:k,emoji:r.game_emoji||'🎮',entries:[]};byGame[k].entries.push(r)});
+  const sections=Object.values(byGame).map(g=>{
+    const rows=g.entries.slice(0,20).map((r,i)=>{
       const medal=i===0?'👑':i===1?'🥈':i===2?'🥉':'';
-      return`<tr>
-        <td style="text-align:center">${medal||i+1}</td>
-        <td><strong>${escHtml(r.player)}</strong><span style="font-size:.65rem;color:var(--text-dim);margin-left:6px">${escHtml(getPlayerClass(r.player))}</span></td>
-        <td class="game-rank-table"><span class="rank-score">${escHtml(r.score)}</span><span class="score-label">${escHtml(r.scoreLabel)}</span></td>
-        <td style="font-size:.65rem;color:var(--text-dim)">${escHtml(r.date)}</td>
-        <td><button class="delete-btn rank-del-btn" data-rgid="${gid}" data-rplayer="${escHtml(r.player)}" style="font-size:.6rem;padding:2px 8px">削除</button></td>
-      </tr>`;
+      return`<tr><td style="text-align:center">${medal||(i+1)}</td><td><strong>${esc(r.student_name)}</strong></td><td><span class="rank-score">${esc(r.score)}</span><span class="score-label">${esc(r.score_label||'')}</span></td><td><button class="delete-btn" data-del-rank="${r.id}" style="font-size:.6rem;padding:2px 8px">削除</button></td></tr>`;
     }).join('');
-    return`<div style="margin-bottom:20px">
-      <div class="section-title">${escHtml(emoji)} ${escHtml(name)}（${entries.length}人）</div>
-      <div class="tbl-wrap"><table><tr><th>#</th><th>プレイヤー</th><th>スコア</th><th>記録日</th><th></th></tr>${rows}</table></div>
-    </div>`;
+    return`<div style="margin-bottom:20px"><div class="section-title">${g.emoji} ${esc(g.name)}（${g.entries.length}人）</div><div class="tbl-wrap"><table><tr><th>#</th><th>プレイヤー</th><th>スコア</th><th></th></tr>${rows}</table></div></div>`;
   }).join('');
-
-  return`<div class="game-manage-form">
-    <h3 style="color:var(--accent-cyan)">🏆 GAME RANKINGS</h3>
-    <p style="color:var(--text-dim);font-size:.8rem">各ゲームのプレイヤー最高記録。削除ボタンで不正記録をリセットできます。</p>
-  </div>
-  ${sections}`;
+  return`<div class="game-manage-form"><h3 style="color:var(--accent-cyan)">🏆 GAME RANKINGS</h3></div>${sections}`;
 }
 
 function renderAdminSummary(){
-  const sorted=[...state.players].sort((a,b)=>getPlayerCoins(b.name)-getPlayerCoins(a.name));
-  let rows=sorted.map(p=>{
-    const total=getPlayerCoins(p.name);const badges=getPlayerBadges(p.name);
-    const bd=state.games.map(g=>{const c=getPlayerGameCoins(p.name,g.id);return c>0?`${escHtml(g.emoji)}${c}`:''}).filter(Boolean).join(' ');
-    return`<tr><td><strong>${escHtml(p.name)}</strong></td><td style="font-size:.7rem;color:var(--text-dim)">${escHtml(p.className)||'—'}</td><td style="font-size:.75rem;color:var(--text-dim)">${bd||'—'}</td><td class="total-coins">${total}</td><td style="text-align:center;color:var(--accent-orange)">${badges>0?'🏅'+badges:'—'}</td></tr>`;
-  }).join('');
-  if(!rows)rows=`<tr><td colspan="5" class="no-data">生徒がいません</td></tr>`;
-
-  // Class management
-  const clsTags=state.classes.map(c=>
-    `<span class="cat-tag">${escHtml(c)}<button class="cls-del" data-cls="${escHtml(c)}">✕</button></span>`
-  ).join('');
-
+  const sorted=[...S.students].sort((a,b)=>(b.totalCoins||0)-(a.totalCoins||0));
+  const rows=sorted.map(s=>`<tr><td><strong>${esc(s.name)}</strong></td><td style="font-size:.7rem;color:var(--text-dim)">${esc(s.className)}</td><td class="total-coins">${s.totalCoins||0}</td><td style="text-align:center;color:var(--accent-orange)">${(s.totalBadges||0)>0?'🏅'+s.totalBadges:'—'}</td></tr>`).join('');
+  const clsTags=S.classes.map(c=>`<span class="cat-tag">${esc(c.name)}<button class="cat-del" data-del-cls="${c.id}">✕</button></span>`).join('');
   return`<div class="section-title">📊 全生徒一覧</div>
-    <div class="tbl-wrap"><table><tr class="summary-th"><th>生徒</th><th>クラス</th><th>内訳</th><th>ALT</th><th>🏅</th></tr>${rows}</table></div>
+    <div class="tbl-wrap"><table><tr class="summary-th"><th>生徒</th><th>クラス</th><th>ALT</th><th>🏅</th></tr>${rows||'<tr><td colspan="4" class="no-data">生徒がいません</td></tr>'}</table></div>
     <div class="cat-manage-form" style="margin-top:20px">
       <h3>🏫 クラス管理</h3>
       <div class="form-stack">
@@ -1108,458 +840,178 @@ function renderAdminSummary(){
 }
 
 // ═══ 入退室ログ ═══
-// Analytics API対応: GET /api/t/:slug/analytics/logins
 function renderAdminLoginLog(){
-  const active=loginTracker.getActive();
-  const onlineHtml=active.length?active.map(s=>
-    `<div class="online-chip"><span class="online-dot"></span>${escHtml(s.user)}<span style="font-size:.65rem;color:var(--text-dim)">${escHtml(s.className)}</span><span class="online-dur">${loginTracker.formatDuration(s.loginTs,null)}</span></div>`
-  ).join(''):'<div style="color:var(--text-dim);font-size:.85rem">現在オンラインのユーザーはいません</div>';
+  if(!S.loginLogs.length){loadLoginLogs().then(()=>render());return'<div class="no-data">読み込み中...</div>'}
+  // Active sessions (no logout)
+  const active=S.loginLogs.filter(l=>!l.logout_at);
+  const onlineHtml=active.length?active.map(s=>{
+    const dur=formatDurationFromDate(s.login_at);
+    return`<div class="online-chip"><span class="online-dot"></span>${esc(s.student_name)}<span style="font-size:.65rem;color:var(--text-dim)">${esc(s.class_name)}</span><span class="duration-badge">${dur}</span></div>`;
+  }).join(''):'<div style="color:var(--text-dim);font-size:.85rem">現在オンラインのユーザーはいません</div>';
 
-  const recent=loginTracker.getRecent(100);
-  const rows=recent.length?recent.map(s=>{
-    const dur=s.logoutTs?loginTracker.formatDuration(s.loginTs,s.logoutTs):`<span style="color:var(--accent-green)">滞在中 (${loginTracker.formatDuration(s.loginTs,null)})</span>`;
-    const logoutStr=s.logoutTime?escHtml(s.logoutTime):'—';
-    return`<tr><td>${escHtml(s.user)}</td><td><span style="font-size:.75rem;color:var(--text-dim)">${escHtml(s.className)}</span></td><td style="font-size:.8rem">${escHtml(s.loginTime)}</td><td style="font-size:.8rem">${logoutStr}</td><td class="duration-badge">${dur}</td></tr>`;
-  }).join(''):`<tr><td colspan="5" class="no-data">まだログイン記録がありません</td></tr>`;
+  const rows=S.loginLogs.slice(0,100).map(s=>{
+    const dur=s.duration_seconds?formatSeconds(s.duration_seconds):(s.logout_at?'—':`<span style="color:var(--accent-green)">滞在中</span>`);
+    return`<tr><td>${esc(s.student_name)}</td><td><span style="font-size:.75rem;color:var(--text-dim)">${esc(s.class_name)}</span></td><td style="font-size:.8rem">${esc(s.login_at||'')}</td><td style="font-size:.8rem">${s.logout_at?esc(s.logout_at):'—'}</td><td class="duration-badge">${dur}</td></tr>`;
+  }).join('');
 
   return`
     <div class="section-title">🟢 現在オンライン（${active.length}名）</div>
     <div class="online-list">${onlineHtml}</div>
-    <div class="section-title">📋 入退室ログ <button class="logout-btn" id="refreshLoginLog" style="font-size:.6rem;padding:3px 8px;margin-left:8px;border-color:var(--accent-cyan);color:var(--accent-cyan)">🔄 API更新</button></div>
+    <div class="section-title">📋 入退室ログ</div>
     <div class="tbl-wrap"><table>
       <tr><th>名前</th><th>クラス</th><th>入室</th><th>退室</th><th>滞在時間</th></tr>
-      ${rows}
+      ${rows||'<tr><td colspan="5" class="no-data">まだログイン記録がありません</td></tr>'}
     </table></div>`;
 }
-async function refreshLoginLogFromAPI(){
-  try{
-    const data=await ANALYTICS_API.getLogins();
-    if(data&&data.recent&&Array.isArray(data.recent)){
-      const localTs=new Set(loginTracker.sessions.map(s=>s.loginTs));
-      data.recent.forEach(s=>{if(s.loginTs&&!localTs.has(s.loginTs))loginTracker.sessions.push(s)});
-      loginTracker.sessions.sort((a,b)=>b.loginTs-a.loginTs);
-      loginTracker.save();
-      showToast('✅ ログインデータを更新しました');
-      render();
-    }
-  }catch(e){showToast('⚠️ API取得に失敗しました')}
+
+function formatSeconds(sec){
+  if(!sec||sec<60)return'1分未満';
+  const h=Math.floor(sec/3600);const m=Math.floor((sec%3600)/60);
+  return h>0?`${h}時間${m}分`:`${m}分`;
+}
+function formatDurationFromDate(dateStr){
+  if(!dateStr)return'';
+  try{const ms=Date.now()-new Date(dateStr).getTime();return formatSeconds(Math.floor(ms/1000))}catch(e){return''}
 }
 
 // ═══ ゲーム利用状況 ═══
-// Analytics API対応: GET /api/t/:slug/analytics/gameplay
 function renderAdminGameUsage(){
-  const gameStats=gamePlayTracker.getGameStats();
-  const playerStats=gamePlayTracker.getPlayerStats();
-  const maxPlays=gameStats.length?Math.max(...gameStats.map(g=>g.plays)):1;
+  if(!S.gameplay){loadGameplay().then(()=>render());return'<div class="no-data">読み込み中...</div>'}
+  const perGame=S.gameplay.perGame||[];
+  const perPlayer=S.gameplay.perPlayer||[];
+  const maxPlays=perGame.length?Math.max(...perGame.map(g=>g.total_plays)):1;
 
-  // ゲーム別サマリー
-  const gameRows=gameStats.length?gameStats.map(gs=>{
-    const g=state.games.find(g=>g.id===gs.gameId);
-    const emoji=g?g.emoji:'❓';
-    const pct=Math.round(gs.plays/maxPlays*100);
+  const gameRows=perGame.length?perGame.map(g=>{
+    const pct=Math.round(g.total_plays/maxPlays*100);
     return`<div class="usage-bar-row">
-      <div class="usage-bar-label">${escHtml(emoji)} ${escHtml(gs.gameName)}</div>
+      <div class="usage-bar-label">${esc(g.emoji)} ${esc(g.game_name)}</div>
       <div class="usage-bar-track"><div class="usage-bar-fill" style="width:${pct}%"></div></div>
-      <div class="usage-bar-val">${gs.plays}回 / ${gs.uniquePlayers}人<br>${gamePlayTracker.formatDuration(gs.totalDuration)}</div>
+      <div class="usage-bar-val">${g.total_plays}回 / ${g.unique_players}人${g.total_duration?'<br>'+formatSeconds(g.total_duration):''}</div>
     </div>`;
   }).join(''):'<div class="no-data">まだプレイ記録がありません</div>';
 
-  // 生徒別カード
-  const playerCards=playerStats.length?playerStats.map(ps=>{
-    const cls=getPlayerClass(ps.user);
-    const clsTag=cls?`<span style="font-size:.65rem;color:var(--text-dim);background:rgba(0,0,0,0.04);padding:1px 8px;border-radius:10px">${escHtml(cls)}</span>`:'';
-    const gameList=Object.values(ps.games).sort((a,b)=>b.plays-a.plays);
-    const maxG=gameList.length?Math.max(...gameList.map(g=>g.plays)):1;
-    const bars=gameList.map(g=>{
-      const gg=state.games.find(sg=>sg.id===g.gameId);
-      const emoji=gg?gg.emoji:'❓';
-      const pct=Math.round(g.plays/maxG*100);
-      return`<div class="usage-bar-row">
-        <div class="usage-bar-label" style="min-width:70px;font-size:.75rem">${escHtml(emoji)} ${escHtml(g.gameName)}</div>
-        <div class="usage-bar-track"><div class="usage-bar-fill" style="width:${pct}%"></div></div>
-        <div class="usage-bar-val">${g.plays}回 ${gamePlayTracker.formatDuration(g.duration)}</div>
-      </div>`;
-    }).join('');
-    return`<div class="usage-card">
-      <h4><div class="user-avatar" style="width:24px;height:24px;font-size:.7rem">${escHtml(ps.user.charAt(0))}</div>${escHtml(ps.user)} ${clsTag}
-        <span style="margin-left:auto;font-family:'Orbitron';font-size:.7rem;color:var(--accent-cyan)">${ps.totalPlays}回 / ${gamePlayTracker.formatDuration(ps.totalDuration)}</span>
-      </h4>
-      <div class="usage-game-bars">${bars}</div>
-    </div>`;
-  }).join(''):'<div class="no-data">まだプレイ記録がありません。<br>生徒がゲームをプレイすると記録されます。</div>';
-
-  // 直近プレイログ
-  const recentPlays=gamePlayTracker.sessions.slice(0,30);
-  const recentRows=recentPlays.length?recentPlays.map(s=>{
-    const g=state.games.find(g=>g.id===s.gameId);
-    const emoji=g?g.emoji:'❓';
-    return`<tr><td>${escHtml(s.user)}</td><td>${escHtml(emoji)} ${escHtml(s.gameName)}</td><td class="duration-badge">${gamePlayTracker.formatDuration(s.duration)}</td><td style="font-size:.75rem;color:var(--text-dim)">${escHtml(s.date)}</td></tr>`;
-  }).join(''):'<tr><td colspan="4" class="no-data">まだ記録がありません</td></tr>';
-
-  return`
-    <div class="section-title">🎮 ゲーム別プレイ回数・時間 <button class="logout-btn" id="refreshGameUsage" style="font-size:.6rem;padding:3px 8px;margin-left:8px;border-color:var(--accent-cyan);color:var(--accent-cyan)">🔄 API更新</button></div>
-    <div class="usage-game-bars" style="background:var(--bg-card);border:1.5px solid rgba(0,0,0,0.06);border-radius:14px;padding:16px;margin-bottom:20px">${gameRows}</div>
-    <div class="section-title">👤 生徒別ゲーム利用状況</div>
-    ${playerCards}
-    <div class="section-title" style="margin-top:20px">📋 直近のプレイログ</div>
-    <div class="tbl-wrap"><table>
-      <tr><th>名前</th><th>ゲーム</th><th>プレイ時間</th><th>日時</th></tr>
-      ${recentRows}
-    </table></div>`;
-}
-async function refreshGameUsageFromAPI(){
-  try{
-    const data=await ANALYTICS_API.getGameplay();
-    if(data&&data.sessions&&Array.isArray(data.sessions)){
-      const localTs=new Set(gamePlayTracker.sessions.map(s=>s.startTs));
-      data.sessions.forEach(s=>{if(s.startTs&&!localTs.has(s.startTs))gamePlayTracker.sessions.push(s)});
-      gamePlayTracker.sessions.sort((a,b)=>b.startTs-a.startTs);
-      gamePlayTracker.save();
-      showToast('✅ ゲーム利用データを更新しました');
-      render();
-    }
-  }catch(e){showToast('⚠️ API取得に失敗しました')}
-}
-
-// ═══ アクティビティダッシュボード ═══
-function renderAdminActivity(){
-  // 統計カード
-  const totalCoins = state.coinLog.reduce((s,l)=>s+l.amount, 0);
-  const totalPlayers = state.players.length;
-  const totalGames = state.games.length;
-  const totalBadges = Object.values(state.badges).reduce((s,b)=>s+b, 0);
-  const activeGames = state.games.filter(g=>g.url&&g.url.trim()).length;
-
-  const statsHtml = `<div class="activity-stats">
-    <div class="stat-card stat-gold"><div class="stat-value">${totalCoins}</div><div class="stat-label">総ALT発行数</div></div>
-    <div class="stat-card stat-cyan"><div class="stat-value">${totalPlayers}</div><div class="stat-label">登録生徒数</div></div>
-    <div class="stat-card stat-green"><div class="stat-value">${activeGames}/${totalGames}</div><div class="stat-label">稼働ゲーム</div></div>
-    <div class="stat-card stat-orange"><div class="stat-value">${totalBadges}</div><div class="stat-label">総バッジ数</div></div>
-    <div class="stat-card stat-purple"><div class="stat-value">${state.rankings.length}</div><div class="stat-label">ランキング記録</div></div>
-  </div>`;
-
-  // 異常検知アラート
-  const alerts = activityLog.getAlerts();
-  const alertsHtml = alerts.length ? alerts.map(a=>`<div class="alert-card">${escHtml(a)}</div>`).join('') : '';
-
-  // クラス別統計
-  const classStats = state.classes.map(cls => {
-    const members = state.players.filter(p=>p.className===cls);
-    const classCoins = members.reduce((s,p)=>s+getPlayerCoins(p.name), 0);
-    const avgCoins = members.length ? Math.round(classCoins/members.length) : 0;
-    return `<div class="game-list-item">
-      <div class="game-list-item-info"><div><strong>${escHtml(cls)}</strong><div style="font-size:.7rem;color:var(--text-dim);margin-top:2px">${members.length}名</div></div></div>
-      <div style="text-align:right">
-        <div style="font-family:'Orbitron';font-weight:700;color:var(--accent-gold);font-size:.85rem">${classCoins} ALT</div>
-        <div style="font-size:.65rem;color:var(--text-dim)">平均 ${avgCoins}</div>
+  const playerCards=perPlayer.length?perPlayer.map(ps=>{
+    return`<div style="background:var(--bg-card);border:1.5px solid rgba(0,0,0,0.06);border-radius:14px;padding:16px;margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <div class="user-avatar" style="width:24px;height:24px;font-size:.7rem">${esc(ps.student_name.charAt(0))}</div>
+        <strong>${esc(ps.student_name)}</strong>
+        <span style="font-size:.65rem;color:var(--text-dim);background:rgba(0,0,0,0.04);padding:1px 8px;border-radius:10px">${esc(ps.class_name)}</span>
+        <span style="margin-left:auto;font-family:'Orbitron';font-size:.7rem;color:var(--accent-cyan)">${ps.total_plays}回${ps.total_duration?' / '+formatSeconds(ps.total_duration):''}</span>
       </div>
     </div>`;
-  }).join('');
+  }).join(''):'<div class="no-data">まだプレイ記録がありません</div>';
 
-  // ゲーム別利用統計
-  const gameStats = state.games.map(g => {
-    const plays = state.coinLog.filter(l=>l.gameId===g.id).length;
-    const totalAlt = state.coinLog.filter(l=>l.gameId===g.id).reduce((s,l)=>s+l.amount, 0);
-    const uniquePlayers = new Set(state.coinLog.filter(l=>l.gameId===g.id).map(l=>l.player)).size;
-    return {game: g, plays, totalAlt, uniquePlayers};
-  }).sort((a,b)=>b.plays-a.plays);
-
-  const gameStatsRows = gameStats.slice(0,10).map(gs =>
-    `<tr><td>${escHtml(gs.game.emoji)} ${escHtml(gs.game.name)}</td><td style="font-family:'Orbitron';font-weight:700;color:var(--accent-cyan)">${gs.plays}</td><td>${gs.uniquePlayers}人</td><td class="total-coins">${gs.totalAlt}</td></tr>`
-  ).join('') || '<tr><td colspan="4" class="no-data">データなし</td></tr>';
-
-  // アクティビティフィード
-  const feed = activityLog.getRecent(30);
-  const feedHtml = feed.length ? feed.map(item => {
-    const icons = {coin:'💰', badge:'🏅', player:'👤', game:'🎮', security:'🔒', ranking:'🏆', admin:'⚙️'};
-    return `<div class="activity-item">
-      <div class="activity-icon">${icons[item.type]||'📋'}</div>
-      <div class="activity-body"><strong>${escHtml(item.actor)}</strong><p>${escHtml(item.detail)}</p></div>
-      <div class="activity-time">${escHtml(item.time)}</div>
-    </div>`;
-  }).join('') : '<div class="no-data">まだアクティビティがありません。<br>操作を行うと記録されます。</div>';
-
-  return `
-    ${alertsHtml}
-    ${statsHtml}
-    <div class="section-title">🏫 クラス別統計</div>
-    <div class="game-list-admin" style="margin-bottom:20px">${classStats}</div>
-    <div class="section-title">🎮 ゲーム利用ランキング</div>
-    <div class="tbl-wrap" style="margin-bottom:20px"><table><tr><th>ゲーム</th><th>回数</th><th>利用者</th><th>ALT</th></tr>${gameStatsRows}</table></div>
-    <div class="section-title">📡 アクティビティフィード</div>
-    <div class="activity-feed">${feedHtml}</div>`;
+  return`
+    <div class="section-title">🎮 ゲーム別プレイ回数・時間</div>
+    <div style="background:var(--bg-card);border:1.5px solid rgba(0,0,0,0.06);border-radius:14px;padding:16px;margin-bottom:20px">${gameRows}</div>
+    <div class="section-title">👤 生徒別ゲーム利用状況</div>
+    ${playerCards}`;
 }
 
-// ============ EVENTS ============
+// ═══ 保護者PIN管理（管理者用） ═══
+function renderAdminParentPin(){
+  const sOpts=S.students.map(s=>`<option value="${s.id}">${esc(s.name)}（${esc(s.className)}）</option>`).join('');
+  return`<div class="admin-form" style="border-color:rgba(0,144,217,0.15)">
+    <h3 style="color:var(--accent-cyan)">📩 保護者PIN発行</h3>
+    <div class="form-stack">
+      <div class="form-group"><label>生徒を選択</label><select id="parentPinStudent">${sOpts}</select></div>
+      <button class="btn-primary btn-purple" id="issueParentPinBtn">📩 PIN発行</button>
+    </div>
+    <div id="parentPinResult"></div>
+    <div style="margin-top:16px;font-size:.75rem;color:var(--text-dim)">発行されたPINは保護者にお伝えください。保護者はログイン画面の「ほごしゃ」タブから、お子さまの名前とPINでログインできます。</div>
+  </div>`;
+}
+
+// ════════════════════════════════════
+// EVENTS
+// ════════════════════════════════════
 function bindEvents(){
-  // Class select
-  document.querySelectorAll('.class-select-btn').forEach(b=>{
-    b.onclick=()=>{state.loginClass=b.dataset.cls;render();const ni=document.getElementById('nameInput');if(ni)ni.scrollIntoView({behavior:'smooth',block:'center'});};
-  });
-  // Name input login
-  const loginBtn=document.getElementById('loginBtn');
-  const nameInput=document.getElementById('nameInput');
-  if(loginBtn){
-    loginBtn.onclick=()=>{
-      const name=nameInput.value.trim();
-      const nameErr=validateName(name);
-      if(nameErr){showToast('⚠️ '+nameErr);return}
-      // Check if registered player in this class
-      const match=state.players.find(p=>p.name===name&&p.className===state.loginClass);
-      if(match){
-        state.user=match.name;state.screen='portal';
-        SESSION.save('portal', match.name, state.loginClass);
-        activityLog.add('player', match.name, `ログイン（${escHtml(state.loginClass)}）`);
-        loginTracker.startSession(match.name, state.loginClass);
-        render();
-      }else if(playerExists(name)){
-        // Same name exists in different class
-        showToast('⚠️ このなまえは別のクラスで登録されています');
-      }else{
-        showToast('⚠️ 登録されていません。先生にたのんでね');
-      }
-    };
-    nameInput.onkeydown=(e)=>{if(e.key==='Enter')loginBtn.click()};
-    nameInput.focus();
-  }
-  // Login tab switching
-  const tabS=document.getElementById('tabStudent');if(tabS)tabS.onclick=()=>{state.loginTab='student';render()};
-  const tabP=document.getElementById('tabParent');if(tabP)tabP.onclick=()=>{state.loginTab='parent';render()};
+  on('goTenantBtn','click',async()=>{const slug=val('slugInput');if(!slug){toast('教室IDを入力してください');return}try{const r=await apiGet('/t/'+slug+'/info');S.tenant=r.tenant;const cRes=await apiGet('/t/'+slug+'/classes');S.classes=cRes.classes||[];try{const gRes=await apiGet('/t/'+slug+'/games');S.games=gRes.games||[]}catch(e){}S.screen='student-login';render()}catch(e){toast('教室が見つかりません: '+e.message)}});
+  on('registerLink','click',()=>{S.screen='register';render()});
+  on('backToLanding','click',()=>{S.screen='landing';render()});
+  on('registerBtn','click',async()=>{const name=val('regName'),slug=val('regSlug'),email=val('regEmail'),pass=val('regPass'),display=val('regDisplay');if(!name||!slug||!email||!pass){toast('全項目を入力してください');return}try{const r=await apiPost('/auth/register',{tenantName:name,slug,email,password:pass,displayName:display||name});S.token=r.token;S.tenant=r.tenant;S.user={email,displayName:display||name,role:'owner'};S.screen='admin';AUTH.save({token:S.token,tenant:S.tenant,user:S.user,screen:'admin'});await loadTenantData();toast('教室を作成しました！')}catch(e){toast('登録エラー: '+e.message)}});
+  document.querySelectorAll('.class-select-btn').forEach(b=>{b.onclick=()=>{S.loginClass=b.dataset.cls;render()}});
+  on('loginBtn','click',async()=>{const name=val('nameInput');const nameErr=validateName(name);if(nameErr){toast(nameErr);return}const hErr=validateHiragana(name);if(hErr){toast(hErr);return}try{const r=await apiPost('/auth/student/login',{tenantSlug:S.tenant.slug,className:S.loginClass,studentName:name});S.token=r.token;S.user={id:r.student.id,name:r.student.name,className:r.student.className,role:'student'};S.screen='portal';AUTH.save({token:S.token,tenant:S.tenant,user:S.user,screen:'portal'});await loadTenantData()}catch(e){toast(e.message)}});
+  const ni=document.getElementById('nameInput');if(ni){ni.onkeydown=e=>{if(e.key==='Enter'){const b=document.getElementById('loginBtn');if(b)b.click()}};ni.focus()}
+
+  // Login tab switch
+  on('tabStudent','click',()=>{S.loginTab='student';render()});
+  on('tabParent','click',()=>{S.loginTab='parent';render()});
+
   // Parent login
-  const plBtn=document.getElementById('parentLoginBtn');
-  const pnInput=document.getElementById('parentNameInput');
-  const ppInput=document.getElementById('parentPinInput');
-  if(plBtn){
-    plBtn.onclick=async()=>{
-      const sName=pnInput.value.trim();
-      const pin=ppInput.value.trim();
-      if(!sName||!pin){showToast('⚠️ 名前とPINを入力してください');return}
-      plBtn.disabled=true;plBtn.textContent='ログイン中...';
-      try{
-        const r=await fetch('/api/auth/parent-login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tenantSlug:state.tenant?state.tenant.slug:'demo',studentName:sName,pin:pin})});
-        const d=await r.json();
-        if(r.ok&&d.token){location.href='/parent.html?token='+encodeURIComponent(d.token)}
-        else{showToast('❌ '+(d.error||'ログインに失敗しました'));plBtn.disabled=false;plBtn.textContent='保護者ログイン ▶'}
-      }catch(e){showToast('⚠️ サーバーに接続できません');plBtn.disabled=false;plBtn.textContent='保護者ログイン ▶'}
-    };
-    if(ppInput)ppInput.onkeydown=(e)=>{if(e.key==='Enter')plBtn.click()};
-    if(pnInput)pnInput.focus();
-  }
-  const gl=document.getElementById('guestLink');if(gl)gl.onclick=()=>{state.user='__guest__';state.screen='guest';render()};
-  const al=document.getElementById('adminLink');if(al)al.onclick=()=>{state.screen='admin-login';render()};
-  const bl=document.getElementById('backToLogin');if(bl)bl.onclick=()=>{state.screen='login';render()};
-  const apb=document.getElementById('adminPassBtn');const api=document.getElementById('adminPassInput');
-  if(apb){
-    apb.onclick=async()=>{
-      if(LOGIN_SECURITY.isLocked()){showToast('🔒 ロックアウト中です');render();return}
-      const pw=api.value;
-      if(!pw){showToast('⚠️ パスワードを入力してください');return}
-      apb.disabled=true;apb.textContent='認証中...';
-      try{
-        const res=await apiPost({action:'adminLogin',password:pw});
-        if(res&&res.ok&&res.token){
-          LOGIN_SECURITY.reset();
-          ADMIN_TOKEN.set(res.token, res.expiresIn);
-          state.screen='admin';
-          SESSION.save('admin', null, null);
-          activityLog.add('admin','管理者','ログイン成功（サーバー認証）');
-          render();
-        } else {
-          LOGIN_SECURITY.recordFailure();
-          const msg=(res&&res.message)?res.message:'パスワードが違います';
-          activityLog.add('security','管理者ログイン','パスワード不一致（試行'+LOGIN_SECURITY.attempts+'回目）');
-          if(res&&res.error==='RATE_LIMITED'){
-            LOGIN_SECURITY.lockedUntil=Date.now()+(res.waitSeconds||60)*1000;
-            showToast('🔒 サーバー側でロックされました');
-          } else if(LOGIN_SECURITY.isLocked()){
-            showToast('🔒 ロックアウトされました（60秒間）');
-            const lockTimer=setInterval(()=>{
-              if(!LOGIN_SECURITY.isLocked()){clearInterval(lockTimer);render();return}
-              render();
-            },1000);
-          } else {
-            showToast('❌ '+msg);
-          }
-          render();
-        }
-      }catch(e){
-        showToast('⚠️ サーバーに接続できません');
-        render();
-      }
-    };
-    api.onkeydown=(e)=>{if(e.key==='Enter')apb.click()};api.focus();
-  }
-  const lo=document.getElementById('logoutBtn');if(lo)lo.onclick=()=>{
-    if(state.user&&state.user!=='__guest__')loginTracker.endSession(state.user);
-    // 管理者トークン破棄（サーバー側も無効化）
-    const adminToken=ADMIN_TOKEN.get();
-    if(adminToken){apiPost({action:'adminLogout',token:adminToken}).catch(()=>{});ADMIN_TOKEN.clear()}
-    state.user=null;state.loginClass=null;state.screen='login';SESSION.clear();render();
-  };
-
-  document.querySelectorAll('.cat-btn').forEach(b=>{b.onclick=()=>{state.selectedCategory=b.dataset.cat;render()}});
-  // ゲームプレイ記録
-  document.querySelectorAll('.game-card[data-gid]').forEach(card=>{
-    card.addEventListener('click',()=>{
-      if(state.user&&state.user!=='__guest__'){
-        const gid=parseInt(card.dataset.gid);const g=state.games.find(g=>g.id===gid);
-        if(g&&g.url&&g.url.trim()) gamePlayTracker.startPlay(state.user, gid, g.name);
-      }
-    });
+  on('parentLoginBtn','click',async()=>{
+    const name=val('parentStudentName'),pin=val('parentPin');
+    if(!name||!pin){toast('名前とPINを入力してください');return}
+    if(!/^\d{4}$/.test(pin)){toast('PINは4桁の数字です');return}
+    try{
+      const r=await apiPost('/auth/parent-login',{tenantSlug:S.tenant.slug,studentName:name,pin});
+      S.token=r.token;S.user={id:r.student.id,name:r.student.name,className:r.student.className,role:'parent'};
+      AUTH.save({token:S.token,tenant:S.tenant,user:S.user,screen:'portal'});
+      window.location.href='/parent.html';
+    }catch(e){toast(e.message)}
   });
-  document.querySelectorAll('.admin-tab').forEach(t=>{t.onclick=()=>{state.adminTab=t.dataset.tab;render()}});
-  // ★ ポータルタブ
-  document.querySelectorAll('.portal-tab').forEach(t=>{t.onclick=()=>{state.portalTab=t.dataset.ptab;render()}});
-  // ★ ゲーム別ランキングタブ（URL ?gameId= パラメータ連動）
-  document.querySelectorAll('.game-rank-tab').forEach(t=>{t.onclick=()=>{state.selectedRankGame=parseInt(t.dataset.rgid);setUrlParam('gameId',t.dataset.rgid);render()}});
+  const pi=document.getElementById('parentPin');if(pi){pi.onkeydown=e=>{if(e.key==='Enter'){const b=document.getElementById('parentLoginBtn');if(b)b.click()}}}
 
-  // Add coin
-  const acb=document.getElementById('addCoinBtn');
-  if(acb)acb.onclick=async()=>{
-    const player=document.getElementById('coinPlayer').value;
-    const gameId=parseInt(document.getElementById('coinGame').value);
-    const gameName=getGameName(gameId);
-    const amount=parseInt(document.getElementById('coinAmount').value);
-    if(!player||!gameId||!amount||amount<1)return;
-    const now=new Date();const date=`${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
-    // ローカル即反映
-    state.coinLog.push({id:Date.now(),player,gameId,gameName,amount,date});
-    activityLog.add('coin', player, `${gameName} で ${amount} ALT獲得`);
-    showToast(`🪙 ${player}に${amount}ALT付与！`);render();
-    // API送信
-    await adminApiPost({action:'addCoin',player,gameId,gameName,amount});
-  };
-
-  // Add player
-  const apb2=document.getElementById('addPlayerBtn');
-  if(apb2)apb2.onclick=async()=>{
-    const name=document.getElementById('newPlayerName').value.trim();
-    const className=document.getElementById('newPlayerClass').value;
-    if(!name||!className){showToast('⚠️ なまえとクラスを入力');return}
-    const nameErr = validateName(name);
-    if(nameErr){showToast('⚠️ '+nameErr);return}
-    if(playerExists(name)){showToast('⚠️ すでに登録されています');return}
-    state.players.push({name,className});
-    activityLog.add('player', name, `新規登録（${className}）`);
-    showToast(`✅ ${name}（${className}）を追加`);render();
-    const res=await adminApiPost({action:'addPlayer',name,className});
-    if(res&&res.error)showToast('⚠️ '+res.error);
-  };
-
-  // Add badge
-  const abb=document.getElementById('addBadgeBtn');
-  if(abb)abb.onclick=async()=>{
-    const player=document.getElementById('badgePlayer').value;if(!player)return;
-    state.badges[player]=(state.badges[player]||0)+1;
-    activityLog.add('badge', player, `バッジ付与（計${state.badges[player]}個）`);
-    showToast(`🏅 ${player}にバッジ付与！（計${state.badges[player]}個）`);render();
-    await adminApiPost({action:'addBadge',player});
-  };
-
-  // Add game
-  const agb=document.getElementById('addGameBtn');
-  if(agb)agb.onclick=async()=>{
-    const name=document.getElementById('newGameName').value.trim();if(!name)return;
-    if(name.length > VALIDATION.MAX_GAME_NAME_LENGTH){showToast('⚠️ ゲーム名が長すぎます');return}
-    const url=document.getElementById('newGameUrl').value.trim();
-    const urlErr = validateUrl(url);
-    if(urlErr){showToast('⚠️ '+urlErr);return}
-    const emoji=document.getElementById('newGameEmoji').value.trim()||'🎮';
-    const category=document.getElementById('newGameCat').value;
-    const newGameId=Date.now();
-    state.games.push({id:newGameId,name,emoji,url,category});
-    activityLog.add('game', name, `新しいゲーム追加（${category}）`);
-    showToast(`✅ ${emoji} ${name}を追加しました`);render();
-    const res=await adminApiPost({action:'addGame',name,emoji,url,category});
-    if(res&&res.id){
-      // APIから返ったIDでローカルを更新
-      const g=state.games.find(g=>g.id===newGameId);
-      if(g)g.id=res.id;
-    }
-  };
-
-  // Delete game
-  document.querySelectorAll('.delete-btn[data-gameid]').forEach(b=>{
-    b.onclick=async()=>{const gid=parseInt(b.dataset.gameid);if(!confirm('このゲームを削除しますか？'))return;
-      state.games=state.games.filter(g=>g.id!==gid);showToast('🗑️ 削除しました');render();
-      await adminApiPost({action:'deleteGame',gameId:gid});
-    };
+  // Guest
+  on('guestLink','click',()=>{S.screen='guest';render()});
+  on('adminLink','click',()=>{S.screen='admin-login';render()});
+  on('backToStudentLogin','click',()=>{S.screen='student-login';render()});
+  on('adminLoginBtn','click',async()=>{if(LOGIN_SECURITY.isLocked()){toast('ロックアウト中です');return}const email=val('adminEmail'),pass=val('adminPass');if(!email||!pass){toast('入力してください');return}try{const r=await apiPost('/auth/admin/login',{email,password:pass});LOGIN_SECURITY.reset();S.token=r.token;S.tenant=r.tenant;S.user={...r.user,role:r.user.role};S.screen='admin';AUTH.save({token:S.token,tenant:S.tenant,user:S.user,screen:'admin'});await loadTenantData()}catch(e){LOGIN_SECURITY.recordFailure();toast(e.message);render();if(LOGIN_SECURITY.isLocked()){const iv=setInterval(()=>{const el=document.getElementById('lockCountdown');if(!el||!LOGIN_SECURITY.isLocked()){clearInterval(iv);if(!LOGIN_SECURITY.isLocked())render();return}el.textContent=LOGIN_SECURITY.getRemainingSeconds()},1000)}}});
+  on('logoutBtn','click',()=>{S.token=null;S.user=null;S.dashboard=null;S.coinLogs=[];S.students=[];S.badges=[];S.streak=null;S.studentDashboard=null;AUTH.clear();S.screen=S.tenant?'student-login':'landing';render()});
+  document.querySelectorAll('.portal-tab').forEach(t=>{t.onclick=()=>{S.portalTab=t.dataset.ptab;if(t.dataset.ptab==='dashboard'&&!S.studentDashboard)loadStudentDashboard();render()}});
+  document.querySelectorAll('.dash-stat-tab').forEach(t=>{t.onclick=()=>{S.dashStatPeriod=t.dataset.dashPeriod;render()}});
+  document.querySelectorAll('[data-dash-go-games]').forEach(b=>{b.onclick=()=>{S.portalTab='games';render()}});
+  document.querySelectorAll('.cat-btn:not(.comment-tpl)').forEach(b=>{b.onclick=()=>{S.selectedCategory=b.dataset.cat;render()}});
+  document.querySelectorAll('.game-rank-tab').forEach(t=>{t.onclick=()=>{S.selectedRankGame=parseInt(t.dataset.rgid);render()}});
+  document.querySelectorAll('.game-card[href]').forEach(a=>{a.addEventListener('click',()=>{const gid=a.dataset.gid;const g=S.games.find(g=>String(g.id)===gid);if(g&&S.user)gamePlayTracker.startPlay(S.user.name,g.id,g.name)})});
+  document.querySelectorAll('.admin-tab').forEach(t=>{t.onclick=()=>{S.adminTab=t.dataset.tab;S.dashboard=null;if(t.dataset.tab!=='summary')S.parentTokens=null;render()}});
+  on('refreshBtn','click',()=>{S.dashboard=null;loadTenantData()});
+  on('addCoinBtn','click',async()=>{const sid=val('coinStudent'),gid=val('coinGame'),amt=parseInt(val('coinAmount'));if(!sid||!amt||amt<1)return;try{await apiPost('/t/'+S.tenant.slug+'/coins',{studentId:parseInt(sid),gameId:parseInt(gid),amount:amt});toast('🪙 ALT付与しました！');await loadTenantData()}catch(e){toast(e.message)}});
+  on('addStudentBtn','click',async()=>{const name=val('newStudentName'),cls=val('newStudentClass');if(!name||!cls){toast('名前とクラスを入力');return}try{await apiPost('/t/'+S.tenant.slug+'/students',{name,className:cls});toast('✅ '+name+'を追加');await loadTenantData()}catch(e){toast(e.message)}});
+  on('addBadgeBtn','click',async()=>{const sid=val('badgeStudent');if(!sid)return;try{await apiPost('/t/'+S.tenant.slug+'/badges',{studentId:parseInt(sid)});toast('🏅 バッジ付与！');await loadTenantData()}catch(e){toast(e.message)}});
+  on('addGameBtn','click',async()=>{const name=val('newGameName');if(!name)return;const url=val('newGameUrl'),emoji=val('newGameEmoji')||'🎮',cat=val('newGameCat');const urlErr=validateUrl(url);if(urlErr){toast(urlErr);return}try{await apiPost('/t/'+S.tenant.slug+'/games',{name,emoji,url,category:cat});toast('✅ '+name+'を追加');await loadTenantData()}catch(e){toast(e.message)}});
+  document.querySelectorAll('[data-del-game]').forEach(b=>{b.onclick=async()=>{if(!confirm('このゲームを削除しますか？'))return;try{await apiDel('/t/'+S.tenant.slug+'/games/'+b.dataset.delGame);toast('削除しました');await loadTenantData()}catch(e){toast(e.message)}}});
+  document.querySelectorAll('[data-save-game]').forEach(b=>{b.onclick=async()=>{const gid=b.dataset.saveGame;const input=document.querySelector('[data-url-game="'+gid+'"]');const url=input?input.value.trim():'';const urlErr=validateUrl(url);if(urlErr){toast(urlErr);return}try{await apiPut('/t/'+S.tenant.slug+'/games/'+gid,{url});toast('URL保存しました');await loadTenantData()}catch(e){toast(e.message)}}});
+  document.querySelectorAll('[data-del-rank]').forEach(b=>{b.onclick=async()=>{if(!confirm('この記録を削除しますか？'))return;try{await apiDel('/t/'+S.tenant.slug+'/rankings/'+b.dataset.delRank);toast('削除しました');await loadTenantData()}catch(e){toast(e.message)}}});
+  on('addClassBtn','click',async()=>{const name=val('newClassName');if(!name)return;try{await apiPost('/t/'+S.tenant.slug+'/classes',{name});toast('🏫 '+name+'を追加');await loadTenantData()}catch(e){toast(e.message)}});
+  document.querySelectorAll('[data-del-cls]').forEach(b=>{b.onclick=async()=>{if(!confirm('このクラスを削除しますか？'))return;try{await apiDel('/t/'+S.tenant.slug+'/classes/'+b.dataset.delCls);toast('削除しました');await loadTenantData()}catch(e){toast(e.message)}}});
+  document.querySelectorAll('[data-parent-link]').forEach(b=>{b.onclick=async()=>{const sid=parseInt(b.dataset.parentLink);const sname=b.dataset.sname||'';try{const r=await apiPost('/parent-tokens',{tenant_id:S.tenant.id,student_id:sid});const url=location.origin+r.url;if(navigator.clipboard){await navigator.clipboard.writeText(url);toast('📩 '+sname+'の保護者リンクをコピーしました！')}else{prompt('以下のURLをコピーしてください:',url)}}catch(e){toast('エラー: '+e.message)}}});
+  document.querySelectorAll('.comment-tpl').forEach(b=>{b.onclick=()=>{const inp=document.getElementById('commentText');if(inp)inp.value=b.dataset.tpl}});
+  on('refreshTokensBtn','click',()=>{S.parentTokens=null;render()});
+  document.querySelectorAll('[data-copy-token]').forEach(b=>{b.onclick=async()=>{const url=b.dataset.copyToken;if(navigator.clipboard){await navigator.clipboard.writeText(url);toast('📋 URLをコピーしました')}else{prompt('URLをコピー:',url)}}});
+  document.querySelectorAll('[data-revoke-token]').forEach(b=>{b.onclick=async()=>{const id=b.dataset.revokeToken;const sname=b.dataset.sname||'この生徒';if(!confirm(sname+'の保護者リンクを無効化しますか？'))return;try{await apiDel('/parent-tokens/'+id);toast('🗑 '+sname+'の保護者リンクを無効化しました');S.parentTokens=null;render()}catch(e){toast('エラー: '+e.message)}}});
+  on('saveCommentBtn','click',async()=>{const sid=val('commentStudent'),text=val('commentText');if(!sid||!text){toast('生徒とコメントを入力してください');return}const now=new Date();const month=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');try{await apiPost('/teacher-comments',{tenant_id:S.tenant.id,student_id:parseInt(sid),comment:text,month});toast('💬 コメントを保存しました');document.getElementById('commentText').value=''}catch(e){toast('エラー: '+e.message)}});
+  on('issueParentPinBtn','click',async()=>{
+    const sid=val('parentPinStudent');if(!sid)return;
+    try{
+      const r=await apiPost('/auth/parent-tokens',{studentId:parseInt(sid)});
+      const url=location.origin+'/';
+      const msg=`【TRAIL GAME PRO 3 保護者ログイン】\nお子さま: ${r.student.name}（${r.student.className}）\nPIN: ${r.pin}\nログインURL: ${url}\n※ログイン画面で「ほごしゃ」タブを選び、お子さまの名前とPINを入力してください。`;
+      const box=document.getElementById('parentPinResult');
+      box.innerHTML=`<div style="margin-top:14px;background:rgba(0,144,217,0.06);border:1.5px solid rgba(0,144,217,0.2);border-radius:10px;padding:14px">
+        <div style="font-family:'Orbitron',sans-serif;font-size:.65rem;color:var(--accent-cyan);margin-bottom:8px;letter-spacing:1px">PIN発行完了</div>
+        <div style="font-size:.85rem;font-weight:700;margin-bottom:4px">${esc(r.student.name)}（${esc(r.student.className)}）</div>
+        <div style="font-family:'Orbitron',sans-serif;font-size:1.6rem;font-weight:900;letter-spacing:8px;color:var(--accent-purple);margin:8px 0">${esc(r.pin)}</div>
+        <button class="btn-primary btn-purple" id="copyPinBtn" style="font-size:.7rem;padding:10px">📋 LINEやメール用にコピー</button>
+      </div>`;
+      document.getElementById('copyPinBtn').onclick=()=>{
+        navigator.clipboard.writeText(msg).then(()=>toast('コピーしました！LINEやメールに貼り付けてください')).catch(()=>{prompt('以下をコピーしてください:',msg)});
+      };
+    }catch(e){toast('PIN発行エラー: '+e.message)}
   });
-
-  // ★ ランキング記録削除（管理者）
-  document.querySelectorAll('.rank-del-btn').forEach(b=>{
-    b.onclick=async()=>{
-      const gid=parseInt(b.dataset.rgid);const player=b.dataset.rplayer;
-      if(!confirm(`「${player}」の記録を削除しますか？`))return;
-      state.rankings=state.rankings.filter(r=>!(r.gameId===gid&&r.player===player));
-      showToast(`🗑️ ${player}の記録を削除`);render();
-      await adminApiPost({action:'deleteRankingEntry',gameId:gid,player});
-    };
-  });
-
-  // Save game URL
-  document.querySelectorAll('.url-save-btn').forEach(b=>{
-    b.onclick=async()=>{
-      const gid=parseInt(b.dataset.gameid);
-      const input=document.querySelector(`.url-edit[data-gameid="${gid}"]`);
-      const url=input?input.value.trim():'';
-      if(url){const urlErr=validateUrl(url);if(urlErr){showToast('⚠️ '+urlErr);return}}
-      const g=state.games.find(g=>g.id===gid);
-      if(g)g.url=url;
-      showToast('✅ URL保存しました');render();
-      await adminApiPost({action:'updateGameUrl',gameId:gid,url});
-    };
-  });
-
-  // Add class
-  const aclb=document.getElementById('addClassBtn');
-  if(aclb)aclb.onclick=async()=>{
-    const name=document.getElementById('newClassName').value.trim();if(!name)return;
-    const clsErr=validateClassName(name);
-    if(clsErr){showToast('⚠️ '+clsErr);return}
-    if(state.classes.includes(name)){showToast('⚠️ すでにあります');return}
-    state.classes.push(name);showToast(`🏫 ${name}を追加`);render();
-    await adminApiPost({action:'addClass',className:name});
-  };
-
-  // Delete class
-  document.querySelectorAll('.cls-del').forEach(b=>{
-    b.onclick=async()=>{const cls=b.dataset.cls;
-      const count=state.players.filter(p=>p.className===cls).length;
-      if(!confirm(`「${cls}」を削除しますか？${count>0?`\n（${count}名の生徒がこのクラスに所属しています）`:''}`))return;
-      state.classes=state.classes.filter(c=>c!==cls);showToast('🗑️ 削除');render();
-      await adminApiPost({action:'deleteClass',className:cls});
-    };
-  });
-
-  // Refresh data
-  const rfb=document.getElementById('refreshBtn');
-  if(rfb)rfb.onclick=()=>{loadData()};
-
-  // Analytics API refresh buttons
-  const rll=document.getElementById('refreshLoginLog');
-  if(rll)rll.onclick=()=>{refreshLoginLogFromAPI()};
-  const rgu=document.getElementById('refreshGameUsage');
-  if(rgu)rgu.onclick=()=>{refreshGameUsageFromAPI()};
 }
+function on(id,ev,fn){const el=document.getElementById(id);if(el)el.addEventListener(ev,fn)}
+function val(id){const el=document.getElementById(id);return el?el.value.trim():''}
+createStars();
 
-function createStars(){
-  const c=document.getElementById('stars');
-  for(let i=0;i<50;i++){const s=document.createElement('div');s.className='star';s.style.left=Math.random()*100+'%';s.style.top=Math.random()*100+'%';s.style.animationDelay=Math.random()*3+'s';s.style.animationDuration=(2+Math.random()*3)+'s';s.style.width=s.style.height=(1+Math.random()*2)+'px';c.appendChild(s)}
-}
-
-// セッション復元（管理者セッションは復元しない — パスワード再入力を強制）
-(function restoreSession(){
-  const s = SESSION.load();
-  if(s){
-    if(s.screen==='portal' && s.user){
-      state.screen='portal'; state.user=s.user; state.loginClass=s.loginClass;
-    }
-    // admin セッションは復元しない（sessionStorage改竄によるバイパス防止）
+// ★ 0-15: ページ復帰時にデータ更新（ゲームから戻ったとき）
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='visible'&&S.user&&S.tenant){
+    setTimeout(()=>{loadTenantData();if(S.user.role==='student')loadStreak()},800);
   }
-  applyUrlParams(); // ?gameId= パラメータ対応
-})();
-loadData();createStars();
+});
+
+if(S.token&&S.tenant){loadTenantData()}else{render()}
 </script>
 </body>
 </html>

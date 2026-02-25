@@ -405,7 +405,25 @@ try {
 } catch (e) { /* already exists */ }
 // UNIQUE constraint for tenant+student in parent_tokens
 db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_parent_tokens_tenant_student ON parent_tokens(tenant_id, student_id)`);
+// PIN初期値を0000に統一（NULLまたは空文字のもの）
+db.exec(`UPDATE parent_tokens SET pin = '0000' WHERE pin IS NULL OR pin = ''`);
   console.log('  Migrations: OK');
+
+  // ── Auto-add new games to all existing tenants ──
+  const newGames = [
+    { name: '書き順マスター', emoji: '✍️', url: 'https://tanqtrail-arch.github.io/kanji-stroke/', category: '国語' },
+  ];
+  const allTenants = db.prepare('SELECT id FROM tenants').all();
+  const insertNewGame = db.prepare(`
+    INSERT INTO games (tenant_id, name, emoji, url, category)
+    SELECT ?, ?, ?, ?, ?
+    WHERE NOT EXISTS (SELECT 1 FROM games WHERE tenant_id = ? AND name = ? AND is_active = 1)
+  `);
+  for (const t of allTenants) {
+    for (const g of newGames) {
+      insertNewGame.run(t.id, g.name, g.emoji, g.url, g.category, t.id, g.name);
+    }
+  }
 
   // Seed demo tenant if no tenants exist
   const count = db.prepare('SELECT COUNT(*) as c FROM tenants').get().c;
@@ -422,6 +440,9 @@ db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_parent_tokens_tenant_student ON p
       ['探究キッズ','探究スターター','探究ベーシック','探究アドバンス','探究リミットレス','探究個別'].forEach(c => insertClass.run(tenantId, c));
       const insertGame = db.prepare('INSERT INTO games (tenant_id, name, emoji, category) VALUES (?, ?, ?, ?)');
       [['分数融合','🧬','算数'],['分数ガンマン','🔫','算数'],['どっちがおおきい','⚖️','算数'],['約分工房','🔧','算数'],['分数テトリス','🧱','算数'],['暗算パネル','🧠','算数'],['特産品マッチング','🍎','地理'],['都道府県シルエットクイズ','🗾','地理'],['気候バトルカード','🌦️','理科'],['絵画クイズ','🎨','その他'],['元素クエスト','⚗️','理科'],['迷路アタック','🏃','その他'],['お土産暗算','🛍️','算数'],['江戸時代迷路クイズ','🏯','歴史'],['文明ビルダー','🏛️','歴史']].forEach(g => insertGame.run(tenantId, g[0], g[1], g[2]));
+      // URL付きゲーム
+      const insertGameWithUrl = db.prepare('INSERT INTO games (tenant_id, name, emoji, url, category) VALUES (?, ?, ?, ?, ?)');
+      [['書き順マスター','✍️','https://tanqtrail-arch.github.io/kanji-stroke/','国語']].forEach(g => insertGameWithUrl.run(tenantId, g[0], g[1], g[2], g[3]));
     })();
     console.log(`  Seed: demo tenant created (slug: demo, email: ${adminEmail}, pass: ${adminPass})`);
   }

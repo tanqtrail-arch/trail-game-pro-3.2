@@ -6,7 +6,7 @@
 
 const { Router } = require('express');
 const db = require('../db');
-const { requireStudent } = require('../middleware/auth');
+const { verifyToken } = require('../middleware/auth');
 
 const router = Router();
 
@@ -92,15 +92,35 @@ function getTodayMission(studentId, tenantId, jstToday) {
 }
 
 // ═══ メインエンドポイント ═══
-router.get('/:tenantSlug/student-dashboard', requireStudent, (req, res) => {
+router.get('/:tenantSlug/student-dashboard', (req, res) => {
   try {
     const tenant = db.prepare('SELECT * FROM tenants WHERE slug = ?').get(req.params.tenantSlug);
-    if (!tenant || req.tenantId !== tenant.id) {
-      return res.status(403).json({ error: 'アクセス権がありません' });
+    if (!tenant) {
+      return res.status(404).json({ error: 'テナントが見つかりません' });
     }
 
-    const studentId = req.user.studentId;
     const tenantId = tenant.id;
+
+    // Bearer認証 or クエリパラメータ ?student= で生徒を特定
+    let studentId = null;
+    const auth = req.headers.authorization;
+    if (auth && auth.startsWith('Bearer ')) {
+      try {
+        const decoded = verifyToken(auth.slice(7));
+        if (decoded.role === 'student' && decoded.tenantId === tenantId) {
+          studentId = decoded.studentId;
+        }
+      } catch (e) { /* ignore invalid token */ }
+    }
+    if (!studentId && req.query.student) {
+      const studentRow = db.prepare(
+        'SELECT id FROM students WHERE name = ? AND tenant_id = ?'
+      ).get(req.query.student, tenantId);
+      if (studentRow) studentId = studentRow.id;
+    }
+    if (!studentId) {
+      return res.status(400).json({ error: '生徒の指定が必要です' });
+    }
 
     // JST日付
     const jstNow = new Date(Date.now() + 9 * 60 * 60 * 1000);
