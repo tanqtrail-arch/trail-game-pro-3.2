@@ -56,9 +56,10 @@ db.transaction(() => {
     { name: 'お土産暗算', emoji: '🛍️', category: '算数' },
     { name: '江戸時代迷路クイズ', emoji: '🏯', category: '歴史' },
     { name: '文明ビルダー', emoji: '🏛️', category: '歴史' },
+    { name: '書き順マスター', emoji: '✍️', url: 'https://tanqtrail-arch.github.io/kanji-stroke/', category: '国語' },
   ];
-  const insertGame = db.prepare('INSERT OR IGNORE INTO games (tenant_id, name, emoji, category) VALUES (?, ?, ?, ?)');
-  defaultGames.forEach(g => insertGame.run(tenantId, g.name, g.emoji, g.category));
+  const insertGame = db.prepare('INSERT OR IGNORE INTO games (tenant_id, name, emoji, url, category) VALUES (?, ?, ?, ?, ?)');
+  defaultGames.forEach(g => insertGame.run(tenantId, g.name, g.emoji, g.url || null, g.category));
 })();
 
 console.log('Seed completed.');
