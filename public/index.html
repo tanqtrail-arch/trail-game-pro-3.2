@@ -500,9 +500,11 @@ function renderStudentLogin(){
   const tabBtnBase='flex:1;padding:8px 6px;border:none;border-radius:8px;font-family:inherit;font-size:.8rem;font-weight:700;cursor:pointer;transition:all .3s';
   const tabBtnActive='background:var(--accent-cyan);color:#fff';
   const tabBtnInactive='background:none;color:var(--text-dim)';
+  const parentActive='background:#F97316;color:#fff';
+  const parentInactive='background:none;color:#F97316';
   const loginTabs=`<div style="${tabStyle}">
     <button id="tabStudent" style="${tabBtnBase};${isStudent?tabBtnActive:tabBtnInactive}">🎮 せいと</button>
-    <button id="tabParent" style="${tabBtnBase};${!isStudent?tabBtnActive:tabBtnInactive}">👨‍👩‍👧 ほごしゃ</button>
+    <button id="tabParent" style="${tabBtnBase};${!isStudent?parentActive:parentInactive}">👨‍👩‍👧 ほごしゃ</button>
   </div>`;
 
   let formContent='';
