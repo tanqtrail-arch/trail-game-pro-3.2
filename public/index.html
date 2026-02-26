@@ -525,7 +525,7 @@ function renderStudentLogin(){
     formContent=`<div style="font-size:.8rem;color:var(--text-dim);margin-bottom:14px">おこさまの名前とPINを入力してください</div>
       <input class="login-input" id="parentStudentName" placeholder="おこさまのなまえ" maxlength="20" autocomplete="off"/>
       <input class="login-input" id="parentPin" type="tel" placeholder="4桁PIN" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" autocomplete="off" style="letter-spacing:8px;text-align:center;font-family:'Orbitron',sans-serif;font-size:1.2rem"/>
-      <button class="login-btn" id="parentLoginBtn">ログイン ▶</button>`;
+      <button class="login-btn" id="parentLoginBtn" style="background:linear-gradient(135deg,#F97316,#EA580C)">ログイン ▶</button>`;
   }
 
   return`<div class="login-screen">
@@ -533,7 +533,7 @@ function renderStudentLogin(){
     <div class="login-subtitle">EXPLORE • PLAY • GROW</div>
     <div style="font-size:.75rem;color:var(--accent-purple);margin-bottom:16px;font-weight:700">${esc(S.tenant?S.tenant.name:'')}</div>
     <div class="login-box" style="max-width:420px">
-      <h2>${isStudent?'にゅうしつ':'ほごしゃログイン'}</h2>
+      <h2${isStudent?'':' style="color:#F97316"'}>${isStudent?'にゅうしつ':'ほごしゃログイン'}</h2>
       ${loginTabs}
       ${formContent}
     </div>
