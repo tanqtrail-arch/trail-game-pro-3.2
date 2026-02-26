@@ -412,6 +412,7 @@ db.exec(`UPDATE parent_tokens SET pin = '0000' WHERE pin IS NULL OR pin = ''`);
   // ── Auto-add new games to all existing tenants ──
   const newGames = [
     { name: '書き順マスター', emoji: '✍️', url: 'https://tanqtrail-arch.github.io/kanji-stroke/', category: '国語' },
+    { name: 'ビルビルタウン', emoji: '🏙️', url: 'https://tanqtrail-arch.github.io/building-town/', category: '算数' },
   ];
   const allTenants = db.prepare('SELECT id FROM tenants').all();
   const insertNewGame = db.prepare(`
@@ -442,7 +443,7 @@ db.exec(`UPDATE parent_tokens SET pin = '0000' WHERE pin IS NULL OR pin = ''`);
       [['分数融合','🧬','算数'],['分数ガンマン','🔫','算数'],['どっちがおおきい','⚖️','算数'],['約分工房','🔧','算数'],['分数テトリス','🧱','算数'],['暗算パネル','🧠','算数'],['特産品マッチング','🍎','地理'],['都道府県シルエットクイズ','🗾','地理'],['気候バトルカード','🌦️','理科'],['絵画クイズ','🎨','その他'],['元素クエスト','⚗️','理科'],['迷路アタック','🏃','その他'],['お土産暗算','🛍️','算数'],['江戸時代迷路クイズ','🏯','歴史'],['文明ビルダー','🏛️','歴史']].forEach(g => insertGame.run(tenantId, g[0], g[1], g[2]));
       // URL付きゲーム
       const insertGameWithUrl = db.prepare('INSERT INTO games (tenant_id, name, emoji, url, category) VALUES (?, ?, ?, ?, ?)');
-      [['書き順マスター','✍️','https://tanqtrail-arch.github.io/kanji-stroke/','国語']].forEach(g => insertGameWithUrl.run(tenantId, g[0], g[1], g[2], g[3]));
+      [['書き順マスター','✍️','https://tanqtrail-arch.github.io/kanji-stroke/','国語'],['ビルビルタウン','🏙️','https://tanqtrail-arch.github.io/building-town/','算数']].forEach(g => insertGameWithUrl.run(tenantId, g[0], g[1], g[2], g[3]));
     })();
     console.log(`  Seed: demo tenant created (slug: demo, email: ${adminEmail}, pass: ${adminPass})`);
   }
