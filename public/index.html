@@ -253,6 +253,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 const CATEGORIES=['算数','地理','歴史','理科','国語','その他'];
 const CAT_EMOJI={'算数':'🔢','地理':'🗾','歴史':'🏯','理科':'🔬','国語':'📖','その他':'🎮'};
 function esc(s){if(s==null)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
+// 🆕 ゲームURLにトークン・認証パラメータを付与するヘルパー
+function buildGameUrl(baseUrl){
+  if(!baseUrl)return'';
+  const p=new URLSearchParams();
+  if(S.token)p.set('token',S.token);
+  if(S.user){
+    if(S.user.id)p.set('student_id',S.user.id);
+    if(S.user.name)p.set('player',S.user.name);
+    if(S.user.className)p.set('class_name',S.user.className);
+  }
+  if(S.tenant){
+    if(S.tenant.slug)p.set('tenant_slug',S.tenant.slug);
+    if(S.tenant.id)p.set('tenant_id',S.tenant.id);
+  }
+  const qs=p.toString();
+  return qs?baseUrl+(baseUrl.includes('?')?'&':'?')+qs:baseUrl;
+}
 const AUTH={KEY:'trail_saas_auth',save(data){try{sessionStorage.setItem(this.KEY,JSON.stringify(data))}catch(e){}},load(){try{return JSON.parse(sessionStorage.getItem(this.KEY))}catch(e){return null}},clear(){try{sessionStorage.removeItem(this.KEY)}catch(e){}},getToken(){const d=this.load();return d?d.token:null}};
 const API_BASE='/api';
 async function api(method,path,body){const opts={method,headers:{'Content-Type':'application/json'}};const tk=AUTH.getToken();if(tk)opts.headers['Authorization']='Bearer '+tk;if(body)opts.body=JSON.stringify(body);const res=await fetch(API_BASE+path,opts);const json=await res.json();if(!res.ok)throw new Error(json.error||'API Error');return json}
@@ -272,6 +289,49 @@ window.addEventListener('beforeunload',()=>gamePlayTracker.endPlay());
 
 let S={screen:'landing',tenant:null,user:null,token:null,games:[],classes:[],students:[],coinLogs:[],badges:[],rankings:[],adminTab:'activity',portalTab:'home',selectedCategory:'すべて',selectedRankGame:null,loginClass:null,loginTab:'student',loading:false,dashboard:null,loginLogs:[],gameplay:null,parentTokens:null,streak:null,studentDashboard:null,dashStatPeriod:'today'};
 (function restore(){const d=AUTH.load();if(!d)return;S.token=d.token;S.tenant=d.tenant;S.user=d.user;S.screen=d.screen||'landing'})();
+
+// 🆕 URLパラメータからトークン・認証情報を受け取る（ゲームからの帰還時）
+let _needRefreshAlt=false;
+(function receiveUrlParams(){
+  const params=new URLSearchParams(window.location.search);
+  const token=params.get('token');
+  const studentId=params.get('student_id');
+  const studentName=params.get('student_name');
+  const tenantSlug=params.get('tenant_slug');
+  const tenantId=params.get('tenant_id');
+  const className=params.get('class_name');
+  const refreshAlt=params.get('refresh_alt');
+
+  // トークンがURLにある場合 → セッションを復元
+  if(token){
+    // 既存セッションがあればトークンだけ更新、なければ新規構築
+    const existing=AUTH.load();
+    const tenant=existing&&existing.tenant?existing.tenant:{id:tenantId?parseInt(tenantId):null,slug:tenantSlug||null,name:''};
+    if(tenantSlug&&tenant)tenant.slug=tenantSlug;
+    if(tenantId&&tenant)tenant.id=parseInt(tenantId);
+    const user=existing&&existing.user?existing.user:{id:studentId?parseInt(studentId):null,name:studentName||'',className:className||'',role:'student'};
+    if(studentId&&user)user.id=parseInt(studentId);
+    if(studentName&&user)user.name=studentName;
+    if(className&&user)user.className=className;
+
+    S.token=token;
+    S.tenant=tenant;
+    S.user=user;
+    S.screen='portal';
+    AUTH.save({token:token,tenant:tenant,user:user,screen:'portal'});
+  }
+
+  // refresh_alt=1 → データ再読み込みフラグ
+  if(refreshAlt==='1')_needRefreshAlt=true;
+
+  // URLをクリーンアップ（パラメータを除去）
+  if(token||studentId||refreshAlt){
+    const clean=new URL(window.location);
+    ['token','student_id','student_name','tenant_slug','tenant_id','class_name','refresh_alt'].forEach(k=>clean.searchParams.delete(k));
+    window.history.replaceState({},'',clean.toString());
+  }
+})();
+
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
 function createStars(){const c=document.getElementById('stars');for(let i=0;i<50;i++){const s=document.createElement('div');s.className='star';s.style.left=Math.random()*100+'%';s.style.top=Math.random()*100+'%';s.style.animationDelay=Math.random()*3+'s';s.style.animationDuration=(2+Math.random()*3)+'s';s.style.width=s.style.height=(1+Math.random()*2)+'px';c.appendChild(s)}}
 
@@ -333,11 +393,11 @@ function renderLanding(){return`<div class="login-screen"><div class="login-logo
 function renderRegister(){return`<div class="login-screen"><div class="login-logo">TRAIL GAME PRO 3</div><div class="login-subtitle">新規登録</div><div class="login-box" style="max-width:400px"><h2>🏫 教室を作成</h2><div class="form-stack"><div class="form-group"><label>教室名</label><input class="login-input" id="regName" placeholder="例: 探究学習教室"/></div><div class="form-group"><label>スラッグ（URL用ID・英小文字/数字/ハイフン）</label><input class="login-input" id="regSlug" placeholder="例: my-school"/></div><div class="form-group"><label>管理者メールアドレス</label><input class="login-input" id="regEmail" type="email" placeholder="teacher@example.com"/></div><div class="form-group"><label>パスワード</label><input class="login-input" id="regPass" type="password" placeholder="8文字以上"/></div><div class="form-group"><label>表示名</label><input class="login-input" id="regDisplay" placeholder="先生の名前"/></div><button class="login-btn" id="registerBtn">登録 ▶</button></div></div><div class="admin-link" id="backToLanding">← 戻る</div></div>`}
 function renderStudentLogin(){const classBtns=(S.classes||[]).map(c=>`<button class="class-select-btn${S.loginClass===c.name?' active':''}" data-cls="${esc(c.name)}">${esc(c.name)}</button>`).join('');const nameSection=S.loginClass?`<div style="margin-top:20px"><div style="font-size:.75rem;color:var(--text-dim);margin-bottom:8px">「${esc(S.loginClass)}」のなまえをいれてね</div><input class="login-input" id="nameInput" placeholder="なまえ（ひらがな）" maxlength="20" autocomplete="off"/><button class="login-btn" id="loginBtn">にゅうしつ ▶</button></div>`:'<div style="margin-top:16px;font-size:.8rem;color:var(--text-dim)">↑ クラスをえらんでね</div>';return`<div class="login-screen"><div class="login-logo">TRAIL GAME PRO 3</div><div class="login-subtitle">EXPLORE • PLAY • GROW</div><div style="font-size:.75rem;color:var(--accent-purple);margin-bottom:16px;font-weight:700">${esc(S.tenant?S.tenant.name:'')}</div><div class="login-box" style="max-width:420px"><h2>にゅうしつ</h2><div style="font-size:.8rem;color:var(--text-dim);margin-bottom:14px">クラスをえらんでね</div><div class="class-select-grid">${classBtns}</div>${nameSection}</div><div class="admin-link" id="guestLink" style="margin-top:20px;color:var(--accent-purple)">🎮 なまえなしであそぶ</div><div class="admin-link" id="adminLink">🔧 管理者ログイン</div><div class="admin-link" id="backToLanding" style="margin-top:8px">← 教室選択に戻る</div></div>`}
 function renderAdminLogin(){const locked=LOGIN_SECURITY.isLocked();const lockMsg=locked?`<div class="lockout-msg"><strong>🔒 LOCKED</strong><br>ログイン試行回数が上限に達しました。<br><span id="lockCountdown">${LOGIN_SECURITY.getRemainingSeconds()}</span>秒後に再試行してください。</div>`:'';const attemptsLeft=LOGIN_SECURITY.maxAttempts-LOGIN_SECURITY.attempts;const attemptsMsg=LOGIN_SECURITY.attempts>0&&!locked?`<div style="font-size:.7rem;color:var(--accent-pink);margin-top:8px">残り${attemptsLeft}回</div>`:'';return`<div class="login-screen"><div class="login-box" style="text-align:center"><h2>🔒 ADMIN</h2><p style="color:var(--text-dim);margin-bottom:14px;font-size:.8rem">管理者アカウントでログイン</p><input class="login-input" id="adminEmail" type="email" placeholder="メールアドレス" ${locked?'disabled':''}/><input class="login-input" id="adminPass" type="password" placeholder="パスワード" ${locked?'disabled':''}/><button class="login-btn" id="adminLoginBtn" ${locked?'disabled style="opacity:.5;cursor:not-allowed"':''}>LOGIN</button>${lockMsg}${attemptsMsg}</div><div class="admin-link" id="backToStudentLogin">← プレイヤーログインに戻る</div></div>`}
-function renderGuest(){const cards=S.games.map(g=>{const hasUrl=g.url&&g.url.trim();const tag=hasUrl?'a':'div';const href=hasUrl?` href="${esc(g.url)}" target="_blank" rel="noopener"`:'';return`<${tag} class="game-card"${href}><span class="game-emoji">${esc(g.emoji)}</span><div class="game-name">${esc(g.name)}</div>${g.category?`<span class="game-category-badge">${esc(g.category)}</span>`:''}<div class="game-link-hint">${hasUrl?'▶ タップでプレイ':'準備中...'}</div></${tag}>`}).join('');return`<div class="portal"><div class="header"><div class="header-logo">TRAIL GP3</div><div class="header-right"><span style="font-size:.75rem;color:var(--text-dim)">🎮 おためしモード</span><button class="logout-btn" id="logoutBtn">もどる</button></div></div><div style="padding:10px 14px;margin-bottom:16px;background:rgba(124,92,191,0.06);border:1px solid rgba(124,92,191,0.15);border-radius:10px;font-size:.8rem;color:var(--text-dim);text-align:center">おためしモード：ALTはたまりません</div><div class="section-title">🎮 GAMES</div><div class="game-grid">${cards}</div></div>`}
+function renderGuest(){const cards=S.games.map(g=>{const hasUrl=g.url&&g.url.trim();const tag=hasUrl?'a':'div';const gameUrl=hasUrl?buildGameUrl(g.url.trim()):'';const href=hasUrl?` href="${esc(gameUrl)}" target="_blank" rel="noopener"`:'';return`<${tag} class="game-card"${href}><span class="game-emoji">${esc(g.emoji)}</span><div class="game-name">${esc(g.name)}</div>${g.category?`<span class="game-category-badge">${esc(g.category)}</span>`:''}<div class="game-link-hint">${hasUrl?'▶ タップでプレイ':'準備中...'}</div></${tag}>`}).join('');return`<div class="portal"><div class="header"><div class="header-logo">TRAIL GP3</div><div class="header-right"><span style="font-size:.75rem;color:var(--text-dim)">🎮 おためしモード</span><button class="logout-btn" id="logoutBtn">もどる</button></div></div><div style="padding:10px 14px;margin-bottom:16px;background:rgba(124,92,191,0.06);border:1px solid rgba(124,92,191,0.15);border-radius:10px;font-size:.8rem;color:var(--text-dim);text-align:center">おためしモード：ALTはたまりません</div><div class="section-title">🎮 GAMES</div><div class="game-grid">${cards}</div></div>`}
 function renderPortal(){const name=S.user?S.user.name:'';const total=getStudentCoins(name);const badges=getStudentBadges(name);const tabs=`<div class="portal-tabs"><button class="portal-tab ${S.portalTab==='home'?'active':''}" data-ptab="home">🏠 HOME</button><button class="portal-tab ${S.portalTab==='dashboard'?'active':''}" data-ptab="dashboard">📈 ダッシュボード</button><button class="portal-tab ${S.portalTab==='ranking'?'active':''}" data-ptab="ranking">🏆 ランキング</button><button class="portal-tab ${S.portalTab==='games'?'active':''}" data-ptab="games">🎮 ゲーム</button><button class="portal-tab ${S.portalTab==='history'?'active':''}" data-ptab="history">📊 ALT履歴</button></div>`;let content='';if(S.portalTab==='home')content=renderPortalHome();else if(S.portalTab==='dashboard')content=renderPortalDashboard();else if(S.portalTab==='ranking')content=renderPortalRanking();else if(S.portalTab==='games')content=renderPortalGames();else content=renderPortalHistory();return`<div class="portal"><div class="header"><div class="header-logo">TRAIL GP3</div><div class="header-right"><div class="coin-display">🪙 ${total}</div>${badges>0?`<div class="badge-count">🏅${badges}</div>`:''}<div class="user-badge"><div class="user-avatar">${esc(name.charAt(0))}</div>${esc(name)}</div><span style="font-size:.65rem;color:var(--text-dim);background:rgba(0,0,0,0.04);padding:2px 8px;border-radius:10px">${esc(S.user?S.user.className:'')}</span><button class="logout-btn" id="logoutBtn">ログアウト</button></div></div>${tabs}${content}</div>`}
 
 // ★ 0-15: ストリークウィジェットをホームタブに組み込み
-function renderPortalHome(){const cards=S.games.slice().reverse().map(g=>{const hasUrl=g.url&&g.url.trim();const tag=hasUrl?'a':'div';const playerParam=S.user&&S.user.name?'?player='+encodeURIComponent(S.user.name):'';const href=hasUrl?` href="${esc(g.url)}${playerParam}" target="_blank" rel="noopener"`:'';return`<${tag} class="game-card" data-gid="${g.id}"${href}><span class="game-emoji">${esc(g.emoji)}</span><div class="game-name">${esc(g.name)}</div>${g.category?`<span class="game-category-badge">${esc(g.category)}</span>`:''}<div class="game-link-hint">${hasUrl?'▶ タップでプレイ':'準備中...'}</div></${tag}>`}).join('');return`${renderStreakWidget()}<div class="section-title">🆕 NEW GAMES</div><div class="game-grid">${cards||'<div class="no-data">ゲームがまだありません</div>'}</div>`}
+function renderPortalHome(){const cards=S.games.slice().reverse().map(g=>{const hasUrl=g.url&&g.url.trim();const tag=hasUrl?'a':'div';const gameUrl=hasUrl?buildGameUrl(g.url.trim()):'';const href=hasUrl?` href="${esc(gameUrl)}" target="_blank" rel="noopener"`:'';return`<${tag} class="game-card" data-gid="${g.id}"${href}><span class="game-emoji">${esc(g.emoji)}</span><div class="game-name">${esc(g.name)}</div>${g.category?`<span class="game-category-badge">${esc(g.category)}</span>`:''}<div class="game-link-hint">${hasUrl?'▶ タップでプレイ':'準備中...'}</div></${tag}>`}).join('');return`${renderStreakWidget()}<div class="section-title">🆕 NEW GAMES</div><div class="game-grid">${cards||'<div class="no-data">ゲームがまだありません</div>'}</div>`}
 
 // ★ 生徒ダッシュボード描画
 function renderPortalDashboard(){
@@ -458,7 +518,7 @@ function renderPortalDashboard(){
 }
 
 function renderPortalRanking(){const ranking=S.rankings||[];const globalHtml=ranking.slice(0,10).map((r,i)=>{const cls=i===0?' rank-gold':i===1?' rank-silver':i===2?' rank-bronze':'';const num=i<3?'<div class="rank-medal">'+(i===0?'👑':i===1?'🥈':'🥉')+'</div>':'<div class="rank-num">'+(i+1)+'</div>';const isMe=S.user&&r.student_name===S.user.name&&i>=3?' style="border-color:rgba(0,229,255,0.25)"':'';return`<div class="rank-item${cls}"${isMe}>${num}<div class="rank-name">${esc(r.student_name||r.name||'')}<span style="font-size:.65rem;color:var(--text-dim);margin-left:6px">${esc(r.class_name||'')}</span></div><div class="rank-alt">${r.total_coins||0} ALT</div></div>`}).join('');const byGame={};(S.rankings||[]).forEach(r=>{if(r.game_name){const k=r.game_name;if(!byGame[k])byGame[k]={name:k,emoji:r.game_emoji||'🎮',id:r.game_id,entries:[]};byGame[k].entries.push(r)}});const gamesWithRank=Object.values(byGame);if(!S.selectedRankGame&&gamesWithRank.length>0)S.selectedRankGame=gamesWithRank[0].id;const gameTabsHtml=gamesWithRank.map(g=>`<button class="game-rank-tab ${S.selectedRankGame===g.id?'active':''}" data-rgid="${g.id}">${g.emoji} ${esc(g.name)}</button>`).join('');let gameRankContent='<div style="color:var(--text-dim);font-size:.85rem;text-align:center;padding:20px">まだゲームの記録がありません</div>';if(S.selectedRankGame){const selGame=gamesWithRank.find(g=>g.id===S.selectedRankGame);if(selGame&&selGame.entries.length>0){const rows=selGame.entries.slice(0,10).map((r,i)=>{const medal=i===0?'👑':i===1?'🥈':i===2?'🥉':'';const numStr=medal?`<span style="font-size:1.1rem">${medal}</span>`:`<span style="font-family:'Orbitron';font-size:.8rem;color:var(--text-dim)">${i+1}</span>`;const isMe=S.user&&r.student_name===S.user.name?'style="background:rgba(0,144,217,0.05);border-color:rgba(0,229,255,0.2)"':'';return`<tr ${isMe}><td style="width:40px;text-align:center">${numStr}</td><td><strong>${esc(r.student_name)}</strong></td><td class="game-rank-table"><span class="rank-score">${esc(r.score)}</span><span class="score-label">${esc(r.score_label||'')}</span></td></tr>`}).join('');gameRankContent=`<div class="tbl-wrap game-rank-table"><table><tr><th>#</th><th>プレイヤー</th><th>スコア</th></tr>${rows}</table></div>`}}return`<div class="section-title">🏆 総合ランキング</div><div class="ranking-section"><div class="ranking-list">${globalHtml||'<div class="no-data">まだ記録がありません</div>'}</div></div><div class="section-title" style="margin-top:10px">🎮 ゲーム別ランキング</div>${gamesWithRank.length?`<div class="game-rank-tabs">${gameTabsHtml}</div>${gameRankContent}`:'<div style="color:var(--text-dim);font-size:.85rem;padding:16px;background:var(--bg-card);border-radius:12px;text-align:center">まだゲームの記録がありません</div>'}`}
-function renderPortalGames(){const usedCats=[...new Set(S.games.map(g=>g.category||'その他'))];const catBtns=['すべて',...CATEGORIES.filter(c=>usedCats.includes(c))].map(c=>{const count=c==='すべて'?S.games.length:S.games.filter(g=>g.category===c).length;return`<button class="cat-btn ${S.selectedCategory===c?'active':''}" data-cat="${c}">${c}${c!=='すべて'?` (${count})`:''}</button>`}).join('');const filtered=S.selectedCategory==='すべて'?S.games:S.games.filter(g=>g.category===S.selectedCategory);const cards=filtered.map(g=>{const hasUrl=g.url&&g.url.trim();const tag=hasUrl?'a':'div';const playerParam=S.user&&S.user.name?'?player='+encodeURIComponent(S.user.name):'';const href=hasUrl?` href="${esc(g.url)}${playerParam}" target="_blank" rel="noopener"`:'';return`<${tag} class="game-card" data-gid="${g.id}"${href}><span class="game-emoji">${esc(g.emoji)}</span><div class="game-name">${esc(g.name)}</div><div class="game-link-hint">${hasUrl?'▶ タップでプレイ':'準備中...'}</div></${tag}>`}).join('');return`<div class="category-filter">${catBtns}</div><div class="game-grid">${cards}</div>`}
+function renderPortalGames(){const usedCats=[...new Set(S.games.map(g=>g.category||'その他'))];const catBtns=['すべて',...CATEGORIES.filter(c=>usedCats.includes(c))].map(c=>{const count=c==='すべて'?S.games.length:S.games.filter(g=>g.category===c).length;return`<button class="cat-btn ${S.selectedCategory===c?'active':''}" data-cat="${c}">${c}${c!=='すべて'?` (${count})`:''}</button>`}).join('');const filtered=S.selectedCategory==='すべて'?S.games:S.games.filter(g=>g.category===S.selectedCategory);const cards=filtered.map(g=>{const hasUrl=g.url&&g.url.trim();const tag=hasUrl?'a':'div';const gameUrl=hasUrl?buildGameUrl(g.url.trim()):'';const href=hasUrl?` href="${esc(gameUrl)}" target="_blank" rel="noopener"`:'';return`<${tag} class="game-card" data-gid="${g.id}"${href}><span class="game-emoji">${esc(g.emoji)}</span><div class="game-name">${esc(g.name)}</div><div class="game-link-hint">${hasUrl?'▶ タップでプレイ':'準備中...'}</div></${tag}>`}).join('');return`<div class="category-filter">${catBtns}</div><div class="game-grid">${cards}</div>`}
 function renderPortalHistory(){const name=S.user?S.user.name:'';const logs=S.coinLogs.filter(l=>l.student_name===name);const rows=logs.length?logs.slice(0,30).map(l=>`<tr><td>${esc(l.game_emoji||'🎮')} ${esc(l.game_name||'—')}</td><td class="coin-plus">+${l.amount}</td><td style="color:var(--text-dim);font-size:.75rem">${esc(l.created_at||'')}</td></tr>`).join(''):'<tr><td colspan="3" class="no-data">まだ記録がありません</td></tr>';return`<div class="tbl-wrap"><table><tr><th>ゲーム</th><th>ALT</th><th>日付</th></tr>${rows}</table></div>`}
 function renderAdmin(){const tabs=`<div class="admin-tabs"><button class="admin-tab ${S.adminTab==='activity'?'active':''}" data-tab="activity">📡 監視</button><button class="admin-tab ${S.adminTab==='loginlog'?'active':''}" data-tab="loginlog">🚪 入退室</button><button class="admin-tab ${S.adminTab==='coins'?'active':''}" data-tab="coins">💰 ALT付与</button><button class="admin-tab ${S.adminTab==='badges'?'active':''}" data-tab="badges">🏅 バッジ</button><button class="admin-tab ${S.adminTab==='games'?'active':''}" data-tab="games">🎮 ゲーム</button><button class="admin-tab ${S.adminTab==='rankings'?'active':''}" data-tab="rankings">🏆 ランキング</button><button class="admin-tab ${S.adminTab==='usage'?'active':''}" data-tab="usage">🕹️ 利用状況</button><button class="admin-tab ${S.adminTab==='summary'?'active':''}" data-tab="summary">📊 一覧</button></div>`;let content='';if(S.adminTab==='activity')content=renderAdminActivity();else if(S.adminTab==='loginlog')content=renderAdminLoginLog();else if(S.adminTab==='coins')content=renderAdminCoins();else if(S.adminTab==='badges')content=renderAdminBadges();else if(S.adminTab==='games')content=renderAdminGames();else if(S.adminTab==='rankings')content=renderAdminRankings();else if(S.adminTab==='usage')content=renderAdminGameUsage();else content=renderAdminSummary();return`<div class="admin-panel"><div class="header"><div class="header-logo">TRAIL GP3</div><div class="header-right"><div class="user-badge"><div class="user-avatar" style="background:linear-gradient(135deg,var(--accent-gold),var(--accent-pink))">★</div>${esc(S.user?S.user.displayName:'管理者')}</div><button class="logout-btn" id="refreshBtn" style="border-color:var(--accent-cyan);color:var(--accent-cyan)">🔄 更新</button><button class="logout-btn" id="logoutBtn">ログアウト</button></div></div>${tabs}${content}</div>`}
 function renderAdminActivity(){const d=S.dashboard;if(!d){loadDashboard().then(()=>render());return'<div class="no-data">読み込み中...</div>'}const st=d.stats||{};return`<div class="activity-stats"><div class="stat-card stat-gold"><div class="stat-value">${st.totalCoins||0}</div><div class="stat-label">総ALT発行数</div></div><div class="stat-card stat-cyan"><div class="stat-value">${st.totalStudents||0}</div><div class="stat-label">登録生徒数</div></div><div class="stat-card stat-green"><div class="stat-value">${st.totalGames||0}</div><div class="stat-label">ゲーム数</div></div><div class="stat-card stat-orange"><div class="stat-value">${st.totalBadges||0}</div><div class="stat-label">総バッジ数</div></div><div class="stat-card stat-purple"><div class="stat-value">${st.todayActive||0}</div><div class="stat-label">今日のアクティブ</div></div></div><div class="section-title">🏫 クラス別統計</div><div class="game-list-admin">${(d.classStats||[]).map(c=>`<div class="game-list-item"><div class="game-list-item-info"><div><strong>${esc(c.name)}</strong><div style="font-size:.7rem;color:var(--text-dim);margin-top:2px">${c.student_count}名</div></div></div><div style="text-align:right"><div class="total-coins">${c.total_coins} ALT</div></div></div>`).join('')}</div><div class="section-title" style="margin-top:16px">🎮 ゲーム利用ランキング</div><div class="tbl-wrap"><table><tr><th>ゲーム</th><th>回数</th><th>利用者</th></tr>${(d.gameUsage||[]).map(g=>`<tr><td>${esc(g.emoji)} ${esc(g.name)}</td><td style="font-family:'Orbitron';color:var(--accent-cyan)">${g.play_count}</td><td>${g.unique_players}人</td></tr>`).join('')||'<tr><td colspan="3" class="no-data">データなし</td></tr>'}</table></div><div class="section-title" style="margin-top:16px">📡 最近のアクティビティ</div><div class="activity-feed">${(d.recentActivity||[]).map(a=>{const icons={coin:'💰',badge:'🏅',player:'👤',game:'🎮',security:'🔒',login:'🚪'};return`<div class="activity-item"><div class="activity-icon">${icons[a.type]||'📋'}</div><div class="activity-body"><strong>${esc(a.actor)}</strong><p>${esc(a.detail)}</p></div><div class="activity-time">${esc(a.created_at||'')}</div></div>`}).join('')||'<div class="no-data">まだアクティビティがありません</div>'}</div>`}
@@ -525,7 +585,7 @@ function renderStudentLogin(){
     formContent=`<div style="font-size:.8rem;color:var(--text-dim);margin-bottom:14px">おこさまの名前とPINを入力してください</div>
       <input class="login-input" id="parentStudentName" placeholder="おこさまのなまえ" maxlength="20" autocomplete="off"/>
       <input class="login-input" id="parentPin" type="tel" placeholder="4桁PIN" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" autocomplete="off" style="letter-spacing:8px;text-align:center;font-family:'Orbitron',sans-serif;font-size:1.2rem"/>
-      <button class="login-btn" id="parentLoginBtn">ログイン ▶</button>`;
+      <button class="login-btn" id="parentLoginBtn" style="background:linear-gradient(135deg,#F97316,#EA580C)">ログイン ▶</button>`;
   }
 
   return`<div class="login-screen">
@@ -533,7 +593,7 @@ function renderStudentLogin(){
     <div class="login-subtitle">EXPLORE • PLAY • GROW</div>
     <div style="font-size:.75rem;color:var(--accent-purple);margin-bottom:16px;font-weight:700">${esc(S.tenant?S.tenant.name:'')}</div>
     <div class="login-box" style="max-width:420px">
-      <h2>${isStudent?'にゅうしつ':'ほごしゃログイン'}</h2>
+      <h2${isStudent?'':' style="color:#F97316"'}>${isStudent?'にゅうしつ':'ほごしゃログイン'}</h2>
       ${loginTabs}
       ${formContent}
     </div>
@@ -565,7 +625,9 @@ function renderAdminLogin(){
 // ═══ Guest Mode ═══
 function renderGuest(){
   const cards=S.games.map(g=>{
-    const hasUrl=g.url&&g.url.trim();const tag=hasUrl?'a':'div';const href=hasUrl?` href="${esc(g.url)}" target="_blank" rel="noopener"`:'';
+    const hasUrl=g.url&&g.url.trim();const tag=hasUrl?'a':'div';
+    const gameUrl=hasUrl?buildGameUrl(g.url.trim()):''; // 🆕 トークン付きURL（ゲストはトークンなし）
+    const href=hasUrl?` href="${esc(gameUrl)}" target="_blank" rel="noopener"`:'';
     return`<${tag} class="game-card"${href}><span class="game-emoji">${esc(g.emoji)}</span><div class="game-name">${esc(g.name)}</div>${g.category?`<span class="game-category-badge">${esc(g.category)}</span>`:''}<div class="game-link-hint">${hasUrl?'▶ タップでプレイ':'準備中...'}</div></${tag}>`;
   }).join('');
   return`<div class="portal">
@@ -612,8 +674,8 @@ function renderPortal(){
 function renderPortalHome(){
   const cards=S.games.slice().reverse().map(g=>{
     const hasUrl=g.url&&g.url.trim();const tag=hasUrl?'a':'div';
-    const playerParam=S.user&&S.user.name?'?player='+encodeURIComponent(S.user.name):'';
-    const href=hasUrl?` href="${esc(g.url)}${playerParam}" target="_blank" rel="noopener"`:'';
+    const gameUrl=hasUrl?buildGameUrl(g.url.trim()):''; // 🆕 トークン付きURL
+    const href=hasUrl?` href="${esc(gameUrl)}" target="_blank" rel="noopener"`:'';
     return`<${tag} class="game-card" data-gid="${g.id}"${href}><span class="game-emoji">${esc(g.emoji)}</span><div class="game-name">${esc(g.name)}</div>${g.category?`<span class="game-category-badge">${esc(g.category)}</span>`:''}<div class="game-link-hint">${hasUrl?'▶ タップでプレイ':'準備中...'}</div></${tag}>`;
   }).join('');
   return`<div class="section-title">🆕 NEW GAMES</div><div class="game-grid">${cards||'<div class="no-data">ゲームがまだありません</div>'}</div>`;
@@ -667,8 +729,8 @@ function renderPortalGames(){
   const filtered=S.selectedCategory==='すべて'?S.games:S.games.filter(g=>g.category===S.selectedCategory);
   const cards=filtered.map(g=>{
     const hasUrl=g.url&&g.url.trim();const tag=hasUrl?'a':'div';
-    const playerParam=S.user&&S.user.name?'?player='+encodeURIComponent(S.user.name):'';
-    const href=hasUrl?` href="${esc(g.url)}${playerParam}" target="_blank" rel="noopener"`:'';
+    const gameUrl=hasUrl?buildGameUrl(g.url.trim()):''; // 🆕 トークン付きURL
+    const href=hasUrl?` href="${esc(gameUrl)}" target="_blank" rel="noopener"`:'';
     const unplayed=S.studentDashboard&&S.studentDashboard.unplayedGames||[];
     const isNew=unplayed.includes(g.id);
     return`<${tag} class="game-card" data-gid="${g.id}"${href}>${isNew?'<div class="new-badge">NEW</div>':''}<span class="game-emoji">${esc(g.emoji)}</span><div class="game-name">${esc(g.name)}</div><div class="game-link-hint">${hasUrl?'▶ タップでプレイ':'準備中...'}</div></${tag}>`;
@@ -1013,7 +1075,8 @@ document.addEventListener('visibilitychange',()=>{
   }
 });
 
-if(S.token&&S.tenant){loadTenantData()}else{render()}
+// 🆕 URLパラメータでトークンを受け取った場合もデータ読み込み（refresh_alt対応）
+if(S.token&&S.tenant){loadTenantData().then(()=>{if(_needRefreshAlt){_needRefreshAlt=false;toast('💰 ALT残高を更新しました')}})}else{render()}
 </script>
 </body>
 </html>
