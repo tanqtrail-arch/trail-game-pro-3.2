@@ -59,7 +59,7 @@ router.patch('/:id/end', (req, res) => {
       return res.status(400).json({ error: '無効なセッションIDです' });
     }
 
-    const { score, correct_count, total_count, metadata } = req.body;
+    const { score, correct_count, total_count, max_streak, metadata } = req.body;
 
     // セッション存在確認（ALT計算に必要な student_id / tenant_id / game_id も取得）
     const session = db.prepare(`
@@ -122,6 +122,9 @@ router.patch('/:id/end', (req, res) => {
         accuracy,
         durationSeconds,
         score:           score ?? null,
+        correctCount:    correct_count ?? null,
+        totalCount:      total_count ?? null,
+        maxStreak:       max_streak ?? 0,
       });
     } catch (altErr) {
       console.error('[playSessions] altEngine error (non-fatal):', altErr.message);
@@ -135,7 +138,8 @@ router.patch('/:id/end', (req, res) => {
       alt: {
         total:     altResult.total,
         awards:    altResult.awards,      // [{ reason, label, amount }, ...]
-        breakdown: altResult.breakdown,   // { play_complete: 5, ... }
+        breakdown: altResult.breakdown,   // { base_alt: 25, ... }
+        capInfo:   altResult.capInfo || null, // { alt, capped, cap, gameLifetimeAlt }
       },
     });
 
