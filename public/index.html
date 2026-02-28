@@ -314,11 +314,12 @@ let _needRefreshAlt=false;
 
   // トークンがURLにある場合 → セッションを復元
   if(token){
-    // 既存セッションがあればトークンだけ更新、なければ新規構築
+    // 既存セッションがあればベースにする
     const existing=AUTH.load();
-    const tenant=existing&&existing.tenant?existing.tenant:{id:tenantId?parseInt(tenantId):null,slug:tenantSlug||null,name:''};
-    if(tenantSlug&&tenant)tenant.slug=tenantSlug;
-    if(tenantId&&tenant)tenant.id=parseInt(tenantId);
+    // tenant: 既存値を優先。URLに tenant_slug があれば上書き
+    const tenant=existing&&existing.tenant&&existing.tenant.slug?existing.tenant:{id:tenantId?parseInt(tenantId):null,slug:tenantSlug||null,name:''};
+    if(tenantSlug)tenant.slug=tenantSlug;
+    if(tenantId)tenant.id=parseInt(tenantId);
     const user=existing&&existing.user?existing.user:{id:studentId?parseInt(studentId):null,name:studentName||'',className:className||'',role:'student'};
     if(studentId&&user)user.id=parseInt(studentId);
     if(studentName&&user)user.name=studentName;
@@ -328,7 +329,8 @@ let _needRefreshAlt=false;
     S.tenant=tenant;
     S.user=user;
     S.screen='portal';
-    AUTH.save({token:token,tenant:tenant,user:user,screen:'portal'});
+    // slug が有効な場合のみ保存（null slug でストレージを汚染しない）
+    if(tenant.slug)AUTH.save({token:token,tenant:tenant,user:user,screen:'portal'});
   }
 
   // refresh_alt=1 → データ再読み込みフラグ
@@ -405,7 +407,7 @@ function renderStreakWidget(){
   return`<div class="streak-widget"><div class="sw-flame">${flame}</div><div class="sw-info"><div class="sw-current">${current}<span style="font-size:.7rem;opacity:.7;font-family:inherit"> 日連続</span></div><div class="sw-label">最長: ${max}日 &nbsp;${status}</div></div><div class="sw-dots">${dots}</div></div>`;
 }
 
-async function loadTenantData(){if(!S.tenant)return;const slug=S.tenant.slug;S.loading=true;render();try{const[gRes,cRes]=await Promise.all([apiGet('/t/'+slug+'/games'),apiGet('/t/'+slug+'/classes')]);S.games=gRes.games||[];S.classes=cRes.classes||[];try{const rRes=await apiGet('/t/'+slug+'/rankings');S.rankings=rRes.rankings||[]}catch(e){}if(S.user&&S.user.role&&S.user.role!=='student'){try{const[sRes,coRes,bRes]=await Promise.all([apiGet('/t/'+slug+'/students'),apiGet('/t/'+slug+'/coins'),apiGet('/t/'+slug+'/badges')]);S.students=sRes.students||[];S.coinLogs=coRes.logs||[];S.badges=bRes.summary||[]}catch(e){console.error(e)}}else if(S.user&&S.user.role==='student'){try{const coRes=await apiGet('/t/'+slug+'/coins');S.coinLogs=coRes.logs||[]}catch(e){}}}catch(e){console.error('loadData:',e);toast('データ読み込みエラー')}S.loading=false;render();
+async function loadTenantData(){if(!S.tenant||!S.tenant.slug){console.error('[loadTenantData] tenant slug が未設定');return}const slug=S.tenant.slug;S.loading=true;render();try{const[gRes,cRes]=await Promise.all([apiGet('/t/'+slug+'/games'),apiGet('/t/'+slug+'/classes')]);S.games=gRes.games||[];S.classes=cRes.classes||[];try{const rRes=await apiGet('/t/'+slug+'/rankings');S.rankings=rRes.rankings||[]}catch(e){}if(S.user&&S.user.role&&S.user.role!=='student'){try{const[sRes,coRes,bRes]=await Promise.all([apiGet('/t/'+slug+'/students'),apiGet('/t/'+slug+'/coins'),apiGet('/t/'+slug+'/badges')]);S.students=sRes.students||[];S.coinLogs=coRes.logs||[];S.badges=bRes.summary||[]}catch(e){console.error(e)}}else if(S.user&&S.user.role==='student'){try{const coRes=await apiGet('/t/'+slug+'/coins');S.coinLogs=coRes.logs||[]}catch(e){}}}catch(e){console.error('loadData:',e);toast('データ読み込みエラー')}S.loading=false;render();
   // ★ 0-15: ストリーク非同期取得
   if(S.user&&S.user.role==='student'){loadStreak();loadStudentDashboard()}
 }
@@ -1022,7 +1024,7 @@ function bindEvents(){
   on('backToLanding','click',()=>{S.screen='landing';render()});
   on('registerBtn','click',async()=>{const name=val('regName'),slug=val('regSlug'),email=val('regEmail'),pass=val('regPass'),display=val('regDisplay');if(!name||!slug||!email||!pass){toast('全項目を入力してください');return}try{const r=await apiPost('/auth/register',{tenantName:name,slug,email,password:pass,displayName:display||name});S.token=r.token;S.tenant=r.tenant;S.user={email,displayName:display||name,role:'owner'};S.screen='admin';AUTH.save({token:S.token,tenant:S.tenant,user:S.user,screen:'admin'});await loadTenantData();toast('教室を作成しました！')}catch(e){toast('登録エラー: '+e.message)}});
   document.querySelectorAll('.class-select-btn').forEach(b=>{b.onclick=()=>{S.loginClass=b.dataset.cls;render()}});
-  on('loginBtn','click',async()=>{const name=val('nameInput');const nameErr=validateName(name);if(nameErr){toast(nameErr);return}const hErr=validateHiragana(name);if(hErr){toast(hErr);return}try{const r=await apiPost('/auth/student/login',{tenantSlug:S.tenant.slug,className:S.loginClass,studentName:name});S.token=r.token;S.user={id:r.student.id,name:r.student.name,className:r.student.className,role:'student'};S.screen='portal';AUTH.save({token:S.token,tenant:S.tenant,user:S.user,screen:'portal'});await loadTenantData()}catch(e){toast(e.message)}});
+  on('loginBtn','click',async()=>{const name=val('nameInput');const nameErr=validateName(name);if(nameErr){toast(nameErr);return}const hErr=validateHiragana(name);if(hErr){toast(hErr);return}try{const r=await apiPost('/auth/student/login',{tenantSlug:S.tenant.slug,className:S.loginClass,studentName:name});S.token=r.token;if(r.tenant)S.tenant=r.tenant;S.user={id:r.student.id,name:r.student.name,className:r.student.className,role:'student'};S.screen='portal';AUTH.save({token:S.token,tenant:S.tenant,user:S.user,screen:'portal'});await loadTenantData()}catch(e){toast(e.message)}});
   const ni=document.getElementById('nameInput');if(ni){ni.onkeydown=e=>{if(e.key==='Enter'){const b=document.getElementById('loginBtn');if(b)b.click()}};ni.focus()}
 
   // Login tab switch
