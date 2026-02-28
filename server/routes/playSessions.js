@@ -59,7 +59,7 @@ router.patch('/:id/end', (req, res) => {
       return res.status(400).json({ error: '無効なセッションIDです' });
     }
 
-    const { score, correct_count, total_count, max_streak, metadata } = req.body;
+    const { score, correct_count, total_count, max_streak, metadata, skip_alt } = req.body;
 
     // セッション存在確認（ALT計算に必要な student_id / tenant_id / game_id も取得）
     const session = db.prepare(`
@@ -110,24 +110,27 @@ router.patch('/:id/end', (req, res) => {
 
     // ── ★ ALTエンジン呼び出し ──
     // ended_at が記録された＝completed とみなす
+    // skip_alt=true の場合はALT計算をスキップ（外部ゲームが/api/external/game-resultで別途ALT処理するため）
     // エラーが起きてもプレイ記録は既に保存済みなので 200 を返す
     let altResult = { total: 0, breakdown: {}, awards: [] };
-    try {
-      altResult = processSessionALT({
-        id:              sessionId,
-        studentId:       session.student_id,
-        tenantId:        session.tenant_id,
-        gameId:          session.game_id,
-        completed:       true,
-        accuracy,
-        durationSeconds,
-        score:           score ?? null,
-        correctCount:    correct_count ?? null,
-        totalCount:      total_count ?? null,
-        maxStreak:       max_streak ?? 0,
-      });
-    } catch (altErr) {
-      console.error('[playSessions] altEngine error (non-fatal):', altErr.message);
+    if (!skip_alt) {
+      try {
+        altResult = processSessionALT({
+          id:              sessionId,
+          studentId:       session.student_id,
+          tenantId:        session.tenant_id,
+          gameId:          session.game_id,
+          completed:       true,
+          accuracy,
+          durationSeconds,
+          score:           score ?? null,
+          correctCount:    correct_count ?? null,
+          totalCount:      total_count ?? null,
+          maxStreak:       max_streak ?? 0,
+        });
+      } catch (altErr) {
+        console.error('[playSessions] altEngine error (non-fatal):', altErr.message);
+      }
     }
 
     res.json({

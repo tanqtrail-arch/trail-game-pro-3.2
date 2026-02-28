@@ -1105,9 +1105,11 @@ document.addEventListener('visibilitychange',()=>{
     // アクティブなプレイセッションを終了（ALT記録）→ 完了後にデータ再取得
     if(S._activeSessionId&&S.token){
       const sid=S._activeSessionId;S._activeSessionId=null;
-      api('PATCH','/play-sessions/'+sid+'/end',{score:null,correct_count:null,total_count:null}).then(r=>{
+      // 外部ゲームはPOST /api/external/game-resultで自身のセッションを作成しALTを記録する
+      // ポータル側のセッションはスコアデータなし(skip_alt=true)で閉じるだけにする
+      api('PATCH','/play-sessions/'+sid+'/end',{score:null,correct_count:null,total_count:null,skip_alt:true}).then(r=>{
         if(r.alt&&(r.alt.total>0||(r.alt.capInfo&&r.alt.capInfo.capped)))showAltPopup(r.alt);
-        // セッション終了（ALT付与）完了後にデータ再取得してヘッダー更新
+        // セッション終了完了後にデータ再取得してヘッダー更新
         if(S.user&&S.tenant){loadTenantData();if(S.user.role==='student')loadStreak()}
       }).catch(()=>{
         if(S.user&&S.tenant){loadTenantData();if(S.user.role==='student')loadStreak()}
