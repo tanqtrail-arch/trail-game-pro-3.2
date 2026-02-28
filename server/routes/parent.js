@@ -453,7 +453,13 @@ router.get('/parent-dashboard', (req, res) => {
   // 専用テーブルがないのでnullを返す
   const nextGoal = null;
 
+  // ── student/tenant情報（JWT認証時にフロントが必要） ──
+  const studentRow = db.prepare('SELECT s.name, c.name as class_name FROM students s LEFT JOIN classes c ON s.class_id = c.id WHERE s.id = ? AND s.tenant_id = ?').get(studentId, tenantId);
+  const tenantRow = db.prepare('SELECT name, slug FROM tenants WHERE id = ?').get(tenantId);
+
   res.json({
+    student: { id: studentId, name: studentRow ? studentRow.name : '', className: studentRow ? studentRow.class_name : '' },
+    tenant: { id: tenantId, name: tenantRow ? tenantRow.name : '', slug: tenantRow ? tenantRow.slug : '' },
     stats: {
       today: { alt: todayAlt, plays: todayPlays, minutes: Math.round(todayMinutes / 60) },
       week: { alt: weekAlt, plays: weekPlays, minutes: Math.round(weekMinutes / 60) },
