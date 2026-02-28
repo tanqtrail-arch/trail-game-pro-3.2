@@ -240,6 +240,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <body>
 <div class="stars" id="stars"></div>
 <div class="toast" id="toast"></div>
+<!-- ローディングオーバーレイ -->
+<div id="loading-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+  background:rgba(255,255,255,0.85); z-index:9999;
+  align-items:center; justify-content:center; flex-direction:column;">
+  <div style="width:48px; height:48px; border:4px solid #e0e0e0; border-top:4px solid #4fc3f7;
+    border-radius:50%; animation:spin 0.8s linear infinite;"></div>
+  <p style="margin-top:16px; color:#666; font-size:14px;">読み込み中...</p>
+</div>
+<style>@keyframes spin { to { transform: rotate(360deg); } }</style>
 <!-- ★ 0-15: ALT獲得ポップアップ -->
 <div id="alt-popup">
   <div class="alt-popup-inner">
@@ -287,6 +296,8 @@ function apiGet(p){return api('GET',p)}
 function apiPost(p,b){return api('POST',p,b)}
 function apiPut(p,b){return api('PUT',p,b)}
 function apiDel(p){return api('DELETE',p)}
+function showLoading(){const el=document.getElementById('loading-overlay');if(el)el.style.display='flex'}
+function hideLoading(){const el=document.getElementById('loading-overlay');if(el)el.style.display='none'}
 const VALIDATION={MAX_NAME_LENGTH:20,MAX_CLASS_LENGTH:30,MAX_GAME_NAME_LENGTH:40,MAX_URL_LENGTH:500,HIRAGANA_PATTERN:/^[\u3040-\u309F\u30FC\u3000\s]+$/,URL_PATTERN:/^https?:\/\/.+/};
 function validateName(name){if(!name||name.length===0)return'名前を入力してください';if(name.length>VALIDATION.MAX_NAME_LENGTH)return`${VALIDATION.MAX_NAME_LENGTH}文字以内で入力してください`;return null}
 function validateHiragana(name){if(!name)return'名前を入力してください';if(!VALIDATION.HIRAGANA_PATTERN.test(name))return'ひらがなで入力してください';return null}
@@ -407,7 +418,7 @@ function renderStreakWidget(){
   return`<div class="streak-widget"><div class="sw-flame">${flame}</div><div class="sw-info"><div class="sw-current">${current}<span style="font-size:.7rem;opacity:.7;font-family:inherit"> 日連続</span></div><div class="sw-label">最長: ${max}日 &nbsp;${status}</div></div><div class="sw-dots">${dots}</div></div>`;
 }
 
-async function loadTenantData(){if(!S.tenant||!S.tenant.slug){console.error('[loadTenantData] tenant slug が未設定');return}const slug=S.tenant.slug;S.loading=true;render();try{const[gRes,cRes]=await Promise.all([apiGet('/t/'+slug+'/games'),apiGet('/t/'+slug+'/classes')]);S.games=gRes.games||[];S.classes=cRes.classes||[];try{const rRes=await apiGet('/t/'+slug+'/rankings');S.rankings=rRes.rankings||[]}catch(e){}if(S.user&&S.user.role&&S.user.role!=='student'){try{const[sRes,coRes,bRes]=await Promise.all([apiGet('/t/'+slug+'/students'),apiGet('/t/'+slug+'/coins'),apiGet('/t/'+slug+'/badges')]);S.students=sRes.students||[];S.coinLogs=coRes.logs||[];S.badges=bRes.summary||[]}catch(e){console.error(e)}}else if(S.user&&S.user.role==='student'){try{const coRes=await apiGet('/t/'+slug+'/coins');S.coinLogs=coRes.logs||[]}catch(e){}}}catch(e){console.error('loadData:',e);toast('データ読み込みエラー')}S.loading=false;render();
+async function loadTenantData(){if(!S.tenant||!S.tenant.slug){console.error('[loadTenantData] tenant slug が未設定');return}const slug=S.tenant.slug;S.loading=true;render();try{const[gRes,cRes]=await Promise.all([apiGet('/t/'+slug+'/games'),apiGet('/t/'+slug+'/classes')]);S.games=gRes.games||[];S.classes=cRes.classes||[];try{const rRes=await apiGet('/t/'+slug+'/rankings');S.rankings=rRes.rankings||[]}catch(e){}if(S.user&&S.user.role&&S.user.role!=='student'){try{const[sRes,coRes,bRes]=await Promise.all([apiGet('/t/'+slug+'/students'),apiGet('/t/'+slug+'/coins'),apiGet('/t/'+slug+'/badges')]);S.students=sRes.students||[];S.coinLogs=coRes.logs||[];S.badges=bRes.summary||[]}catch(e){console.error(e)}}else if(S.user&&S.user.role==='student'){try{const coRes=await apiGet('/t/'+slug+'/coins');S.coinLogs=coRes.logs||[]}catch(e){}}}catch(e){console.error('loadData:',e);toast('データ読み込みエラー')}S.loading=false;hideLoading();render();
   // ★ 0-15: ストリーク非同期取得
   if(S.user&&S.user.role==='student'){loadStreak();loadStudentDashboard()}
 }
@@ -1104,19 +1115,20 @@ document.addEventListener('visibilitychange',()=>{
     if(!S.token||!S.user){const d=AUTH.load();if(d&&d.token){S.token=d.token;S.tenant=d.tenant;S.user=d.user;S.screen=d.screen||'portal';render()}}
     // アクティブなプレイセッションを終了（ALT記録）→ 完了後にデータ再取得
     if(S._activeSessionId&&S.token){
+      showLoading();
       const sid=S._activeSessionId;S._activeSessionId=null;
       // 外部ゲームはPOST /api/external/game-resultで自身のセッションを作成しALTを記録する
       // ポータル側のセッションはスコアデータなし(skip_alt=true)で閉じるだけにする
       api('PATCH','/play-sessions/'+sid+'/end',{score:null,correct_count:null,total_count:null,skip_alt:true}).then(r=>{
         if(r.alt&&(r.alt.total>0||(r.alt.capInfo&&r.alt.capInfo.capped)))showAltPopup(r.alt);
         // セッション終了完了後にデータ再取得してヘッダー更新
-        if(S.user&&S.tenant){loadTenantData();if(S.user.role==='student')loadStreak()}
+        if(S.user&&S.tenant){loadTenantData().finally(hideLoading);if(S.user.role==='student')loadStreak()}else{hideLoading()}
       }).catch(()=>{
-        if(S.user&&S.tenant){loadTenantData();if(S.user.role==='student')loadStreak()}
+        if(S.user&&S.tenant){loadTenantData().finally(hideLoading);if(S.user.role==='student')loadStreak()}else{hideLoading()}
       });
     } else if(S.user&&S.tenant){
       // アクティブセッションがない場合は即座にデータ再取得
-      loadTenantData();if(S.user.role==='student')loadStreak()
+      showLoading();loadTenantData().finally(hideLoading);if(S.user.role==='student')loadStreak()
     }
   }
 });
