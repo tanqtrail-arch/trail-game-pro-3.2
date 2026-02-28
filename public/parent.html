@@ -217,37 +217,60 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 
   // ── URLからtoken取得 ──
   const params = new URLSearchParams(location.search);
-  const token = params.get('token');
+  let token = params.get('token');
+
+  // JWTかUUIDかを判定（JWTは"eyJ"で始まる）
+  const isJwt = token && token.startsWith('eyJ');
 
   if (!token) {
     showPinLogin();
     return;
   }
 
-  // ── Step 1: トークン検証 ──
-  fetch('/api/parent-verify?token=' + encodeURIComponent(token))
-    .then(r => {
-      if (!r.ok) throw new Error('invalid');
-      return r.json();
+  if (isJwt) {
+    // ── JWT認証フロー（PINログイン後） ──
+    fetch('/api/parent-dashboard', {
+      headers: { 'Authorization': 'Bearer ' + token }
     })
-    .then(verifyData => {
-      // ── Step 2: ダッシュボードデータ取得 ──
-      return fetch('/api/parent-dashboard?token=' + encodeURIComponent(token))
-        .then(r => {
-          if (!r.ok) throw new Error('dashboard_error');
-          return r.json();
-        })
-        .then(dashData => {
-          renderDashboard(verifyData, dashData);
-        });
-    })
-    .catch(err => {
-      if (err.message === 'dashboard_error') {
-        showAuth('error', 'データの取得に失敗しました', 'しばらくしてからもう一度お試しください。');
-      } else {
-        showAuth('expired', 'リンクが無効です', 'このリンクは無効または期限切れです。\n先生に新しいリンクを発行してもらってください。');
-      }
-    });
+      .then(r => {
+        if (!r.ok) throw new Error('dashboard_error');
+        return r.json();
+      })
+      .then(dashData => {
+        const verifyData = {
+          student: dashData.student || { id: 0, name: '', className: '' },
+          tenant: dashData.tenant || { id: '', name: '', slug: '' }
+        };
+        renderDashboard(verifyData, dashData);
+      })
+      .catch(err => {
+        showPinLogin();
+      });
+  } else {
+    // ── UUIDトークン認証フロー（リンクベースアクセス） ──
+    fetch('/api/parent-verify?token=' + encodeURIComponent(token))
+      .then(r => {
+        if (!r.ok) throw new Error('invalid');
+        return r.json();
+      })
+      .then(verifyData => {
+        return fetch('/api/parent-dashboard?token=' + encodeURIComponent(token))
+          .then(r => {
+            if (!r.ok) throw new Error('dashboard_error');
+            return r.json();
+          })
+          .then(dashData => {
+            renderDashboard(verifyData, dashData);
+          });
+      })
+      .catch(err => {
+        if (err.message === 'dashboard_error') {
+          showAuth('error', 'データの取得に失敗しました', 'しばらくしてからもう一度お試しください。');
+        } else {
+          showAuth('expired', 'リンクが無効です', 'このリンクは無効または期限切れです。\n先生に新しいリンクを発行してもらってください。');
+        }
+      });
+  }
 
   // ── PINログイン画面 ──
   function showPinLogin() {

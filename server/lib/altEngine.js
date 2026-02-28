@@ -9,6 +9,12 @@
 'use strict';
 
 const db = require('../db');
+const {
+  calculateBaseAlt,
+  calcDiminishedAlt,
+  applyGameCap,
+  calcBonusRate,
+} = require('../utils/altCalculator');
 
 // ─────────────────────────────────────────────
 // デフォルトルール定数（DBにルールがない場合のフォールバック）
@@ -277,6 +283,7 @@ function processSessionALT(session) {
   const {
     id: sessionId, studentId, tenantId, gameId,
     completed, accuracy, durationSeconds, score,
+    correctCount, totalCount, maxStreak: inputMaxStreak,
   } = session;
 
   // 二重付与ガード
@@ -287,31 +294,155 @@ function processSessionALT(session) {
     return { total: 0, breakdown: {}, awards: [] };
   }
 
-  const rules            = getRules(tenantId);
+  // ── ストリーク・月間プレイ回数 ──
   const currentStreak    = updateAndGetStreak(studentId, tenantId);
   const monthlyPlayCount = getMonthlyPlayCount(studentId, tenantId);
   const firstPlay        = isFirstPlayForGame(studentId, gameId);
   const personalBest     = checkPersonalBest(studentId, gameId, score);
 
-  const result = calculateALT(rules, {
-    completed,
-    accuracy:        accuracy ?? 0,
-    durationSeconds: durationSeconds ?? 0,
-    isPersonalBest:  personalBest,
-    currentStreak,
-    monthlyPlayCount,
-    isFirstPlay:     firstPlay,
-  });
+  // ── ① 新ALT計算（正答率ベース・統一関数）──
+  const cc = correctCount ?? (accuracy != null && (session.total_count || totalCount) ? Math.round((accuracy / 100) * (session.total_count || totalCount || 0)) : 0);
+  const tc = totalCount ?? session.total_count ?? 0;
+  const ms = inputMaxStreak ?? 0;
+
+  let baseAlt = calculateBaseAlt(cc, tc, ms, durationSeconds ?? 0);
+
+  // ── ② 同一ゲーム逓減 ──
+  // 当日の同一ゲームプレイ回数を取得（JST基準）
+  const jstDate = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const todayGamePlays = db.prepare(`
+    SELECT COUNT(*) AS cnt FROM play_sessions
+    WHERE student_id = ? AND game_id = ? AND tenant_id = ? AND started_at >= ?
+  `).get(studentId, gameId, tenantId, jstDate);
+  const todayPlayCount = todayGamePlays?.cnt ?? 1;
+
+  // ゲームのカテゴリを取得（② ミッション判定 & ④ 苦手カテゴリ判定で使用）
+  const gameRow = db.prepare('SELECT category FROM games WHERE id = ?').get(gameId);
+
+  // ミッション指定ゲームは逓減の対象外
+  let isMissionGame = false;
+  if (gameRow && gameRow.category) {
+    // 最もプレイ数の少ないカテゴリ = 今日のミッションカテゴリ
+    const missionCat = db.prepare(`
+      SELECT g.category FROM games g
+      LEFT JOIN play_sessions ps ON ps.game_id = g.id AND ps.student_id = ? AND ps.tenant_id = ?
+      WHERE g.tenant_id = ? AND g.is_active = 1 AND g.category IS NOT NULL
+      GROUP BY g.category ORDER BY COUNT(ps.id) ASC LIMIT 1
+    `).get(studentId, tenantId, tenantId);
+    if (missionCat && missionCat.category === gameRow.category) {
+      isMissionGame = true;
+    }
+  }
+
+  const diminishedAlt = isMissionGame ? baseAlt : calcDiminishedAlt(baseAlt, todayPlayCount);
+
+  // ── ③ ゲーム別ALTキャップ ──
+  // 生徒の全体累計ALT
+  const studentTotalRow = db.prepare(`
+    SELECT COALESCE(SUM(amount), 0) AS total FROM coin_logs
+    WHERE student_id = ? AND tenant_id = ?
+  `).get(studentId, tenantId);
+  const studentTotalAlt = studentTotalRow?.total ?? 0;
+
+  // ゲーム別累計ALT
+  const gameLifetimeRow = db.prepare(`
+    SELECT COALESCE(SUM(amount), 0) AS total FROM coin_logs
+    WHERE student_id = ? AND tenant_id = ? AND game_id = ?
+  `).get(studentId, tenantId, gameId);
+  const gameLifetimeAlt = gameLifetimeRow?.total ?? 0;
+
+  const capResult = applyGameCap(diminishedAlt, gameLifetimeAlt, studentTotalAlt);
+
+  // ── ④ チャレンジボーナス（キャップ後に適用）──
+  // 苦手カテゴリ判定: このゲームのカテゴリの正答率が50%以下
+  let isWeakCategory = false;
+  if (gameRow && gameRow.category) {
+    const catStats = db.prepare(`
+      SELECT COALESCE(SUM(ps.correct_count), 0) AS correct, COALESCE(SUM(ps.total_count), 0) AS total
+      FROM play_sessions ps JOIN games g ON ps.game_id = g.id
+      WHERE ps.student_id = ? AND ps.tenant_id = ? AND g.category = ?
+    `).get(studentId, tenantId, gameRow.category);
+    if (catStats && catStats.total > 0) {
+      isWeakCategory = (catStats.correct / catStats.total) <= 0.5;
+    }
+  }
+
+  const bonusResult = calcBonusRate(capResult.alt, firstPlay, isWeakCategory);
+
+  // ── 最終ALT ──
+  const finalAlt = bonusResult.alt;
+
+  // ── awards配列を構築 ──
+  const awards = [];
+  const breakdown = {};
+
+  // 基本ALT
+  awards.push({ reason: 'base_alt', label: '基本ALT', amount: baseAlt });
+  breakdown.base_alt = baseAlt;
+
+  // 逓減
+  if (todayPlayCount > 1 && !isMissionGame) {
+    const dimLabel = `逓減(${todayPlayCount}回目)`;
+    awards.push({ reason: 'diminished', label: dimLabel, amount: diminishedAlt - baseAlt });
+    breakdown.diminished = diminishedAlt;
+  } else if (todayPlayCount > 1 && isMissionGame) {
+    awards.push({ reason: 'mission_exempt', label: 'ミッション対象（逓減なし）', amount: 0 });
+    breakdown.mission_exempt = true;
+  }
+
+  // キャップ
+  if (capResult.capped) {
+    awards.push({ reason: 'game_cap', label: `ゲーム上限(${gameLifetimeAlt}/${capResult.cap})`, amount: capResult.alt - diminishedAlt });
+    breakdown.game_cap = capResult.alt;
+  }
+
+  // チャレンジボーナス
+  if (bonusResult.bonusRate > 1.0) {
+    const bonusLabel = firstPlay && isWeakCategory ? '初プレイ＋苦手ボーナス(×2.5)'
+      : firstPlay ? '初プレイボーナス(×2.0)'
+      : '苦手カテゴリボーナス(×1.5)';
+    awards.push({ reason: 'challenge_bonus', label: bonusLabel, amount: bonusResult.alt - capResult.alt });
+    breakdown.challenge_bonus = bonusResult.alt - capResult.alt;
+  }
+
+  // ストリークボーナス（既存ルールベース、追加ALTとして加算）
+  const rules = getRules(tenantId);
+  let streakBonus = 0;
+  if      (currentStreak === 30) { streakBonus = rules.streak_30 || 0; awards.push({ reason: 'streak_30', label: '30日連続！', amount: streakBonus }); }
+  else if (currentStreak ===  7) { streakBonus = rules.streak_7  || 0; awards.push({ reason: 'streak_7',  label: '7日連続！',  amount: streakBonus }); }
+  else if (currentStreak ===  3) { streakBonus = rules.streak_3  || 0; awards.push({ reason: 'streak_3',  label: '3日連続！',  amount: streakBonus }); }
+  if (streakBonus > 0) breakdown['streak'] = streakBonus;
+
+  // 自己ベスト
+  let bestBonus = 0;
+  if (personalBest && score != null) {
+    bestBonus = rules.highscore || 0;
+    if (bestBonus > 0) {
+      awards.push({ reason: 'highscore', label: '自己ベスト更新！', amount: bestBonus });
+      breakdown.highscore = bestBonus;
+    }
+  }
+
+  const total = finalAlt + streakBonus + bestBonus;
+
+  // 逓減情報をnoteに付記
+  let note = JSON.stringify(breakdown);
+  if (todayPlayCount > 1) {
+    note = `(逓減:${todayPlayCount}回目) ${note}`;
+  }
+  if (capResult.capped) {
+    note = `(上限到達:${gameLifetimeAlt + capResult.alt}/${capResult.cap}) ${note}`;
+  }
 
   // DB保存（失敗してもプレイ記録は壊さない）
   try {
-    persistALT(studentId, tenantId, sessionId, gameId, result.total, JSON.stringify(result.breakdown));
+    persistALT(studentId, tenantId, sessionId, gameId, total, note);
   } catch (err) {
     console.error('[altEngine] persistALT error (non-fatal):', err.message);
-    return { ...result, persistError: true };
+    return { total, breakdown, awards, persistError: true };
   }
 
-  return result;
+  return { total, breakdown, awards, capInfo: capResult };
 }
 
 // ─────────────────────────────────────────────

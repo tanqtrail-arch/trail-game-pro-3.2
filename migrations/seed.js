@@ -57,7 +57,6 @@ db.transaction(() => {
     { name: '江戸時代迷路クイズ', emoji: '🏯', category: '歴史' },
     { name: '文明ビルダー', emoji: '🏛️', category: '歴史' },
     { name: '書き順マスター', emoji: '✍️', url: 'https://tanqtrail-arch.github.io/kanji-stroke/', category: '国語' },
-    { name: 'ビルビルタウン', emoji: '🏙️', url: 'https://tanqtrail-arch.github.io/building-town-v2/', category: '算数' },
   ];
   const insertGame = db.prepare('INSERT OR IGNORE INTO games (tenant_id, name, emoji, url, category) VALUES (?, ?, ?, ?, ?)');
   defaultGames.forEach(g => insertGame.run(tenantId, g.name, g.emoji, g.url || null, g.category));
