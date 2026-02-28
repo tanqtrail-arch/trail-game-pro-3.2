@@ -5,7 +5,7 @@ const path = require('path');
 const fs = require('fs');
 const Database = require('better-sqlite3');
 
-const dbPath = process.env.DATABASE_PATH || './data/trail-game.db';
+const dbPath = process.env.DATABASE_PATH || '/data/trail-game.db';
 const dbDir = path.dirname(dbPath);
 if (!fs.existsSync(dbDir)) fs.mkdirSync(dbDir, { recursive: true });
 
