@@ -76,6 +76,8 @@ const gameSavesRoutes = require('./routes/gameSaves');
 app.use('/api/game-saves', gameSavesRoutes);
 const subjectLevelsRoutes = require('./routes/subjectLevels');
 app.use('/api/t', subjectLevelsRoutes);
+const coursesRoutes = require('./routes/courses');
+app.use('/api/t', coursesRoutes);
 
 app.use('/api', parentRoutes);                         // ★ NEW: 保護者ダッシュボード
 
@@ -90,6 +92,9 @@ app.get('/parent', (req, res) => {
 });
 app.get('/super-admin', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/super-admin.html'));
+});
+app.get('/course', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/course.html'));
 });
 
 // ═══ SPA Fallback ═══

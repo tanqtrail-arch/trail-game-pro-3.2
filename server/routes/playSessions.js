@@ -10,6 +10,7 @@ const { Router } = require('express');
 const db = require('../db');
 const { processSessionALT } = require('../lib/altEngine'); // ★ 0-5追加
 const { updateSubjectLevel } = require('../lib/subjectLevelUpdater');
+const courseEngine = require('../lib/courseEngine');
 
 const router = Router();
 
@@ -108,6 +109,37 @@ router.patch('/:id/end', (req, res) => {
       metadata      ? JSON.stringify(metadata) : null,
       sessionId
     );
+
+    // ── ★ コースゲーム判定（ALT非付与・courseEngineで処理）──
+    const _gameInfo = db.prepare('SELECT is_course_game FROM games WHERE id = ?').get(session.game_id);
+    if (_gameInfo && _gameInfo.is_course_game === 1) {
+      const _courseGame = db.prepare(
+        'SELECT course_id FROM course_games WHERE game_id = ?'
+      ).get(session.game_id);
+      if (_courseGame) {
+        try {
+          const courseResult = courseEngine.onCourseGameEnd(
+            session.student_id, session.tenant_id, _courseGame.course_id, session.game_id,
+            { correct_count: correct_count ?? 0, total_count: total_count ?? 0 }, db
+          );
+          return res.json({
+            success: true,
+            isCourseGame: true,
+            duration_seconds: durationSeconds,
+            achievement: courseResult.achievement,
+            passed: courseResult.passed,
+            mastered: courseResult.mastered,
+            gradeUp: courseResult.gradeUp,
+            oldGrade: courseResult.oldGrade,
+            newGrade: courseResult.newGrade,
+            newBadge: courseResult.newBadge,
+          });
+        } catch (courseErr) {
+          console.error('[playSessions] courseEngine error:', courseErr.message);
+          return res.json({ success: true, isCourseGame: true, duration_seconds: durationSeconds });
+        }
+      }
+    }
 
     // ── ★ ALTエンジン呼び出し ──
     // ended_at が記録された＝completed とみなす
