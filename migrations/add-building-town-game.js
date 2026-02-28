@@ -15,7 +15,7 @@ db.pragma('foreign_keys = ON');
 const GAME = {
   name: 'ビルビルタウン',
   emoji: '🏙️',
-  url: 'https://tanqtrail-arch.github.io/building-town/',
+  url: 'https://tanqtrail-arch.github.io/building-town-v2/',
   category: '算数',
 };
 
