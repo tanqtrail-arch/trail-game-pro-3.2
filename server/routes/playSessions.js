@@ -9,6 +9,7 @@
 const { Router } = require('express');
 const db = require('../db');
 const { processSessionALT } = require('../lib/altEngine'); // ★ 0-5追加
+const { updateSubjectLevel } = require('../lib/subjectLevelUpdater');
 
 const router = Router();
 
@@ -131,6 +132,16 @@ router.patch('/:id/end', (req, res) => {
       } catch (altErr) {
         console.error('[playSessions] altEngine error (non-fatal):', altErr.message);
       }
+    }
+
+    // ── ★ 科目レベル更新（ALT計算とは独立・失敗してもレスポンスに影響しない）──
+    try {
+      updateSubjectLevel(
+        session.student_id, session.tenant_id, session.game_id,
+        altResult.total, correct_count ?? 0, total_count ?? 0, db
+      );
+    } catch (slErr) {
+      console.error('[playSessions] subjectLevelUpdater error (non-fatal):', slErr.message);
     }
 
     res.json({
