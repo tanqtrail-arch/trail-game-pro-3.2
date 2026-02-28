@@ -316,7 +316,25 @@ function processSessionALT(session) {
   `).get(studentId, gameId, tenantId, jstDate);
   const todayPlayCount = todayGamePlays?.cnt ?? 1;
 
-  const diminishedAlt = calcDiminishedAlt(baseAlt, todayPlayCount);
+  // ゲームのカテゴリを取得（② ミッション判定 & ④ 苦手カテゴリ判定で使用）
+  const gameRow = db.prepare('SELECT category FROM games WHERE id = ?').get(gameId);
+
+  // ミッション指定ゲームは逓減の対象外
+  let isMissionGame = false;
+  if (gameRow && gameRow.category) {
+    // 最もプレイ数の少ないカテゴリ = 今日のミッションカテゴリ
+    const missionCat = db.prepare(`
+      SELECT g.category FROM games g
+      LEFT JOIN play_sessions ps ON ps.game_id = g.id AND ps.student_id = ? AND ps.tenant_id = ?
+      WHERE g.tenant_id = ? AND g.is_active = 1 AND g.category IS NOT NULL
+      GROUP BY g.category ORDER BY COUNT(ps.id) ASC LIMIT 1
+    `).get(studentId, tenantId, tenantId);
+    if (missionCat && missionCat.category === gameRow.category) {
+      isMissionGame = true;
+    }
+  }
+
+  const diminishedAlt = isMissionGame ? baseAlt : calcDiminishedAlt(baseAlt, todayPlayCount);
 
   // ── ③ ゲーム別ALTキャップ ──
   // 生徒の全体累計ALT
@@ -338,7 +356,6 @@ function processSessionALT(session) {
   // ── ④ チャレンジボーナス（キャップ後に適用）──
   // 苦手カテゴリ判定: このゲームのカテゴリの正答率が50%以下
   let isWeakCategory = false;
-  const gameRow = db.prepare('SELECT category FROM games WHERE id = ?').get(gameId);
   if (gameRow && gameRow.category) {
     const catStats = db.prepare(`
       SELECT COALESCE(SUM(ps.correct_count), 0) AS correct, COALESCE(SUM(ps.total_count), 0) AS total
@@ -364,10 +381,13 @@ function processSessionALT(session) {
   breakdown.base_alt = baseAlt;
 
   // 逓減
-  if (todayPlayCount > 1) {
+  if (todayPlayCount > 1 && !isMissionGame) {
     const dimLabel = `逓減(${todayPlayCount}回目)`;
     awards.push({ reason: 'diminished', label: dimLabel, amount: diminishedAlt - baseAlt });
     breakdown.diminished = diminishedAlt;
+  } else if (todayPlayCount > 1 && isMissionGame) {
+    awards.push({ reason: 'mission_exempt', label: 'ミッション対象（逓減なし）', amount: 0 });
+    breakdown.mission_exempt = true;
   }
 
   // キャップ
