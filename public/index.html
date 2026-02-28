@@ -235,6 +235,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 @media(min-width:600px){.app{padding:20px}.login-logo{font-size:3rem}.game-grid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:18px}}
 @media(min-width:768px){.app{max-width:720px;margin:0 auto}.game-grid{grid-template-columns:repeat(3,1fr)}}
 @media(min-width:1024px){.app{max-width:960px}.game-grid{grid-template-columns:repeat(4,1fr)}}
+.course-grid{display:flex;flex-direction:column;gap:10px;margin-bottom:18px}
+.course-card{display:flex;align-items:center;padding:14px;background:var(--bg-card);border:1.5px solid rgba(0,0,0,0.06);border-radius:14px;text-decoration:none;color:inherit;transition:all .3s;gap:12px}
+.course-card.active:hover{transform:translateY(-2px);border-color:var(--border-glow);box-shadow:0 6px 20px rgba(0,0,0,0.06)}
+.course-card.locked{opacity:.55;border-style:dashed;cursor:default}
+.course-emoji{font-size:2rem;flex-shrink:0;width:48px;text-align:center}
+.course-info{flex:1;min-width:0}
+.course-name{font-weight:700;font-size:.95rem;margin-bottom:2px}
+.course-grade{font-family:'Orbitron',sans-serif;font-size:.7rem;color:var(--accent-purple);font-weight:700;letter-spacing:1px}
+.course-progress{font-size:.72rem;color:var(--text-dim);margin-top:2px}
+.course-desc{font-size:.75rem;color:var(--text-dim);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.course-soon{font-size:.7rem;color:var(--accent-orange);margin-top:4px;font-weight:600}
+.course-arrow{font-family:'Orbitron',sans-serif;font-size:1.2rem;color:var(--accent-cyan);font-weight:700;flex-shrink:0}
 </style>
 </head>
 <body>
@@ -691,6 +703,7 @@ function renderPortal(){
     <button class="portal-tab ${S.portalTab==='dashboard'?'active':''}" data-ptab="dashboard">📈 ダッシュボード</button>
     <button class="portal-tab ${S.portalTab==='ranking'?'active':''}" data-ptab="ranking">🏆 ランキング</button>
     <button class="portal-tab ${S.portalTab==='games'?'active':''}" data-ptab="games">🎮 ゲーム</button>
+    <button class="portal-tab ${S.portalTab==='courses'?'active':''}" data-ptab="courses">📚 コース</button>
     <button class="portal-tab ${S.portalTab==='history'?'active':''}" data-ptab="history">📊 ALT履歴</button>
   </div>`;
   let content='';
@@ -698,6 +711,7 @@ function renderPortal(){
   else if(S.portalTab==='dashboard'){if(!S.studentDashboard)loadStudentDashboard();content=renderPortalDashboard();}
   else if(S.portalTab==='ranking')content=renderPortalRanking();
   else if(S.portalTab==='games')content=renderPortalGames();
+  else if(S.portalTab==='courses'){if(!S.courses)loadCourses();content=renderPortalCourses();}
   else content=renderPortalHistory();
   return`<div class="portal">
     <div class="header"><div class="header-logo">TRAIL GP3</div><div class="header-right">
@@ -783,6 +797,44 @@ function renderPortalHistory(){
   const logs=S.coinLogs.filter(l=>l.student_name===name);
   const rows=logs.length?logs.slice(0,30).map(l=>`<tr><td>${esc(l.game_emoji||'🎮')} ${esc(l.game_name||'—')}</td><td class="coin-plus">+${l.amount}</td><td style="color:var(--text-dim);font-size:.75rem">${esc(l.created_at||'')}</td></tr>`).join(''):'<tr><td colspan="3" class="no-data">まだ記録がありません</td></tr>';
   return`<div class="tbl-wrap"><table><tr><th>ゲーム</th><th>ALT</th><th>日付</th></tr>${rows}</table></div>`;
+}
+
+// ═══ Courses ═══
+async function loadCourses(){if(!S.tenant)return;try{const r=await apiGet('/t/'+S.tenant.slug+'/courses');S.courses=r.courses||[];render()}catch(e){S.courses=[];render()}}
+function renderPortalCourses(){
+  const courses=S.courses||[];
+  if(courses.length===0)return'<div class="no-data">読み込み中...</div>';
+  const typeLabels={'hakase':'🎓 博士コース','designer':'🎨 デザイナーコース','expert':'💼 エキスパートコース'};
+  const types=['hakase','designer','expert'];
+  let html='';
+  for(const t of types){
+    const group=courses.filter(c=>c.courseType===t);
+    if(group.length===0)continue;
+    html+=`<div class="section-title">${typeLabels[t]||t}</div><div class="course-grid">`;
+    for(const c of group){
+      const isActive=c.status==='active';
+      const p=c.progress||{};
+      const gradeLabel=p.currentGrade||'4級';
+      const progressText=p.totalGames>0?`${p.gamesPassed}/${p.totalGames} クリア`:'';
+      const masteredText=p.gamesMastered>0?`⭐${p.gamesMastered}マスター`:'';
+      if(isActive){
+        html+=`<a href="/course?id=${esc(c.id)}" class="course-card active">
+          <div class="course-emoji">${esc(c.emoji)}</div>
+          <div class="course-info"><div class="course-name">${esc(c.name)}</div>
+          <div class="course-grade">${esc(gradeLabel)}</div>
+          <div class="course-progress">${progressText} ${masteredText}</div></div>
+          <div class="course-arrow">→</div></a>`;
+      }else{
+        html+=`<div class="course-card locked">
+          <div class="course-emoji">${esc(c.emoji)}</div>
+          <div class="course-info"><div class="course-name">${esc(c.name)}</div>
+          <div class="course-desc">${esc(c.description||'')}</div>
+          <div class="course-soon">🔒 もうすぐオープン！</div></div></div>`;
+      }
+    }
+    html+=`</div>`;
+  }
+  return html;
 }
 
 // ═══ Admin Panel ═══
