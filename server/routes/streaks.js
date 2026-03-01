@@ -3,35 +3,34 @@
  * 連続プレイ日数 API
  * Task 0-4
  *
- * GET  /api/streaks/:studentId          - 生徒のストリーク情報取得
- * GET  /api/streaks/tenant/:tenantId    - テナント全生徒のストリーク一覧
+ * GET  /api/t/:tenantSlug/streaks/:studentId  - 生徒のストリーク情報取得
+ * GET  /api/t/:tenantSlug/streaks             - テナント全生徒のストリーク一覧
  */
 
 'use strict';
 
 const { Router } = require('express');
 const db = require('../db');
-const { requireStudent, requireAdmin } = require('../middleware/auth');
+const { requireAuth, requireAdmin } = require('../middleware/auth');
 
 const router = Router();
 
 // ════════════════════════════════════════════════════════
-//  GET /api/streaks/:studentId
+//  GET /:tenantSlug/streaks/:studentId
 //  生徒のストリーク情報取得
-//  ・生徒本人（requireStudent）または管理者（requireAdmin）が呼べる
 // ════════════════════════════════════════════════════════
-router.get('/:studentId', (req, res) => {
+router.get('/:tenantSlug/streaks/:studentId', requireAuth, (req, res) => {
   try {
+    const tenant = db.prepare('SELECT * FROM tenants WHERE slug = ?').get(req.params.tenantSlug);
+    if (!tenant) return res.status(404).json({ error: 'テナントが見つかりません' });
+    if (req.tenantId !== tenant.id) return res.status(403).json({ error: 'アクセス権がありません' });
+
     const studentId = parseInt(req.params.studentId, 10);
     if (isNaN(studentId)) {
       return res.status(400).json({ error: '無効な studentId です' });
     }
 
-    // テナントIDは query or JWT から
-    const tenantId = req.query.tenant_id || req.tenantId;
-    if (!tenantId) {
-      return res.status(400).json({ error: 'tenant_id が必要です' });
-    }
+    const tenantId = tenant.id;
 
     // ストリーク情報
     const streak = db.prepare(`
@@ -103,18 +102,19 @@ router.get('/:studentId', (req, res) => {
 });
 
 // ════════════════════════════════════════════════════════
-//  GET /api/streaks/tenant/:tenantId
+//  GET /:tenantSlug/streaks
 //  テナント全生徒のストリーク一覧（管理者向け）
 //  ストリーク中の生徒を炎マークで強調するための一覧
 // ════════════════════════════════════════════════════════
-router.get('/tenant/:tenantId', requireAdmin, (req, res) => {
+router.get('/:tenantSlug/streaks', requireAdmin, (req, res) => {
   try {
-    const tenantId = req.params.tenantId;
-
-    // 管理者のテナントと一致するか確認
-    if (req.tenantId && req.tenantId !== tenantId) {
+    const tenant = db.prepare('SELECT * FROM tenants WHERE slug = ?').get(req.params.tenantSlug);
+    if (!tenant) return res.status(404).json({ error: 'テナントが見つかりません' });
+    if (req.tenantId && req.tenantId !== tenant.id) {
       return res.status(403).json({ error: 'アクセス権がありません' });
     }
+
+    const tenantId = tenant.id;
 
     const jstDate   = new Date(Date.now() + 9 * 60 * 60 * 1000);
     const today     = jstDate.toISOString().slice(0, 10);

@@ -93,7 +93,7 @@ export async function getRankings() {
 
 // ─── ストリーク ────────────────────
 export async function getStreak(studentId) {
-  return apiFetch(`/api/streaks/${studentId}?tenant_id=${TENANT_SLUG}`);
+  return apiFetch(`/api/t/${TENANT_SLUG}/streaks/${studentId}`);
 }
 
 // ─── プレイセッション ──────────────

@@ -72,7 +72,7 @@ const superAdminRoutes = require('./routes/superAdmin');
 app.use('/', superAdminRoutes);
 app.use('/api/play-sessions', playSessionsRoutes);
 const streaksRoutes = require('./routes/streaks');
-app.use('/api/streaks', streaksRoutes);
+app.use('/api/t', streaksRoutes);
 const studentDashboardRoutes = require('./routes/studentDashboard');
 app.use('/api/t', studentDashboardRoutes);
 const questionsRoutes = require('./routes/questions');
