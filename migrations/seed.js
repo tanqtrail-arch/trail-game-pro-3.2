@@ -41,19 +41,19 @@ db.transaction(() => {
 
   // デフォルトゲーム
   const defaultGames = [
-    { name: '分数融合', emoji: '🧬', category: '算数' },
+    { name: '分数融合', emoji: '🧬', url: 'https://tanqtrail-arch.github.io/bunsu-fusion/', category: '算数' },
     { name: '分数ガンマン', emoji: '🔫', category: '算数' },
     { name: 'どっちがおおきい', emoji: '⚖️', category: '算数' },
     { name: '約分工房', emoji: '🔧', category: '算数' },
     { name: '分数テトリス', emoji: '🧱', category: '算数' },
     { name: '暗算パネル', emoji: '🧠', category: '算数' },
     { name: '特産品マッチング', emoji: '🍎', category: '地理' },
-    { name: '都道府県シルエットクイズ', emoji: '🗾', category: '地理' },
+    { name: '都道府県シルエットクイズ', emoji: '🗾', url: 'https://tanqtrail-arch.github.io/silhouette-quiz-47/', category: '地理' },
     { name: '気候バトルカード', emoji: '🌦️', category: '理科' },
     { name: '絵画クイズ', emoji: '🎨', category: 'その他' },
     { name: '元素クエスト', emoji: '⚗️', category: '理科' },
     { name: '迷路アタック', emoji: '🏃', category: 'その他' },
-    { name: 'お土産暗算', emoji: '🛍️', category: '算数' },
+    { name: 'お土産暗算', emoji: '🛍️', url: 'https://tanqtrail-arch.github.io/omiyage-anzan/', category: '算数' },
     { name: '江戸時代迷路クイズ', emoji: '🏯', category: '歴史' },
     { name: '文明ビルダー', emoji: '🏛️', category: '歴史' },
     { name: '書き順マスター', emoji: '✍️', url: 'https://tanqtrail-arch.github.io/kanji-stroke/', category: '国語' },
