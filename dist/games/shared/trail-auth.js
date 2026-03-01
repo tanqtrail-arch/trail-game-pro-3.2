@@ -1,7 +1,6 @@
 /**
  * TrailAuth - PIN入力UI
- * TRAIL Ga
- * me Pro 3.2 / Task 0-9
+ * TRAIL Game Pro 3.2 / Task 0-9
  *
  * 使い方:
  *   <link rel="stylesheet" href="/games/shared/trail-auth.css">

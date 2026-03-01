@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>スーパー管理者 - TRAIL Game Pro</title>
+<style>
+  body { font-family: sans-serif; background: #1a1a2e; color: #eee; padding: 20px; }
+  h1 { color: #00d4ff; }
+  .login-box { background: #16213e; padding: 20px; border-radius: 10px; max-width: 400px; margin: 50px auto; }
+  input { width: 100%; padding: 10px; margin: 8px 0; border-radius: 6px; border: 1px solid #444; background: #0f3460; color: #fff; box-sizing: border-box; }
+  button { background: #00d4ff; color: #000; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+  button:hover { background: #00b8d9; }
+  .danger { background: #e74c3c; color: #fff; }
+  table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+  th, td { padding: 10px; border: 1px solid #444; text-align: left; }
+  th { background: #0f3460; }
+  tr:hover { background: #16213e; }
+  .section { background: #16213e; padding: 20px; border-radius: 10px; margin-top: 20px; }
+  /* ダッシュボード */
+  .dash-tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .dash-tab { padding: 8px 16px; border-radius: 6px; cursor: pointer; background: #0f3460; border: 1px solid #444; color: #eee; font-size: 14px; }
+  .dash-tab.active { background: #00d4ff; color: #000; font-weight: bold; border-color: #00d4ff; }
+  .dash-panel { display: none; }
+  .dash-panel.active { display: block; }
+  .stat-cards { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+  .stat-card { background: #0f3460; padding: 16px 20px; border-radius: 10px; min-width: 150px; flex: 1; text-align: center; }
+  .stat-card .num { font-size: 28px; font-weight: bold; color: #00d4ff; }
+  .stat-card .label { font-size: 12px; color: #aaa; margin-top: 4px; }
+  .chart-box { background: #0f3460; border-radius: 10px; padding: 16px; margin-bottom: 16px; max-height: 350px; }
+  .dash-filters { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
+  .dash-filters select, .dash-filters input { padding: 8px; border-radius: 6px; border: 1px solid #444; background: #0f3460; color: #fff; }
+  .dash-export { margin-top: 12px; }
+  .dash-export button { background: #27ae60; margin-right: 8px; }
+  .dash-export button:hover { background: #2ecc71; }
+  .student-detail-back { cursor: pointer; color: #00d4ff; margin-bottom: 12px; display: inline-block; }
+  .leaderboard-row td:first-child { font-weight: bold; color: #f1c40f; }
+</style>
+</head>
+<body>
+
+<div id="loginArea">
+  <div class="login-box">
+    <h2>🔐 スーパー管理者ログイン</h2>
+    <input type="email" id="email" placeholder="メールアドレス">
+    <input type="password" id="password" placeholder="パスワード">
+    <button onclick="login()">ログイン</button>
+    <p id="loginError" style="color:red;"></p>
+  </div>
+</div>
+
+<div id="mainArea" style="display:none;">
+  <h1>🏫 TRAIL スーパー管理者</h1>
+  <!-- ===== 学習ダッシュボード ===== -->
+  <div class="section">
+    <h2>📊 学習ダッシュボード</h2>
+
+    <div class="dash-tabs">
+      <button class="dash-tab active" onclick="switchDashTab('overview')">🏫 教室比較</button>
+      <button class="dash-tab" onclick="switchDashTab('students')">👤 生徒別</button>
+      <button class="dash-tab" onclick="switchDashTab('games')">🎮 ゲーム別</button>
+      <button class="dash-tab" onclick="switchDashTab('export')">📥 エクスポート</button>
+    </div>
+
+    <!-- ====== 教室比較パネル ====== -->
+    <div id="dash-overview" class="dash-panel active">
+      <div id="overviewCards" class="stat-cards"></div>
+      <div class="chart-box"><canvas id="tenantTimeChart"></canvas></div>
+      <div class="chart-box"><canvas id="tenantAccuracyChart"></canvas></div>
+      <table id="tenantCompareTable">
+        <thead><tr>
+          <th>教室名</th><th>アクティブ生徒</th><th>総プレイ数</th>
+          <th>総学習時間</th><th>平均プレイ時間</th><th>平均正答率</th>
+        </tr></thead>
+        <tbody id="tenantCompareBody"></tbody>
+      </table>
+    </div>
+
+    <!-- ====== 生徒別パネル ====== -->
+    <div id="dash-students" class="dash-panel">
+      <div class="dash-filters">
+        <select id="dashTenantSelect" onchange="loadStudentList()">
+          <option value="">教室を選択...</option>
+        </select>
+      </div>
+
+      <div id="studentListView">
+        <table id="studentStatsTable">
+          <thead><tr>
+            <th>生徒名</th><th>総プレイ数</th><th>総学習時間</th>
+            <th>平均正答率</th><th>最高スコア</th><th>詳細</th>
+          </tr></thead>
+          <tbody id="studentStatsBody"></tbody>
+        </table>
+      </div>
+
+      <div id="studentDetailView" style="display:none;">
+        <span class="student-detail-back" onclick="backToStudentList()">← 一覧に戻る</span>
+        <h3 id="studentDetailName"></h3>
+        <div id="studentDetailCards" class="stat-cards"></div>
+        <div class="chart-box"><canvas id="studentDailyChart"></canvas></div>
+        <div class="chart-box"><canvas id="studentGameChart"></canvas></div>
+        <h4>ゲーム別内訳</h4>
+        <table>
+          <thead><tr><th>ゲーム</th><th>プレイ回数</th><th>学習時間</th><th>平均正答率</th><th>最高スコア</th></tr></thead>
+          <tbody id="studentGameBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ====== ゲーム別パネル ====== -->
+    <div id="dash-games" class="dash-panel">
+      <div class="dash-filters">
+        <select id="dashGameTenantSelect" onchange="loadGameList()">
+          <option value="">全教室</option>
+        </select>
+      </div>
+      <div id="gameListView">
+        <table id="gameStatsTable">
+          <thead><tr>
+            <th>ゲーム</th><th>プレイヤー数</th><th>総プレイ数</th>
+            <th>総学習時間</th><th>平均正答率</th><th>詳細</th>
+          </tr></thead>
+          <tbody id="gameStatsBody"></tbody>
+        </table>
+      </div>
+
+      <div id="gameDetailView" style="display:none;">
+        <span class="student-detail-back" onclick="backToGameList()">← 一覧に戻る</span>
+        <h3 id="gameDetailName"></h3>
+        <div id="gameDetailCards" class="stat-cards"></div>
+        <h4>🏆 リーダーボード</h4>
+        <table>
+          <thead><tr><th>順位</th><th>生徒名</th><th>最高スコア</th><th>プレイ回数</th><th>平均正答率</th></tr></thead>
+          <tbody id="gameLeaderBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ====== エクスポートパネル ====== -->
+    <div id="dash-export" class="dash-panel">
+      <h3>📥 データエクスポート</h3>
+      <div class="dash-filters">
+        <label>教室：
+          <select id="exportTenant">
+            <option value="">全教室</option>
+          </select>
+        </label>
+        <label>開始日：<input type="date" id="exportFrom"></label>
+        <label>終了日：<input type="date" id="exportTo"></label>
+      </div>
+      <div class="dash-export">
+        <button onclick="downloadCSV()">📄 CSV ダウンロード</button>
+        <button onclick="downloadDBBackup()" style="background:#3498db;">💾 DBバックアップ</button>
+      </div>
+      <p style="color:#aaa;font-size:13px;margin-top:12px;">
+        ※ CSVはプレイセッションの全データ。DBバックアップはSQLiteファイルそのもの。
+      </p>
+    </div>
+  </div>
+<div class="section">
+    <h2>🎮 全教室に一括ゲーム登録</h2>
+    <input type="text" id="gameEmoji" placeholder="絵文字（例：🎯）" style="width:80px;">
+    <input type="text" id="gameName" placeholder="ゲーム名">
+    <input type="text" id="gameUrl" placeholder="URL（任意）">
+    <input type="text" id="gameCategory" placeholder="カテゴリ（例：算数）">
+    <button onclick="broadcastGame()">📢 全教室に登録</button>
+  </div>
+  <div class="section">
+    <h2>➕ 新しい教室を作成</h2>
+    <input type="text" id="newName" placeholder="教室名">
+    <input type="text" id="newSlug" placeholder="スラッグ（URL用）">
+    <input type="email" id="newEmail" placeholder="管理者メール">
+    <input type="password" id="newPass" placeholder="管理者パスワード">
+    <select id="newPlan" style="width:100%;padding:10px;margin:8px 0;border-radius:6px;border:1px solid #444;background:#0f3460;color:#fff;">
+      <option value="free">Free</option>
+      <option value="pro">Pro</option>
+はい    </select>
+    <button onclick="createTenant()">作成</button>
+  </div>
+
+  <div class="section">
+    <h2>📋 教室一覧</h2>
+    <button onclick="loadTenants()">🔄 更新</button>
+    <table id="tenantTable">
+      <thead><tr><th>教室名</th><th>スラッグ</th><th>プラン</th><th>生徒数</th><th>管理者メール</th><th>操作</th></tr></thead>
+      <tbody id="tenantBody"></tbody>
+    </table>
+  </div>
+</div>
+<div class="section">
+  <h2>🎮 登録済みゲーム一覧</h2>
+  <button onclick="loadGames()">🔄 更新</button>
+  <table id="gameTable" style="margin-top:10px;">
+<thead><tr><th>ゲーム名</th><th>絵文字</th><th>カテゴリ</th><th>URL</th><th>教室名</th><th>操作</th></tr></thead>    <tbody id="gameBody"></tbody>
+  </table>
+</div>
+<script>
+let authHeader = '';
+
+function login() {
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+  authHeader = btoa(email + ':' + password);
+  fetch('/api/super/tenants', { headers: { 'x-super-admin': authHeader } })
+    .then(r => {
+      if (r.ok) {
+        document.getElementById('loginArea').style.display = 'none';
+        document.getElementById('mainArea').style.display = 'block';
+loadTenants(); loadGames(); initDashboard();     
+ } else {
+        document.getElementById('loginError').textContent = '認証失敗。メールとパスワードを確認してください。';
+      }
+    });
+}
+
+function loadTenants() {
+  fetch('/api/super/tenants', { headers: { 'x-super-admin': authHeader } })
+    .then(r => r.json())
+    .then(tenants => {
+      const tbody = document.getElementById('tenantBody');
+      tbody.innerHTML = '';
+      tenants.forEach(t => {
+        tbody.innerHTML += `
+          <tr>
+            <td><input value="${t.name}" id="name_${t.id}" style="width:120px;padding:4px;background:#0f3460;color:#fff;border:1px solid #444;border-radius:4px;"></td>
+            <td><input value="${t.slug}" id="slug_${t.id}" style="width:100px;padding:4px;background:#0f3460;color:#fff;border:1px solid #444;border-radius:4px;"></td>
+            <td>
+              <select id="plan_${t.id}" style="background:#0f3460;color:#fff;border:1px solid #444;border-radius:4px;padding:4px;">
+                <option value="free" ${t.plan==='free'?'selected':''}>Free</option>
+                <option value="pro" ${t.plan==='pro'?'selected':''}>Pro</option>
+              </select>
+            </td>
+            <td>${t.student_count}</td>
+            <td>${t.admin_email || '-'}</td>
+            <td>
+              <button onclick="updateTenant('${t.id}')">保存</button>
+              <button class="danger" onclick="deleteTenant('${t.id}', '${t.name}')">削除</button>
+            </td>
+          </tr>`;
+      });
+    });
+}
+
+function updateTenant(id) {
+  const name = document.getElementById('name_' + id).value;
+  const slug = document.getElementById('slug_' + id).value;
+  const plan = document.getElementById('plan_' + id).value;
+  fetch('/api/super/tenants/' + id, {
+    method: 'PATCH',
+    headers: { 'x-super-admin': authHeader, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, slug, plan })
+  }).then(() => { alert('更新しました！'); loadTenants(); });
+}
+
+function deleteTenant(id, name) {
+  if (!confirm(`「${name}」を削除しますか？この操作は取り消せません。`)) return;
+  fetch('/api/super/tenants/' + id, {
+    method: 'DELETE',
+    headers: { 'x-super-admin': authHeader }
+  }).then(() => { alert('削除しました'); loadTenants(); });
+}
+
+function createTenant() {
+  const name = document.getElementById('newName').value;
+  const slug = document.getElementById('newSlug').value;
+  const adminEmail = document.getElementById('newEmail').value;
+  const adminPassword = document.getElementById('newPass').value;
+  const plan = document.getElementById('newPlan').value;
+  fetch('/api/super/tenants', {
+    method: 'POST',
+    headers: { 'x-super-admin': authHeader, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, slug, adminEmail, adminPassword, plan })
+  }).then(() => { alert('作成しました！'); loadTenants(); });
+}
+function broadcastGame() {
+  const emoji = document.getElementById('gameEmoji').value;
+  const name = document.getElementById('gameName').value;
+  const url = document.getElementById('gameUrl').value;
+  const category = document.getElementById('gameCategory').value;
+  if (!emoji || !name) { alert('絵文字とゲーム名は必須です'); return; }
+  fetch('/api/super/games/broadcast', {
+    method: 'POST',
+    headers: { 'x-super-admin': authHeader, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ emoji, name, url, category })
+  }).then(r => r.json()).then(d => {
+    alert(`✅ ${d.count}教室に登録しました！`);
+    document.getElementById('gameEmoji').value = '';
+    document.getElementById('gameName').value = '';
+    document.getElementById('gameUrl').value = '';
+  document.getElementById('gameCategory').value = '';
+  });
+}
+function loadGames() {
+  fetch('/api/super/games', { headers: { 'x-super-admin': authHeader } })
+    .then(r => r.json())
+    .then(games => {
+      const tbody = document.getElementById('gameBody');
+      tbody.innerHTML = '';
+      games.forEach(g => {
+        tbody.innerHTML += `
+          <tr>
+            <td><input value="${g.name}" id="gname_${g.id}" style="width:120px;padding:4px;background:#0f3460;color:#fff;border:1px solid #444;border-radius:4px;"></td>
+            <td><input value="${g.emoji}" id="gemoji_${g.id}" style="width:50px;padding:4px;background:#0f3460;color:#fff;border:1px solid #444;border-radius:4px;"></td>
+            <td><input value="${g.category||''}" id="gcat_${g.id}" style="width:80px;padding:4px;background:#0f3460;color:#fff;border:1px solid #444;border-radius:4px;"></td>
+            <td><input value="${g.url||''}" id="gurl_${g.id}" style="width:150px;padding:4px;background:#0f3460;color:#fff;border:1px solid #444;border-radius:4px;"></td>
+            <td>${g.tenant_name}</td>
+            <td>
+              <button onclick="updateGame('${g.id}','${g.tenant_id}')">保存</button>
+              <button class="danger" onclick="deleteGame('${g.id}','${g.tenant_id}','${g.name}')">削除</button>
+            </td>
+          </tr>`;
+      });
+    });
+}
+
+function updateGame(id, tenantId) {
+  const name = document.getElementById('gname_' + id).value;
+  const emoji = document.getElementById('gemoji_' + id).value;
+  const category = document.getElementById('gcat_' + id).value;
+  const url = document.getElementById('gurl_' + id).value;
+  fetch('/api/super/games/' + id, {
+    method: 'PATCH',
+    headers: { 'x-super-admin': authHeader, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, emoji, category, url, tenantId })
+  }).then(() => { alert('更新しました！'); loadGames(); });
+}
+
+function deleteGame(id, tenantId, name) {
+  if (!confirm(`「${name}」を削除しますか？`)) return;
+  fetch('/api/super/games/' + id, {
+    method: 'DELETE',
+    headers: { 'x-super-admin': authHeader, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ tenantId })
+  }).then(() => { alert('削除しました'); loadGames(); });
+}
+</script>
+<script>
+// ===== ダッシュボード =====
+const API = '';
+let tenantTimeChartObj = null;
+let tenantAccuracyChartObj = null;
+let studentDailyChartObj = null;
+let studentGameChartObj = null;
+
+function formatTime(seconds) {
+  if (!seconds || seconds === 0) return '0分';
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  if (h > 0) return h + '時間' + (m > 0 ? m + '分' : '');
+  return m + '分';
+}
+
+// タブ切替
+function switchDashTab(tab) {
+  document.querySelectorAll('.dash-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.dash-panel').forEach(p => p.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('dash-' + tab).classList.add('active');
+
+  if (tab === 'overview') loadTenantComparison();
+  if (tab === 'students') { populateTenantSelects(); }
+  if (tab === 'games') { populateTenantSelects(); }
+  if (tab === 'export') { populateTenantSelects(); }
+}
+
+// テナント選択肢を埋める
+async function populateTenantSelects() {
+  try {
+const res = await fetch(API + '/api/super/tenants', { headers: { 'x-super-admin': authHeader } });    const tenants = await res.json();
+    ['dashTenantSelect', 'dashGameTenantSelect', 'exportTenant'].forEach(id => {
+      const sel = document.getElementById(id);
+      if (!sel) return;
+      const val = sel.value;
+      sel.innerHTML = id === 'dashTenantSelect'
+        ? '<option value="">教室を選択...</option>'
+        : '<option value="">全教室</option>';
+      tenants.forEach(t => {
+        sel.innerHTML += `<option value="${t.id}">${t.name}</option>`;
+      });
+      sel.value = val;
+    });
+  } catch (e) { console.error(e); }
+}
+
+// ===== 教室比較 =====
+async function loadTenantComparison() {
+  try {
+    const res = await fetch(API + '/api/play-sessions/stats/tenants/compare');
+    const data = await res.json();
+
+    // 概要カード
+    const totalPlays = data.reduce((s, t) => s + t.total_plays, 0);
+    const totalStudents = data.reduce((s, t) => s + t.active_students, 0);
+    const totalSeconds = data.reduce((s, t) => s + t.total_seconds, 0);
+    document.getElementById('overviewCards').innerHTML = `
+      <div class="stat-card"><div class="num">${data.length}</div><div class="label">教室数</div></div>
+      <div class="stat-card"><div class="num">${totalStudents}</div><div class="label">アクティブ生徒</div></div>
+      <div class="stat-card"><div class="num">${totalPlays}</div><div class="label">総プレイ数</div></div>
+      <div class="stat-card"><div class="num">${formatTime(totalSeconds)}</div><div class="label">総学習時間</div></div>
+    `;
+
+    // テーブル
+    document.getElementById('tenantCompareBody').innerHTML = data.map(t => `
+      <tr>
+        <td>${t.tenant_name}</td>
+        <td>${t.active_students}</td>
+        <td>${t.total_plays}</td>
+        <td>${formatTime(t.total_seconds)}</td>
+        <td>${formatTime(t.avg_seconds_per_play)}</td>
+        <td>${t.avg_accuracy != null ? t.avg_accuracy + '%' : '-'}</td>
+      </tr>
+    `).join('');
+
+    // グラフ：学習時間比較
+    const labels = data.map(t => t.tenant_name);
+    if (tenantTimeChartObj) tenantTimeChartObj.destroy();
+    tenantTimeChartObj = new Chart(document.getElementById('tenantTimeChart'), {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: '総学習時間（分）',
+          data: data.map(t => Math.round(t.total_seconds / 60)),
+          backgroundColor: '#00d4ff88',
+          borderColor: '#00d4ff',
+          borderWidth: 1
+        }, {
+          label: '生徒あたり平均（分）',
+          data: data.map(t => Math.round(t.avg_seconds_per_student / 60)),
+          backgroundColor: '#f1c40f88',
+          borderColor: '#f1c40f',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { title: { display: true, text: '教室別 学習時間', color: '#eee' }, legend: { labels: { color: '#ccc' } } },
+        scales: { x: { ticks: { color: '#ccc' } }, y: { ticks: { color: '#ccc' }, beginAtZero: true } }
+      }
+    });
+
+    // グラフ：正答率比較
+    if (tenantAccuracyChartObj) tenantAccuracyChartObj.destroy();
+    tenantAccuracyChartObj = new Chart(document.getElementById('tenantAccuracyChart'), {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: '平均正答率（%）',
+          data: data.map(t => t.avg_accuracy || 0),
+          backgroundColor: '#2ecc7188',
+          borderColor: '#2ecc71',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { title: { display: true, text: '教室別 平均正答率', color: '#eee' }, legend: { labels: { color: '#ccc' } } },
+        scales: { x: { ticks: { color: '#ccc' } }, y: { ticks: { color: '#ccc' }, beginAtZero: true, max: 100 } }
+      }
+    });
+
+  } catch (e) { console.error('教室比較エラー:', e); }
+}
+
+// ===== 生徒別 =====
+async function loadStudentList() {
+  const tenantId = document.getElementById('dashTenantSelect').value;
+  if (!tenantId) { document.getElementById('studentStatsBody').innerHTML = ''; return; }
+
+  document.getElementById('studentListView').style.display = '';
+  document.getElementById('studentDetailView').style.display = 'none';
+
+  try {
+    const res = await fetch(API + `/api/play-sessions?tenant_id=${tenantId}&limit=1000`);
+    const sessions = await res.json();
+
+    // 生徒ごとに集計
+    const map = {};
+    sessions.forEach(s => {
+      if (!s.ended_at) return;
+      if (!map[s.student_id]) map[s.student_id] = { name: s.student_name, plays: 0, seconds: 0, accuracySum: 0, accuracyCount: 0, bestScore: 0 };
+      const st = map[s.student_id];
+      st.plays++;
+      st.seconds += s.duration_seconds || 0;
+      if (s.accuracy_pct != null) { st.accuracySum += s.accuracy_pct; st.accuracyCount++; }
+      if (s.score > st.bestScore) st.bestScore = s.score;
+    });
+
+    const students = Object.entries(map).map(([id, s]) => ({
+      id, name: s.name, plays: s.plays, seconds: s.seconds,
+      avgAccuracy: s.accuracyCount > 0 ? (s.accuracySum / s.accuracyCount).toFixed(1) : null,
+      bestScore: s.bestScore
+    })).sort((a, b) => b.seconds - a.seconds);
+
+    document.getElementById('studentStatsBody').innerHTML = students.map(s => `
+      <tr>
+        <td>${s.name}</td>
+        <td>${s.plays}</td>
+        <td>${formatTime(s.seconds)}</td>
+        <td>${s.avgAccuracy != null ? s.avgAccuracy + '%' : '-'}</td>
+        <td>${s.bestScore || '-'}</td>
+        <td><button onclick="loadStudentDetail(${s.id})">📊 詳細</button></td>
+      </tr>
+    `).join('') || '<tr><td colspan="6" style="text-align:center;">データなし</td></tr>';
+
+  } catch (e) { console.error('生徒一覧エラー:', e); }
+}
+
+async function loadStudentDetail(studentId) {
+  document.getElementById('studentListView').style.display = 'none';
+  document.getElementById('studentDetailView').style.display = '';
+
+  try {
+    const res = await fetch(API + `/api/play-sessions/stats/student/${studentId}`);
+    const data = await res.json();
+
+    document.getElementById('studentDetailName').textContent =
+      data.byGame.length > 0 ? '' : '（データなし）';
+
+    // 概要カード
+    const o = data.overview;
+    document.getElementById('studentDetailCards').innerHTML = `
+      <div class="stat-card"><div class="num">${o.total_plays}</div><div class="label">総プレイ数</div></div>
+      <div class="stat-card"><div class="num">${formatTime(o.total_seconds)}</div><div class="label">総学習時間</div></div>
+      <div class="stat-card"><div class="num">${formatTime(o.avg_seconds_per_play)}</div><div class="label">平均プレイ時間</div></div>
+      <div class="stat-card"><div class="num">${o.avg_accuracy != null ? o.avg_accuracy + '%' : '-'}</div><div class="label">平均正答率</div></div>
+      <div class="stat-card"><div class="num">${o.best_score || '-'}</div><div class="label">最高スコア</div></div>
+    `;
+
+    // 日別推移グラフ
+    const daily = data.daily.reverse();
+    if (studentDailyChartObj) studentDailyChartObj.destroy();
+    studentDailyChartObj = new Chart(document.getElementById('studentDailyChart'), {
+      type: 'line',
+      data: {
+        labels: daily.map(d => d.date.slice(5)),
+        datasets: [{
+          label: '学習時間（分）',
+          data: daily.map(d => Math.round(d.total_seconds / 60)),
+          borderColor: '#00d4ff',
+          backgroundColor: '#00d4ff33',
+          fill: true,
+          tension: 0.3,
+          yAxisID: 'y'
+        }, {
+          label: '正答率（%）',
+          data: daily.map(d => d.avg_accuracy),
+          borderColor: '#2ecc71',
+          backgroundColor: '#2ecc7133',
+          fill: false,
+          tension: 0.3,
+          yAxisID: 'y1'
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { title: { display: true, text: '日別推移', color: '#eee' }, legend: { labels: { color: '#ccc' } } },
+        scales: {
+          x: { ticks: { color: '#ccc' } },
+          y: { position: 'left', ticks: { color: '#00d4ff' }, beginAtZero: true, title: { display: true, text: '学習時間（分）', color: '#00d4ff' } },
+          y1: { position: 'right', ticks: { color: '#2ecc71' }, beginAtZero: true, max: 100, grid: { drawOnChartArea: false }, title: { display: true, text: '正答率（%）', color: '#2ecc71' } }
+        }
+      }
+    });
+
+    // ゲーム別円グラフ
+    if (studentGameChartObj) studentGameChartObj.destroy();
+    const colors = ['#00d4ff', '#f1c40f', '#e74c3c', '#2ecc71', '#9b59b6', '#e67e22', '#1abc9c', '#3498db'];
+    studentGameChartObj = new Chart(document.getElementById('studentGameChart'), {
+      type: 'doughnut',
+      data: {
+        labels: data.byGame.map(g => g.emoji + ' ' + g.game_name),
+        datasets: [{
+          data: data.byGame.map(g => Math.round(g.total_seconds / 60)),
+          backgroundColor: data.byGame.map((_, i) => colors[i % colors.length] + '88'),
+          borderColor: data.byGame.map((_, i) => colors[i % colors.length]),
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          title: { display: true, text: 'ゲーム別 学習時間（分）', color: '#eee' },
+          legend: { labels: { color: '#ccc' } }
+        }
+      }
+    });
+
+    // ゲーム別テーブル
+    document.getElementById('studentGameBody').innerHTML = data.byGame.map(g => `
+      <tr>
+        <td>${g.emoji} ${g.game_name}</td>
+        <td>${g.play_count}</td>
+        <td>${formatTime(g.total_seconds)}</td>
+        <td>${g.avg_accuracy != null ? g.avg_accuracy + '%' : '-'}</td>
+        <td>${g.best_score || '-'}</td>
+      </tr>
+    `).join('');
+
+  } catch (e) { console.error('生徒詳細エラー:', e); }
+}
+
+function backToStudentList() {
+  document.getElementById('studentListView').style.display = '';
+  document.getElementById('studentDetailView').style.display = 'none';
+}
+
+// ===== ゲーム別 =====
+async function loadGameList() {
+  const tenantId = document.getElementById('dashGameTenantSelect').value;
+  document.getElementById('gameListView').style.display = '';
+  document.getElementById('gameDetailView').style.display = 'none';
+
+  try {
+    // 全セッションから集計
+    let url = API + '/api/play-sessions?limit=5000';
+    if (tenantId) url += '&tenant_id=' + tenantId;
+    const res = await fetch(url);
+    const sessions = await res.json();
+
+    const map = {};
+    sessions.forEach(s => {
+      if (!s.ended_at) return;
+      const key = s.game_id;
+      if (!map[key]) map[key] = { name: s.game_name, emoji: s.game_emoji, players: new Set(), plays: 0, seconds: 0, accuracySum: 0, accuracyCount: 0 };
+      const g = map[key];
+      g.players.add(s.student_id);
+      g.plays++;
+      g.seconds += s.duration_seconds || 0;
+      if (s.accuracy_pct != null) { g.accuracySum += s.accuracy_pct; g.accuracyCount++; }
+    });
+
+    const games = Object.entries(map).map(([id, g]) => ({
+      id, name: g.name, emoji: g.emoji, players: g.players.size, plays: g.plays, seconds: g.seconds,
+      avgAccuracy: g.accuracyCount > 0 ? (g.accuracySum / g.accuracyCount).toFixed(1) : null
+    })).sort((a, b) => b.plays - a.plays);
+
+    document.getElementById('gameStatsBody').innerHTML = games.map(g => `
+      <tr>
+        <td>${g.emoji} ${g.name}</td>
+        <td>${g.players}</td>
+        <td>${g.plays}</td>
+        <td>${formatTime(g.seconds)}</td>
+        <td>${g.avgAccuracy != null ? g.avgAccuracy + '%' : '-'}</td>
+        <td><button onclick="loadGameDetail(${g.id})">📊 詳細</button></td>
+      </tr>
+    `).join('') || '<tr><td colspan="6" style="text-align:center;">データなし</td></tr>';
+
+  } catch (e) { console.error('ゲーム一覧エラー:', e); }
+}
+
+async function loadGameDetail(gameId) {
+  const tenantId = document.getElementById('dashGameTenantSelect').value;
+  document.getElementById('gameListView').style.display = 'none';
+  document.getElementById('gameDetailView').style.display = '';
+
+  try {
+    let url = API + `/api/play-sessions/stats/game/${gameId}`;
+    if (tenantId) url += '?tenant_id=' + tenantId;
+    const res = await fetch(url);
+    const data = await res.json();
+
+    const o = data.overview;
+    document.getElementById('gameDetailCards').innerHTML = `
+      <div class="stat-card"><div class="num">${o.unique_players}</div><div class="label">プレイヤー数</div></div>
+      <div class="stat-card"><div class="num">${o.total_plays}</div><div class="label">総プレイ数</div></div>
+      <div class="stat-card"><div class="num">${formatTime(o.total_seconds)}</div><div class="label">総学習時間</div></div>
+      <div class="stat-card"><div class="num">${o.avg_accuracy != null ? o.avg_accuracy + '%' : '-'}</div><div class="label">平均正答率</div></div>
+      <div class="stat-card"><div class="num">${o.high_score || '-'}</div><div class="label">ハイスコア</div></div>
+    `;
+
+    document.getElementById('gameLeaderBody').innerHTML = data.leaderboard.map((p, i) => `
+      <tr ${i < 3 ? 'class="leaderboard-row"' : ''}>
+        <td>${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1)}</td>
+        <td>${p.student_name}</td>
+        <td>${p.best_score || '-'}</td>
+        <td>${p.play_count}</td>
+        <td>${p.avg_accuracy != null ? p.avg_accuracy + '%' : '-'}</td>
+      </tr>
+    `).join('');
+
+  } catch (e) { console.error('ゲーム詳細エラー:', e); }
+}
+
+function backToGameList() {
+  document.getElementById('gameListView').style.display = '';
+  document.getElementById('gameDetailView').style.display = 'none';
+}
+
+// ===== エクスポート =====
+function downloadCSV() {
+  const tenant = document.getElementById('exportTenant').value;
+  const from = document.getElementById('exportFrom').value;
+  const to = document.getElementById('exportTo').value;
+  let url = API + '/api/play-sessions/export/csv?';
+  if (tenant) url += 'tenant_id=' + tenant + '&';
+  if (from) url += 'from=' + from + '&';
+  if (to) url += 'to=' + to + '&';
+  window.open(url, '_blank');
+}
+
+function downloadDBBackup() {
+  // DBバックアップはスーパー管理者認証が必要なので注意表示
+  alert('DBバックアップ機能は今後追加予定です。現在はCSVエクスポートをご利用ください。');
+}
+
+// ===== ログイン後にダッシュボードも初期化 =====
+const _origLogin = typeof login === 'function' ? login : null;
+
+function initDashboard() {
+  loadTenantComparison();
+  populateTenantSelects();
+}
+
+// 既存のlogin成功時にダッシュボードも読み込む
+// → 既存コードの login() 内で mainArea を表示した後に initDashboard() を呼んでください
+// 例: document.getElementById('mainArea').style.display = ''; の直後に initDashboard();
+</script>
+</body>
+</html>

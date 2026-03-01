@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>探究コース - TRAIL GAME PRO 3</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg-light:#f0f2f5;--bg-card:#ffffff;--text-primary:#2d3748;--text-dim:#a0aec0;--accent-cyan:#0090d9;--accent-gold:#e8a020;--accent-green:#2cb562;--accent-purple:#7c5cbf;--accent-pink:#e05070;--accent-orange:#ff9800;--border-glow:rgba(0,229,255,0.15)}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg-light);color:var(--text-primary);min-height:100vh}
+.app{max-width:480px;margin:0 auto;padding:12px;min-height:100vh}
+.back-btn{display:inline-flex;align-items:center;gap:4px;font-size:.85rem;color:var(--accent-cyan);text-decoration:none;padding:8px 0;font-weight:600}
+.back-btn:hover{text-decoration:underline}
+.course-header{text-align:center;padding:20px 0 16px}
+.course-header-emoji{font-size:3rem}
+.course-header-name{font-family:'Orbitron',sans-serif;font-size:1.1rem;font-weight:900;margin-top:4px}
+.course-header-desc{font-size:.8rem;color:var(--text-dim);margin-top:4px}
+.grade-road{display:flex;align-items:center;justify-content:center;gap:4px;margin:16px 0;flex-wrap:wrap}
+.grade-step{padding:4px 10px;border-radius:8px;font-size:.65rem;font-weight:700;font-family:'Orbitron',sans-serif;border:1.5px solid rgba(0,0,0,0.1);color:var(--text-dim);background:var(--bg-card)}
+.grade-step.current{background:linear-gradient(135deg,var(--accent-cyan),var(--accent-purple));color:#fff;border-color:transparent}
+.grade-step.achieved{background:rgba(0,144,217,0.08);color:var(--accent-cyan);border-color:rgba(0,144,217,0.2)}
+.grade-arrow{color:var(--text-dim);font-size:.6rem}
+.section-title{font-family:'Orbitron',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:2px;color:var(--accent-cyan);padding:12px 0 6px}
+.game-list{display:flex;flex-direction:column;gap:8px;margin-bottom:20px}
+.game-item{display:flex;align-items:center;padding:12px;background:var(--bg-card);border:1.5px solid rgba(0,0,0,0.06);border-radius:12px;gap:10px;transition:all .3s}
+.game-item.unlocked:hover{border-color:var(--border-glow);box-shadow:0 4px 15px rgba(0,0,0,0.05)}
+.game-item.locked{opacity:.45;border-style:dashed}
+.game-step{font-family:'Orbitron',sans-serif;font-size:.65rem;color:var(--text-dim);width:24px;text-align:center;flex-shrink:0}
+.game-emoji{font-size:1.6rem;flex-shrink:0}
+.game-info{flex:1;min-width:0}
+.game-name{font-weight:700;font-size:.85rem}
+.game-status{font-size:.7rem;margin-top:2px}
+.game-status .passed{color:var(--accent-green);font-weight:600}
+.game-status .mastered{color:var(--accent-gold);font-weight:700}
+.game-status .not-passed{color:var(--text-dim)}
+.achieve-bar{height:6px;background:rgba(0,0,0,0.06);border-radius:3px;margin-top:4px;overflow:hidden}
+.achieve-fill{height:100%;border-radius:3px;transition:width .5s}
+.achieve-fill.low{background:var(--accent-pink)}
+.achieve-fill.mid{background:var(--accent-orange)}
+.achieve-fill.pass{background:var(--accent-green)}
+.achieve-fill.master{background:linear-gradient(90deg,var(--accent-gold),var(--accent-orange))}
+.game-action{flex-shrink:0}
+.play-btn{padding:6px 14px;border:none;border-radius:8px;font-family:'Orbitron',sans-serif;font-size:.6rem;font-weight:700;cursor:pointer;letter-spacing:1px;color:#fff;background:linear-gradient(135deg,var(--accent-cyan),var(--accent-purple));transition:all .3s}
+.play-btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,144,217,0.3)}
+.lock-icon{font-size:1.2rem;color:var(--text-dim)}
+.badge-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px}
+.badge-item{text-align:center;padding:10px 6px;background:var(--bg-card);border:1.5px solid rgba(0,0,0,0.06);border-radius:10px}
+.badge-item.earned{border-color:rgba(232,160,32,0.3);background:rgba(232,160,32,0.04)}
+.badge-item.locked{opacity:.35}
+.badge-emoji{font-size:1.4rem}
+.badge-name{font-size:.6rem;color:var(--text-dim);margin-top:2px;font-weight:600}
+.badge-rarity{font-size:.5rem;font-family:'Orbitron',sans-serif;letter-spacing:1px;margin-top:1px}
+.badge-rarity.common{color:var(--text-dim)}
+.badge-rarity.rare{color:var(--accent-cyan)}
+.badge-rarity.epic{color:var(--accent-purple)}
+.badge-rarity.legendary{color:var(--accent-gold)}
+.coming-soon-msg{text-align:center;padding:40px 20px;color:var(--text-dim)}
+.coming-soon-msg .emoji{font-size:3rem;margin-bottom:12px}
+.coming-soon-msg .text{font-size:.9rem;font-weight:600}
+.no-data{text-align:center;padding:20px;color:var(--text-dim);font-size:.85rem}
+@media(min-width:600px){.app{padding:20px;max-width:560px}.badge-grid{grid-template-columns:repeat(6,1fr)}}
+</style>
+</head>
+<body>
+<div class="app" id="app"><div class="no-data">読み込み中...</div></div>
+<script>
+const API_BASE=location.origin+'/api';
+const AUTH_KEY='trail_game_auth';
+function esc(s){if(s==null)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+// 認証情報を復元
+let TOKEN=null,TENANT=null,USER=null;
+(function restore(){
+  try{const d=JSON.parse(localStorage.getItem(AUTH_KEY));if(!d||!d.token)return;TOKEN=d.token;TENANT=d.tenant;USER=d.user}catch(e){}
+})();
+
+async function api(method,path){
+  const opts={method,headers:{'Content-Type':'application/json'}};
+  if(TOKEN)opts.headers['Authorization']='Bearer '+TOKEN;
+  const res=await fetch(API_BASE+path,opts);
+  return res.json();
+}
+
+const params=new URLSearchParams(location.search);
+const courseId=params.get('id');
+
+if(!courseId){
+  document.getElementById('app').innerHTML='<a class="back-btn" href="/">← ポータルに戻る</a><div class="no-data">コースIDが指定されていません</div>';
+}else{
+  loadCourse();
+}
+
+async function loadCourse(){
+  if(!TENANT){document.getElementById('app').innerHTML='<a class="back-btn" href="/">← ログインしてください</a>';return}
+  try{
+    const data=await api('GET','/t/'+TENANT.slug+'/courses/'+courseId);
+    renderCourse(data);
+  }catch(e){
+    document.getElementById('app').innerHTML='<a class="back-btn" href="/">← 戻る</a><div class="no-data">コースの読み込みに失敗しました</div>';
+  }
+}
+
+function renderCourse(data){
+  const c=data.course;
+  const games=data.games||[];
+  const grade=data.grade||{};
+  const thresholds=data.gradeThresholds||[];
+  const badges=data.badges||[];
+  const currentGrade=grade.currentGrade||'4級';
+
+  // 準備中チェック
+  if(c.status!=='active'){
+    document.getElementById('app').innerHTML=`
+      <a class="back-btn" href="/">← ポータルに戻る</a>
+      <div class="course-header"><div class="course-header-emoji">${esc(c.emoji)}</div>
+        <div class="course-header-name">${esc(c.name)}</div></div>
+      <div class="coming-soon-msg"><div class="emoji">🔒</div>
+        <div class="text">このコースはまだ準備中です</div>
+        <div style="font-size:.75rem;margin-top:8px;color:var(--text-dim)">もうすぐオープン！お楽しみに</div></div>`;
+    return;
+  }
+
+  // 段位の道のり
+  const gradeNames=thresholds.map(t=>t.grade);
+  const currentIdx=gradeNames.indexOf(currentGrade);
+  const gradeRoad=gradeNames.map((g,i)=>{
+    let cls='grade-step';
+    if(g===currentGrade)cls+=' current';
+    else if(i<currentIdx)cls+=' achieved';
+    return`<span class="${cls}">${esc(g)}</span>${i<gradeNames.length-1?'<span class="grade-arrow">→</span>':''}`;
+  }).join('');
+
+  // ゲーム一覧
+  let gamesHtml='';
+  if(games.length===0){
+    gamesHtml='<div class="no-data">このコースにはまだゲームが登録されていません</div>';
+  }else{
+    gamesHtml=games.map(g=>{
+      const pct=g.bestAchievement||0;
+      const fillCls=pct>=g.badgeThreshold?'master':pct>=g.passThreshold?'pass':pct>=40?'mid':'low';
+      let statusHtml='';
+      if(g.mastered)statusHtml='<span class="mastered">⭐ マスター ('+pct.toFixed(1)+'%)</span>';
+      else if(g.passed)statusHtml='<span class="passed">✅ 通過 ('+pct.toFixed(1)+'%)</span>';
+      else if(g.attempts>0)statusHtml='<span class="not-passed">最高: '+pct.toFixed(1)+'%</span>';
+      else statusHtml='<span class="not-passed">未挑戦</span>';
+
+      const actionHtml=g.unlocked
+        ?(g.gameUrl?`<a href="${esc(g.gameUrl)}" target="_blank" rel="noopener" class="play-btn">PLAY</a>`:'<span class="play-btn" style="opacity:.5;cursor:default">準備中</span>')
+        :'<span class="lock-icon">🔒</span>';
+
+      return`<div class="game-item ${g.unlocked?'unlocked':'locked'}">
+        <div class="game-step">${g.stepNumber}</div>
+        <div class="game-emoji">${esc(g.gameEmoji||'🎮')}</div>
+        <div class="game-info"><div class="game-name">${esc(g.gameName)}</div>
+          <div class="game-status">${statusHtml}</div>
+          ${g.attempts>0?`<div class="achieve-bar"><div class="achieve-fill ${fillCls}" style="width:${Math.min(100,pct)}%"></div></div>`:''}</div>
+        <div class="game-action">${actionHtml}</div></div>`;
+    }).join('');
+  }
+
+  // バッジ一覧
+  const earnedBadgeIds=new Set();
+  // TODO: 将来的にAPIから獲得済みバッジIDリストを取得
+  const badgesHtml=badges.length?badges.map(b=>{
+    const earned=earnedBadgeIds.has(b.id);
+    return`<div class="badge-item ${earned?'earned':'locked'}">
+      <div class="badge-emoji">${esc(b.emoji)}</div>
+      <div class="badge-name">${esc(b.name)}</div>
+      <div class="badge-rarity ${esc(b.rarity)}">${esc(b.rarity).toUpperCase()}</div></div>`;
+  }).join(''):'';
+
+  document.getElementById('app').innerHTML=`
+    <a class="back-btn" href="/">← ポータルに戻る</a>
+    <div class="course-header">
+      <div class="course-header-emoji">${esc(c.emoji)}</div>
+      <div class="course-header-name">${esc(c.name)}</div>
+      <div class="course-header-desc">${esc(c.description||'')}</div>
+    </div>
+    <div class="grade-road">${gradeRoad}</div>
+    <div style="text-align:center;margin-bottom:16px">
+      <span style="font-family:'Orbitron',sans-serif;font-size:.75rem;color:var(--accent-purple);font-weight:700">現在: ${esc(currentGrade)}</span>
+      <span style="font-size:.7rem;color:var(--text-dim);margin-left:8px">通過 ${grade.gamesPassed||0} / マスター ${grade.gamesMastered||0}</span>
+    </div>
+    <div class="section-title">GAMES</div>
+    <div class="game-list">${gamesHtml}</div>
+    ${badgesHtml?`<div class="section-title">BADGES</div><div class="badge-grid">${badgesHtml}</div>`:''}`;
+}
+</script>
+</body>
+</html>

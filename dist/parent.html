@@ -189,42 +189,6 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .pin-change-trigger{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:var(--cream);border:1px solid var(--border);border-radius:10px;color:var(--brown);font-size:.8rem;font-weight:700;cursor:pointer;transition:all .3s;margin-top:12px}
 .pin-change-trigger:hover{background:var(--cream-dark)}
 
-/* ── AI Coach Section ── */
-.ai-coach-section{background:linear-gradient(135deg,var(--sage-light),rgba(122,158,126,0.08));border:1px solid var(--sage);border-radius:var(--radius);padding:20px;margin-bottom:16px}
-.ai-coach-header{display:flex;align-items:center;gap:10px;margin-bottom:14px}
-.ai-coach-header .ai-icon{font-size:1.4rem}
-.ai-coach-header h3{font-size:.9rem;font-weight:700;color:var(--sage-dark)}
-.ai-comment-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px;box-shadow:var(--shadow)}
-.ai-comment-card .highlight{font-size:1rem;font-weight:900;color:var(--sage-dark);margin-bottom:8px}
-.ai-comment-card .comment{font-size:.85rem;line-height:1.7;color:var(--text);margin-bottom:10px}
-.ai-comment-card .badges{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
-.ai-comment-card .badge-pill{display:inline-block;background:linear-gradient(135deg,#7c3aed,#3b82f6);color:#fff;padding:3px 10px;border-radius:20px;font-size:.65rem;font-weight:700}
-.ai-comment-card .home-hints{border-top:1px dashed var(--border);padding-top:10px;font-size:.8rem;color:var(--brown);line-height:1.6}
-.ai-comment-empty{text-align:center;padding:24px 16px;color:var(--text-dim)}
-.ai-comment-empty p{font-size:.85rem;margin-bottom:4px}
-.ai-comment-empty .sub{font-size:.75rem;color:var(--text-light)}
-
-/* ── Streak Badge ── */
-.streak-badge{display:inline-flex;align-items:center;gap:4px;background:linear-gradient(135deg,#ff6b35,#f7931e);color:#fff;padding:3px 10px;border-radius:20px;font-size:.7rem;font-weight:700;margin-left:6px}
-
-/* ── KPI Stats Enhanced ── */
-.stat-value.green{color:var(--sage-dark)}
-
-/* ── Play History Card ── */
-.play-card{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border)}
-.play-card:last-child{border-bottom:none}
-.play-card-emoji{font-size:1.3rem;width:32px;text-align:center;flex-shrink:0}
-.play-card-body{flex:1;min-width:0}
-.play-card-name{font-size:.82rem;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.play-card-meta{font-size:.65rem;color:var(--text-dim);margin-top:2px;display:flex;gap:8px}
-.play-card-score{font-size:.85rem;font-weight:900;flex-shrink:0}
-.play-card-score.high{color:var(--sage-dark)}
-.play-card-score.mid{color:var(--gold-dark)}
-.play-card-score.low{color:#d44}
-
-/* ── Footer ── */
-.parent-footer{text-align:center;padding:20px 16px 8px;font-size:.7rem;color:var(--text-light);line-height:1.5}
-
 /* ── Responsive ── */
 @media (min-width: 768px) {
   .app { max-width: 720px; }
@@ -404,7 +368,6 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
             <div>
               <span class="class-badge">${esc(s.className)}</span>
               ${totalDays > 0 ? '<span class="days-badge">' + totalDays + '\u65E5\u53C2\u52A0</span>' : ''}
-              ${data.streak && data.streak > 1 ? '<span class="streak-badge">\uD83D\uDD25 ' + data.streak + '\u65E5\u9023\u7D9A</span>' : ''}
             </div>
             <div class="rank-badge"><span class="rank-letter">${esc(rank.label)}</span> ${esc(rank.name)}</div>
           </div>
@@ -446,28 +409,6 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
         <div class="rank-label">${esc(rank.label)}\u30E9\u30F3\u30AF\u300C${esc(rank.name)}\u300D</div>
       </div>`;
 
-    // ③b TRAILコーチ（AIコメント - メイン表示）
-    html += '<div class="section-title"><span>\uD83E\uDD16</span> TRAIL\u30B3\u30FC\u30C1\u304B\u3089\u306E\u30E1\u30C3\u30BB\u30FC\u30B8</div>';
-    html += '<div class="ai-coach-section">';
-    html += '<div class="ai-coach-header"><span class="ai-icon">\uD83E\uDD16</span><h3>TRAIL\u30B3\u30FC\u30C1\u304B\u3089\u306E\u30E1\u30C3\u30BB\u30FC\u30B8</h3></div>';
-    if (data.aiComments && data.aiComments.length > 0) {
-      const latest = data.aiComments[0];
-      html += '<div class="ai-comment-card">';
-      if (latest.highlight) html += '<div class="highlight">' + esc(latest.highlight) + '</div>';
-      if (latest.comment) html += '<div class="comment">' + esc(latest.comment) + '</div>';
-      if (latest.badges) {
-        const badges = typeof latest.badges === 'string' ? latest.badges.split(',') : (Array.isArray(latest.badges) ? latest.badges : []);
-        if (badges.length > 0) {
-          html += '<div class="badges">' + badges.map(b => '<span class="badge-pill">' + esc(b.trim()) + '</span>').join('') + '</div>';
-        }
-      }
-      if (latest.home_hints) html += '<div class="home-hints">\uD83D\uDCA1 ' + esc(latest.home_hints) + '</div>';
-      html += '</div>';
-    } else {
-      html += '<div class="ai-comment-empty"><p>\uD83E\uDD16 TRAIL\u30B3\u30FC\u30C1\u304C\u6E96\u5099\u4E2D\u3067\u3059</p><p class="sub">\u3082\u3046\u3059\u3050\u3001\u304A\u5B50\u3055\u307E\u306E\u5B66\u7FD2\u306B\u3064\u3044\u3066\u306E\u30B3\u30E1\u30F3\u30C8\u304C\u5C4A\u304D\u307E\u3059</p></div>';
-    }
-    html += '</div>';
-
     // ④ 先生からのコメント
     html += `<div class="section-title"><span>\uD83D\uDCAC</span> \u5148\u751F\u304B\u3089\u306E\u30B3\u30E1\u30F3\u30C8</div>`;
     html += '<div class="card">';
@@ -497,8 +438,8 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
     }
     html += '</div>';
 
-    // ⑤ AIコメント履歴
-    html += `<div class="section-title"><span>\uD83E\uDD16</span> AI\u30B3\u30E1\u30F3\u30C8\u5C65\u6B74</div>`;
+    // ⑤ AIからのコメント
+    html += `<div class="section-title"><span>\uD83E\uDD16</span> AI\u304B\u3089\u306E\u30B3\u30E1\u30F3\u30C8</div>`;
     html += '<div class="card">';
     if (data.aiComments && data.aiComments.length > 0) {
       html += '<div class="accordion" id="aiAccordion">';
@@ -617,19 +558,13 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
               <div class="play-name">${esc(p.game_name)}</div>
               <div class="play-date">${fmtDate(p.date)}</div>
             </div>
-            <div style="display:flex;flex-direction:column;align-items:flex-end;flex-shrink:0;">
-              ${p.alt > 0 ? '<div class="play-alt">+' + p.alt + ' ALT</div>' : ''}
-              ${p.accuracy_pct != null ? '<div class="play-card-score ' + (p.accuracy_pct >= 80 ? 'high' : p.accuracy_pct >= 50 ? 'mid' : 'low') + '">' + p.accuracy_pct + '%</div>' : ''}
-            </div>
+            ${p.alt > 0 ? '<div class="play-alt">+' + p.alt + ' ALT</div>' : ''}
           </div>`;
       });
     } else {
       html += '<div class="card-empty">\u307E\u3060\u30D7\u30EC\u30A4\u8A18\u9332\u304C\u3042\u308A\u307E\u305B\u3093</div>';
     }
     html += '</div>';
-
-    // ⑫ フッター
-    html += '<div class="parent-footer">\u4FDD\u8B77\u8005\u306E\u65B9\u3078: AI\u30B3\u30E1\u30F3\u30C8\u306F\u5B9A\u671F\u7684\u306B\u66F4\u65B0\u3055\u308C\u307E\u3059\u3002<br>\u304A\u5B50\u3055\u307E\u306E\u5B66\u7FD2\u3092\u5FDC\u63F4\u3057\u307E\u3057\u3087\u3046\uFF01</div>';
 
     app.innerHTML = html;
 

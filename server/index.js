@@ -91,6 +91,9 @@ app.use('/api/t', coursesRoutes);
 
 app.use('/api', parentRoutes);                         // ★ NEW: 保護者ダッシュボード
 
+const aiRoutes = require('./routes/aiRoutes');
+app.use('/api/ai', aiRoutes);
+
 // ═══ Health Check ═══
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', version: '4.0.0', timestamp: new Date().toISOString() });

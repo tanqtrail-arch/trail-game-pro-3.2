@@ -1,202 +1,848 @@
 <!DOCTYPE html>
 <html lang="ja">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>スーパー管理者 - TRAIL Game Pro</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-  body { font-family: sans-serif; background: #1a1a2e; color: #eee; padding: 20px; }
-  h1 { color: #00d4ff; }
-  .login-box { background: #16213e; padding: 20px; border-radius: 10px; max-width: 400px; margin: 50px auto; }
-  input { width: 100%; padding: 10px; margin: 8px 0; border-radius: 6px; border: 1px solid #444; background: #0f3460; color: #fff; box-sizing: border-box; }
-  button { background: #00d4ff; color: #000; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-  button:hover { background: #00b8d9; }
-  .danger { background: #e74c3c; color: #fff; }
-  table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-  th, td { padding: 10px; border: 1px solid #444; text-align: left; }
-  th { background: #0f3460; }
-  tr:hover { background: #16213e; }
-  .section { background: #16213e; padding: 20px; border-radius: 10px; margin-top: 20px; }
-  /* ダッシュボード */
-  .dash-tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
-  .dash-tab { padding: 8px 16px; border-radius: 6px; cursor: pointer; background: #0f3460; border: 1px solid #444; color: #eee; font-size: 14px; }
-  .dash-tab.active { background: #00d4ff; color: #000; font-weight: bold; border-color: #00d4ff; }
-  .dash-panel { display: none; }
-  .dash-panel.active { display: block; }
+  :root {
+    --bg-primary: #0a0e1a;
+    --bg-card: #141828;
+    --bg-card-hover: #1a2035;
+    --accent-purple: #7c3aed;
+    --accent-blue: #3b82f6;
+    --gradient: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+    --text-primary: #e2e8f0;
+    --text-secondary: #94a3b8;
+    --success: #22c55e;
+    --warning: #eab308;
+    --danger: #ef4444;
+    --sidebar-width: 220px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', 'Hiragino Sans', 'Meiryo', sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+  }
+
+  /* ============ LOGIN ============ */
+  .login-box {
+    background: var(--bg-card);
+    padding: 40px 32px;
+    border-radius: 16px;
+    max-width: 420px;
+    margin: 100px auto;
+    border: 1px solid rgba(124,58,237,0.2);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+  .login-box h2 {
+    text-align: center;
+    margin-bottom: 24px;
+    font-size: 22px;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  input, select {
+    width: 100%;
+    padding: 12px 14px;
+    margin: 6px 0 12px 0;
+    border-radius: 8px;
+    border: 1px solid rgba(148,163,184,0.2);
+    background: rgba(255,255,255,0.05);
+    color: var(--text-primary);
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input:focus, select:focus {
+    border-color: var(--accent-purple);
+  }
+
+  /* ============ BUTTONS ============ */
+  button {
+    background: var(--gradient);
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    transition: opacity 0.2s, transform 0.1s;
+  }
+  button:hover { opacity: 0.9; transform: translateY(-1px); }
+  button:active { transform: translateY(0); }
+  .danger { background: var(--danger); }
+  .danger:hover { opacity: 0.9; }
+  .btn-secondary { background: rgba(255,255,255,0.1); border: 1px solid rgba(148,163,184,0.2); }
+  .btn-secondary:hover { background: rgba(255,255,255,0.15); }
+  .btn-success { background: var(--success); }
+  .btn-info { background: var(--accent-blue); }
+
+  /* ============ APP LAYOUT ============ */
+  .app-layout {
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ============ SIDEBAR ============ */
+  .sidebar {
+    width: var(--sidebar-width);
+    min-width: var(--sidebar-width);
+    background: var(--bg-card);
+    border-right: 1px solid rgba(148,163,184,0.1);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 100;
+    transition: transform 0.3s ease;
+  }
+  .sidebar-brand {
+    padding: 20px 16px;
+    border-bottom: 1px solid rgba(148,163,184,0.1);
+    text-align: center;
+  }
+  .sidebar-brand h2 {
+    font-size: 16px;
+    font-weight: 700;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .sidebar-brand small {
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+  .sidebar-nav {
+    flex: 1;
+    padding: 12px 8px;
+    list-style: none;
+    overflow-y: auto;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    margin-bottom: 4px;
+    border-radius: 10px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
+    user-select: none;
+  }
+  .nav-item:hover {
+    background: rgba(124,58,237,0.1);
+    color: var(--text-primary);
+  }
+  .nav-item.active {
+    background: var(--gradient);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(124,58,237,0.3);
+  }
+  .nav-item .nav-icon {
+    font-size: 18px;
+    width: 24px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  /* ============ MAIN CONTENT ============ */
+  .main-content {
+    flex: 1;
+    margin-left: var(--sidebar-width);
+    padding: 24px 28px;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  .main-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(148,163,184,0.1);
+  }
+  .main-header h1 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .hamburger {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    font-size: 24px;
+    cursor: pointer;
+    padding: 4px 8px;
+  }
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 99;
+  }
+
+  /* ============ PANELS ============ */
+  .main-panel { display: none; }
+  .main-panel.active { display: block; }
+
+  /* ============ KPI CARDS ============ */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .kpi-card {
+    background: var(--bg-card);
+    border: 1px solid rgba(148,163,184,0.1);
+    border-radius: 14px;
+    padding: 22px 20px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  }
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--gradient);
+  }
+  .kpi-card .kpi-icon {
+    font-size: 28px;
+    margin-bottom: 8px;
+  }
+  .kpi-card .kpi-value {
+    font-size: 36px;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 4px;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .kpi-card .kpi-label {
+    font-size: 14px;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  /* ============ STAT CARDS (for sub-panels) ============ */
   .stat-cards { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
-  .stat-card { background: #0f3460; padding: 16px 20px; border-radius: 10px; min-width: 150px; flex: 1; text-align: center; }
-  .stat-card .num { font-size: 28px; font-weight: bold; color: #00d4ff; }
-  .stat-card .label { font-size: 12px; color: #aaa; margin-top: 4px; }
-  .chart-box { background: #0f3460; border-radius: 10px; padding: 16px; margin-bottom: 16px; max-height: 350px; }
-  .dash-filters { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
-  .dash-filters select, .dash-filters input { padding: 8px; border-radius: 6px; border: 1px solid #444; background: #0f3460; color: #fff; }
-  .dash-export { margin-top: 12px; }
-  .dash-export button { background: #27ae60; margin-right: 8px; }
-  .dash-export button:hover { background: #2ecc71; }
-  .student-detail-back { cursor: pointer; color: #00d4ff; margin-bottom: 12px; display: inline-block; }
+  .stat-card {
+    background: var(--bg-card);
+    border: 1px solid rgba(148,163,184,0.1);
+    padding: 16px 20px;
+    border-radius: 12px;
+    min-width: 140px;
+    flex: 1;
+    text-align: center;
+  }
+  .stat-card .num {
+    font-size: 26px;
+    font-weight: 700;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .stat-card .label { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+
+  /* ============ SECTION / CARD ============ */
+  .section {
+    background: var(--bg-card);
+    padding: 24px;
+    border-radius: 14px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(148,163,184,0.1);
+  }
+  .section h2 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: var(--text-primary);
+  }
+  .section h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: var(--text-primary);
+  }
+  .section h4 {
+    font-size: 15px;
+    font-weight: 600;
+    margin: 16px 0 10px 0;
+    color: var(--text-primary);
+  }
+
+  /* ============ CHARTS ============ */
+  .chart-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .chart-box {
+    background: var(--bg-card);
+    border: 1px solid rgba(148,163,184,0.1);
+    border-radius: 14px;
+    padding: 20px;
+    max-height: 350px;
+    min-height: 280px;
+  }
+
+  /* ============ TABLES ============ */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+  }
+  th, td {
+    padding: 12px 14px;
+    text-align: left;
+    border-bottom: 1px solid rgba(148,163,184,0.1);
+    font-size: 14px;
+  }
+  th {
+    background: rgba(124,58,237,0.08);
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    border-bottom: 2px solid rgba(124,58,237,0.2);
+  }
+  tr:hover { background: var(--bg-card-hover); }
   .leaderboard-row td:first-child { font-weight: bold; color: #f1c40f; }
+
+  /* ============ FORMS ============ */
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .form-group label {
+    display: block;
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+  .form-group input,
+  .form-group select {
+    margin: 0;
+  }
+
+  /* ============ INLINE EDIT INPUTS ============ */
+  .inline-edit {
+    padding: 6px 10px;
+    background: rgba(255,255,255,0.05);
+    color: var(--text-primary);
+    border: 1px solid rgba(148,163,184,0.2);
+    border-radius: 6px;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .inline-edit:focus { border-color: var(--accent-purple); }
+
+  /* ============ DASH FILTERS ============ */
+  .dash-filters {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .dash-filters select,
+  .dash-filters input {
+    width: auto;
+    min-width: 180px;
+    margin: 0;
+  }
+  .dash-filters label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    color: var(--text-secondary);
+  }
+
+  /* ============ EXPORT ============ */
+  .dash-export { margin-top: 16px; display: flex; gap: 10px; flex-wrap: wrap; }
+
+  /* ============ BACK LINK ============ */
+  .student-detail-back {
+    cursor: pointer;
+    color: var(--accent-blue);
+    margin-bottom: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+  .student-detail-back:hover { color: var(--accent-purple); }
+
+  /* ============ AI PANEL PLACEHOLDER ============ */
+  .ai-placeholder {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-secondary);
+  }
+  .ai-placeholder .ai-icon { font-size: 48px; margin-bottom: 16px; }
+  .ai-placeholder p { font-size: 15px; }
+
+  /* ============ ACCURACY COLORS ============ */
+  .acc-high { color: var(--success); font-weight: 600; }
+  .acc-mid { color: var(--warning); font-weight: 600; }
+  .acc-low { color: var(--danger); font-weight: 600; }
+  .inactive-warn { color: var(--warning); font-size: 14px; margin-left: 4px; }
+
+  /* ============ GAME MINI STATS ============ */
+  .game-mini-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .game-mini-card {
+    background: var(--bg-card);
+    border: 1px solid rgba(148,163,184,0.1);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .game-mini-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  }
+  .game-mini-emoji { font-size: 28px; flex-shrink: 0; }
+  .game-mini-info { flex: 1; min-width: 0; }
+  .game-mini-name { font-size: 14px; font-weight: 600; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .game-mini-row { display: flex; gap: 12px; font-size: 12px; color: var(--text-secondary); }
+  .game-mini-row span { white-space: nowrap; }
+
+  /* ============ CHART PLACEHOLDER ============ */
+  .chart-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    min-height: 200px;
+    color: var(--text-secondary);
+    font-size: 14px;
+  }
+
+  /* ============ EXPANDABLE ROW ============ */
+  .expand-row { display: none; }
+  .expand-row.open { display: table-row; }
+  .expand-row td { padding: 16px 20px; background: rgba(124,58,237,0.04); }
+  .expand-detail { display: flex; gap: 16px; flex-wrap: wrap; }
+  .expand-item { font-size: 13px; color: var(--text-secondary); }
+  .expand-item strong { color: var(--text-primary); }
+
+  /* ============ MOBILE ============ */
+  @media (max-width: 768px) {
+    .sidebar {
+      transform: translateX(-100%);
+    }
+    .sidebar.open {
+      transform: translateX(0);
+    }
+    .sidebar.open + .sidebar-overlay {
+      display: block;
+    }
+    .main-content {
+      margin-left: 0;
+      padding: 16px;
+    }
+    .hamburger { display: block; }
+    .kpi-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .chart-row {
+      grid-template-columns: 1fr;
+    }
+    .form-grid {
+      grid-template-columns: 1fr;
+    }
+    .kpi-card .kpi-value { font-size: 28px; }
+  }
+  @media (max-width: 480px) {
+    .kpi-grid { grid-template-columns: 1fr; }
+  }
 </style>
 </head>
 <body>
 
+<!-- ============ LOGIN AREA ============ -->
 <div id="loginArea">
   <div class="login-box">
-    <h2>🔐 スーパー管理者ログイン</h2>
+    <h2>TRAIL Game Pro - Super Admin</h2>
     <input type="email" id="email" placeholder="メールアドレス">
     <input type="password" id="password" placeholder="パスワード">
-    <button onclick="login()">ログイン</button>
-    <p id="loginError" style="color:red;"></p>
+    <button onclick="login()" style="width:100%;padding:14px;">ログイン</button>
+    <p id="loginError" style="color:var(--danger);text-align:center;margin-top:12px;font-size:14px;"></p>
   </div>
 </div>
 
+<!-- ============ MAIN APP AREA ============ -->
 <div id="mainArea" style="display:none;">
-  <h1>🏫 TRAIL スーパー管理者</h1>
-  <!-- ===== 学習ダッシュボード ===== -->
-  <div class="section">
-    <h2>📊 学習ダッシュボード</h2>
+  <div class="app-layout">
 
-    <div class="dash-tabs">
-      <button class="dash-tab active" onclick="switchDashTab('overview')">🏫 教室比較</button>
-      <button class="dash-tab" onclick="switchDashTab('students')">👤 生徒別</button>
-      <button class="dash-tab" onclick="switchDashTab('games')">🎮 ゲーム別</button>
-      <button class="dash-tab" onclick="switchDashTab('export')">📥 エクスポート</button>
-    </div>
+    <!-- ======== SIDEBAR ======== -->
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <h2>TRAIL Game Pro</h2>
+        <small>Super Admin Console</small>
+      </div>
+      <ul class="sidebar-nav">
+        <li class="nav-item active" data-panel="overview" onclick="switchPanel('overview')">
+          <span class="nav-icon">📊</span> 概要
+        </li>
+        <li class="nav-item" data-panel="students" onclick="switchPanel('students')">
+          <span class="nav-icon">👤</span> 生徒
+        </li>
+        <li class="nav-item" data-panel="games-dash" onclick="switchPanel('games-dash')">
+          <span class="nav-icon">🎮</span> ゲーム
+        </li>
+        <li class="nav-item" data-panel="ai" onclick="switchPanel('ai')">
+          <span class="nav-icon">🤖</span> AI分析
+        </li>
+        <li class="nav-item" data-panel="tenants" onclick="switchPanel('tenants')">
+          <span class="nav-icon">🏫</span> 教室管理
+        </li>
+        <li class="nav-item" data-panel="export" onclick="switchPanel('export')">
+          <span class="nav-icon">📥</span> エクスポート
+        </li>
+      </ul>
+    </nav>
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
 
-    <!-- ====== 教室比較パネル ====== -->
-    <div id="dash-overview" class="dash-panel active">
-      <div id="overviewCards" class="stat-cards"></div>
-      <div class="chart-box"><canvas id="tenantTimeChart"></canvas></div>
-      <div class="chart-box"><canvas id="tenantAccuracyChart"></canvas></div>
-      <table id="tenantCompareTable">
-        <thead><tr>
-          <th>教室名</th><th>アクティブ生徒</th><th>総プレイ数</th>
-          <th>総学習時間</th><th>平均プレイ時間</th><th>平均正答率</th>
-        </tr></thead>
-        <tbody id="tenantCompareBody"></tbody>
-      </table>
-    </div>
-
-    <!-- ====== 生徒別パネル ====== -->
-    <div id="dash-students" class="dash-panel">
-      <div class="dash-filters">
-        <select id="dashTenantSelect" onchange="loadStudentList()">
-          <option value="">教室を選択...</option>
-        </select>
+    <!-- ======== MAIN CONTENT ======== -->
+    <div class="main-content">
+      <div class="main-header">
+        <button class="hamburger" onclick="toggleSidebar()">☰</button>
+        <h1 id="panelTitle">概要ダッシュボード</h1>
+        <div></div>
       </div>
 
-      <div id="studentListView">
-        <table id="studentStatsTable">
-          <thead><tr>
-            <th>生徒名</th><th>総プレイ数</th><th>総学習時間</th>
-            <th>平均正答率</th><th>最高スコア</th><th>詳細</th>
-          </tr></thead>
-          <tbody id="studentStatsBody"></tbody>
-        </table>
+      <!-- ========== PANEL: 概要 ========== -->
+      <div id="panel-overview" class="main-panel active">
+        <div class="kpi-grid" id="overviewKPI">
+          <div class="kpi-card">
+            <div class="kpi-icon">👥</div>
+            <div class="kpi-value" id="kpiTotalStudents">--</div>
+            <div class="kpi-label">総生徒数</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon">⚡</div>
+            <div class="kpi-value" id="kpiActiveToday">--</div>
+            <div class="kpi-label">今日のアクティブ数</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon">🎮</div>
+            <div class="kpi-value" id="kpiTotalPlays">--</div>
+            <div class="kpi-label">累計プレイ回数</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon">🎯</div>
+            <div class="kpi-value" id="kpiAvgAccuracy">--</div>
+            <div class="kpi-label">全体平均正答率</div>
+          </div>
+        </div>
+
+        <div id="overviewCards" class="stat-cards"></div>
+
+        <div class="chart-row">
+          <div class="chart-box" id="dailyPlaysBox"><canvas id="dailyPlaysChart"></canvas></div>
+          <div class="chart-box" id="gamePopularityBox"><canvas id="gamePopularityChart"></canvas></div>
+        </div>
+
+        <div class="chart-row">
+          <div class="chart-box"><canvas id="tenantTimeChart"></canvas></div>
+          <div class="chart-box"><canvas id="tenantAccuracyChart"></canvas></div>
+        </div>
+
+        <div class="section">
+          <h3>教室別比較</h3>
+          <table id="tenantCompareTable">
+            <thead><tr>
+              <th>教室名</th><th>アクティブ生徒</th><th>総プレイ数</th>
+              <th>総学習時間</th><th>平均プレイ時間</th><th>平均正答率</th>
+            </tr></thead>
+            <tbody id="tenantCompareBody"></tbody>
+          </table>
+        </div>
       </div>
 
-      <div id="studentDetailView" style="display:none;">
-        <span class="student-detail-back" onclick="backToStudentList()">← 一覧に戻る</span>
-        <h3 id="studentDetailName"></h3>
-        <div id="studentDetailCards" class="stat-cards"></div>
-        <div class="chart-box"><canvas id="studentDailyChart"></canvas></div>
-        <div class="chart-box"><canvas id="studentGameChart"></canvas></div>
-        <h4>ゲーム別内訳</h4>
-        <table>
-          <thead><tr><th>ゲーム</th><th>プレイ回数</th><th>学習時間</th><th>平均正答率</th><th>最高スコア</th></tr></thead>
-          <tbody id="studentGameBody"></tbody>
-        </table>
-      </div>
-    </div>
+      <!-- ========== PANEL: 生徒 ========== -->
+      <div id="panel-students" class="main-panel">
+        <div class="dash-filters">
+          <select id="dashTenantSelect" onchange="loadStudentList()">
+            <option value="">教室を選択...</option>
+          </select>
+        </div>
 
-    <!-- ====== ゲーム別パネル ====== -->
-    <div id="dash-games" class="dash-panel">
-      <div class="dash-filters">
-        <select id="dashGameTenantSelect" onchange="loadGameList()">
-          <option value="">全教室</option>
-        </select>
-      </div>
-      <div id="gameListView">
-        <table id="gameStatsTable">
-          <thead><tr>
-            <th>ゲーム</th><th>プレイヤー数</th><th>総プレイ数</th>
-            <th>総学習時間</th><th>平均正答率</th><th>詳細</th>
-          </tr></thead>
-          <tbody id="gameStatsBody"></tbody>
-        </table>
+        <div id="studentListView">
+          <div class="section">
+            <table id="studentStatsTable">
+              <thead><tr>
+                <th>生徒名</th><th>総プレイ数</th><th>総学習時間</th>
+                <th>平均正答率</th><th>最高スコア</th><th>最終プレイ</th><th>詳細</th>
+              </tr></thead>
+              <tbody id="studentStatsBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="studentDetailView" style="display:none;">
+          <span class="student-detail-back" onclick="backToStudentList()">← 一覧に戻る</span>
+          <h3 id="studentDetailName"></h3>
+          <div id="studentDetailCards" class="stat-cards"></div>
+          <div class="chart-row">
+            <div class="chart-box"><canvas id="studentDailyChart"></canvas></div>
+            <div class="chart-box"><canvas id="studentGameChart"></canvas></div>
+          </div>
+          <div class="section">
+            <h4>ゲーム別内訳</h4>
+            <table>
+              <thead><tr><th>ゲーム</th><th>プレイ回数</th><th>学習時間</th><th>平均正答率</th><th>最高スコア</th></tr></thead>
+              <tbody id="studentGameBody"></tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
-      <div id="gameDetailView" style="display:none;">
-        <span class="student-detail-back" onclick="backToGameList()">← 一覧に戻る</span>
-        <h3 id="gameDetailName"></h3>
-        <div id="gameDetailCards" class="stat-cards"></div>
-        <h4>🏆 リーダーボード</h4>
-        <table>
-          <thead><tr><th>順位</th><th>生徒名</th><th>最高スコア</th><th>プレイ回数</th><th>平均正答率</th></tr></thead>
-          <tbody id="gameLeaderBody"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- ====== エクスポートパネル ====== -->
-    <div id="dash-export" class="dash-panel">
-      <h3>📥 データエクスポート</h3>
-      <div class="dash-filters">
-        <label>教室：
-          <select id="exportTenant">
+      <!-- ========== PANEL: ゲーム (dashboard) ========== -->
+      <div id="panel-games-dash" class="main-panel">
+        <div class="dash-filters">
+          <select id="dashGameTenantSelect" onchange="loadGameList()">
             <option value="">全教室</option>
           </select>
-        </label>
-        <label>開始日：<input type="date" id="exportFrom"></label>
-        <label>終了日：<input type="date" id="exportTo"></label>
-      </div>
-      <div class="dash-export">
-        <button onclick="downloadCSV()">📄 CSV ダウンロード</button>
-        <button onclick="downloadDBBackup()" style="background:#3498db;">💾 DBバックアップ</button>
-      </div>
-      <p style="color:#aaa;font-size:13px;margin-top:12px;">
-        ※ CSVはプレイセッションの全データ。DBバックアップはSQLiteファイルそのもの。
-      </p>
-    </div>
-  </div>
-<div class="section">
-    <h2>🎮 全教室に一括ゲーム登録</h2>
-    <input type="text" id="gameEmoji" placeholder="絵文字（例：🎯）" style="width:80px;">
-    <input type="text" id="gameName" placeholder="ゲーム名">
-    <input type="text" id="gameUrl" placeholder="URL（任意）">
-    <input type="text" id="gameCategory" placeholder="カテゴリ（例：算数）">
-    <button onclick="broadcastGame()">📢 全教室に登録</button>
-  </div>
-  <div class="section">
-    <h2>➕ 新しい教室を作成</h2>
-    <input type="text" id="newName" placeholder="教室名">
-    <input type="text" id="newSlug" placeholder="スラッグ（URL用）">
-    <input type="email" id="newEmail" placeholder="管理者メール">
-    <input type="password" id="newPass" placeholder="管理者パスワード">
-    <select id="newPlan" style="width:100%;padding:10px;margin:8px 0;border-radius:6px;border:1px solid #444;background:#0f3460;color:#fff;">
-      <option value="free">Free</option>
-      <option value="pro">Pro</option>
-はい    </select>
-    <button onclick="createTenant()">作成</button>
-  </div>
+        </div>
 
-  <div class="section">
-    <h2>📋 教室一覧</h2>
-    <button onclick="loadTenants()">🔄 更新</button>
-    <table id="tenantTable">
-      <thead><tr><th>教室名</th><th>スラッグ</th><th>プラン</th><th>生徒数</th><th>管理者メール</th><th>操作</th></tr></thead>
-      <tbody id="tenantBody"></tbody>
-    </table>
-  </div>
-</div>
-<div class="section">
-  <h2>🎮 登録済みゲーム一覧</h2>
-  <button onclick="loadGames()">🔄 更新</button>
-  <table id="gameTable" style="margin-top:10px;">
-<thead><tr><th>ゲーム名</th><th>絵文字</th><th>カテゴリ</th><th>URL</th><th>教室名</th><th>操作</th></tr></thead>    <tbody id="gameBody"></tbody>
-  </table>
-</div>
+        <div id="gameMiniStats" class="game-mini-stats"></div>
+
+        <div id="gameListView">
+          <div class="section">
+            <table id="gameStatsTable">
+              <thead><tr>
+                <th>ゲーム</th><th>プレイヤー数</th><th>総プレイ数</th>
+                <th>総学習時間</th><th>平均正答率</th><th>詳細</th>
+              </tr></thead>
+              <tbody id="gameStatsBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="gameDetailView" style="display:none;">
+          <span class="student-detail-back" onclick="backToGameList()">← 一覧に戻る</span>
+          <h3 id="gameDetailName"></h3>
+          <div id="gameDetailCards" class="stat-cards"></div>
+          <div class="section">
+            <h4>リーダーボード</h4>
+            <table>
+              <thead><tr><th>順位</th><th>生徒名</th><th>最高スコア</th><th>プレイ回数</th><th>平均正答率</th></tr></thead>
+              <tbody id="gameLeaderBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== PANEL: AI分析 ========== -->
+      <div id="panel-ai" class="main-panel">
+        <div class="ai-actions" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:24px;">
+          <button class="btn-gradient" onclick="runMorningAI()" disabled style="opacity:0.5;cursor:not-allowed;">
+            🌅 朝のAI分析を実行
+          </button>
+          <button class="btn-gradient" onclick="runEveningAI()" disabled style="opacity:0.5;cursor:not-allowed;">
+            🌙 夜のAI分析を実行
+          </button>
+          <span style="color:var(--text-secondary);font-size:13px;">⏳ AI生成機能は準備中です</span>
+        </div>
+
+        <div class="section" style="margin-bottom:20px;">
+          <h3>📊 クラスAIサマリー</h3>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;margin-top:14px;">
+            <div style="background:var(--bg-card-hover);border-left:4px solid var(--success);border-radius:12px;padding:18px;">
+              <h4 style="margin-bottom:8px;font-size:15px;">💪 強み</h4>
+              <p class="placeholder" style="color:var(--text-secondary);font-size:13px;">AIが分析すると、クラスの強みがここに表示されます</p>
+            </div>
+            <div style="background:var(--bg-card-hover);border-left:4px solid var(--warning);border-radius:12px;padding:18px;">
+              <h4 style="margin-bottom:8px;font-size:15px;">⚠️ 改善ポイント</h4>
+              <p class="placeholder" style="color:var(--text-secondary);font-size:13px;">AIが分析すると、改善ポイントがここに表示されます</p>
+            </div>
+            <div style="background:var(--bg-card-hover);border-left:4px solid var(--accent-blue);border-radius:12px;padding:18px;">
+              <h4 style="margin-bottom:8px;font-size:15px;">💡 おすすめアクション</h4>
+              <p class="placeholder" style="color:var(--text-secondary);font-size:13px;">AIが分析すると、おすすめがここに表示されます</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="section" style="margin-bottom:20px;">
+          <h3>🚨 要注意アラート</h3>
+          <div id="ai-alerts-container" style="margin-top:12px;">
+            <p style="color:var(--text-secondary);font-size:13px;">AIが分析すると、注意が必要な生徒がここに表示されます</p>
+          </div>
+        </div>
+
+        <div class="section" style="margin-bottom:20px;">
+          <h3>🌱 成長ハイライト</h3>
+          <div id="ai-growth-container" style="margin-top:12px;">
+            <p style="color:var(--text-secondary);font-size:13px;">AIが分析すると、成長した生徒がここに表示されます</p>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>💬 生徒別AIコメント</h3>
+          <div id="ai-comments-container" style="margin-top:12px;">
+            <p style="color:var(--text-secondary);font-size:13px;">AIコメントが生成されると、ここに一覧表示されます</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== PANEL: 教室管理 ========== -->
+      <div id="panel-tenants" class="main-panel">
+        <!-- 一括ゲーム登録 -->
+        <div class="section">
+          <h2>全教室に一括ゲーム登録</h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>絵文字</label>
+              <input type="text" id="gameEmoji" placeholder="例：🎯" style="width:100%;">
+            </div>
+            <div class="form-group">
+              <label>ゲーム名</label>
+              <input type="text" id="gameName" placeholder="ゲーム名">
+            </div>
+            <div class="form-group">
+              <label>URL（任意）</label>
+              <input type="text" id="gameUrl" placeholder="URL">
+            </div>
+            <div class="form-group">
+              <label>カテゴリ</label>
+              <input type="text" id="gameCategory" placeholder="例：算数">
+            </div>
+          </div>
+          <button onclick="broadcastGame()">📢 全教室に登録</button>
+        </div>
+
+        <!-- 教室作成 -->
+        <div class="section">
+          <h2>新しい教室を作成</h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>教室名</label>
+              <input type="text" id="newName" placeholder="教室名">
+            </div>
+            <div class="form-group">
+              <label>スラッグ（URL用）</label>
+              <input type="text" id="newSlug" placeholder="スラッグ">
+            </div>
+            <div class="form-group">
+              <label>管理者メール</label>
+              <input type="email" id="newEmail" placeholder="管理者メール">
+            </div>
+            <div class="form-group">
+              <label>管理者パスワード</label>
+              <input type="password" id="newPass" placeholder="パスワード">
+            </div>
+            <div class="form-group">
+              <label>プラン</label>
+              <select id="newPlan">
+                <option value="free">Free</option>
+                <option value="pro">Pro</option>
+              </select>
+            </div>
+          </div>
+          <button onclick="createTenant()">作成</button>
+        </div>
+
+        <!-- 教室一覧 -->
+        <div class="section">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <h2 style="margin-bottom:0;">教室一覧</h2>
+            <button class="btn-secondary" onclick="loadTenants()">🔄 更新</button>
+          </div>
+          <table id="tenantTable">
+            <thead><tr><th>教室名</th><th>スラッグ</th><th>プラン</th><th>生徒数</th><th>管理者メール</th><th>操作</th></tr></thead>
+            <tbody id="tenantBody"></tbody>
+          </table>
+        </div>
+
+        <!-- ゲーム一覧 -->
+        <div class="section">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <h2 style="margin-bottom:0;">登録済みゲーム一覧</h2>
+            <button class="btn-secondary" onclick="loadGames()">🔄 更新</button>
+          </div>
+          <table id="gameTable">
+            <thead><tr><th>ゲーム名</th><th>絵文字</th><th>カテゴリ</th><th>URL</th><th>教室名</th><th>操作</th></tr></thead>
+            <tbody id="gameBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ========== PANEL: エクスポート ========== -->
+      <div id="panel-export" class="main-panel">
+        <div class="section">
+          <h2>データエクスポート</h2>
+          <div class="dash-filters">
+            <label>教室：
+              <select id="exportTenant">
+                <option value="">全教室</option>
+              </select>
+            </label>
+            <label>開始日：<input type="date" id="exportFrom" style="min-width:150px;"></label>
+            <label>終了日：<input type="date" id="exportTo" style="min-width:150px;"></label>
+          </div>
+          <div class="dash-export">
+            <button class="btn-success" onclick="downloadCSV()">📄 CSV ダウンロード</button>
+            <button class="btn-info" onclick="downloadDBBackup()">💾 DBバックアップ</button>
+          </div>
+          <p style="color:var(--text-secondary);font-size:13px;margin-top:16px;">
+            ※ CSVはプレイセッションの全データ。DBバックアップはSQLiteファイルそのもの。
+          </p>
+        </div>
+      </div>
+
+    </div><!-- /.main-content -->
+  </div><!-- /.app-layout -->
+</div><!-- /#mainArea -->
+
 <script>
+// ===== 認証 =====
 let authHeader = '';
 
 function login() {
@@ -208,13 +854,48 @@ function login() {
       if (r.ok) {
         document.getElementById('loginArea').style.display = 'none';
         document.getElementById('mainArea').style.display = 'block';
-loadTenants(); loadGames(); initDashboard();     
- } else {
+        loadTenants(); loadGames(); initDashboard();
+      } else {
         document.getElementById('loginError').textContent = '認証失敗。メールとパスワードを確認してください。';
       }
     });
 }
 
+// ===== サイドバー / パネル切替 =====
+const panelTitles = {
+  'overview': '概要ダッシュボード',
+  'students': '生徒データ',
+  'games-dash': 'ゲーム分析',
+  'ai': 'AI分析',
+  'tenants': '教室管理',
+  'export': 'エクスポート'
+};
+
+function switchPanel(panelId) {
+  document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+  document.querySelectorAll('.main-panel').forEach(p => p.classList.remove('active'));
+  document.querySelector(`[data-panel="${panelId}"]`).classList.add('active');
+  document.getElementById('panel-' + panelId).classList.add('active');
+  document.getElementById('panelTitle').textContent = panelTitles[panelId] || '';
+
+  // Trigger data loading
+  if (panelId === 'overview') loadTenantComparison();
+  if (panelId === 'students') populateTenantSelects();
+  if (panelId === 'games-dash') { populateTenantSelects(); }
+  if (panelId === 'export') populateTenantSelects();
+  if (panelId === 'ai') loadAIData();
+
+  // Close sidebar on mobile
+  if (window.innerWidth <= 768) {
+    document.getElementById('sidebar').classList.remove('open');
+  }
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+// ===== 教室 CRUD =====
 function loadTenants() {
   fetch('/api/super/tenants', { headers: { 'x-super-admin': authHeader } })
     .then(r => r.json())
@@ -224,10 +905,10 @@ function loadTenants() {
       tenants.forEach(t => {
         tbody.innerHTML += `
           <tr>
-            <td><input value="${t.name}" id="name_${t.id}" style="width:120px;padding:4px;background:#0f3460;color:#fff;border:1px solid #444;border-radius:4px;"></td>
-            <td><input value="${t.slug}" id="slug_${t.id}" style="width:100px;padding:4px;background:#0f3460;color:#fff;border:1px solid #444;border-radius:4px;"></td>
+            <td><input value="${t.name}" id="name_${t.id}" class="inline-edit" style="width:120px;"></td>
+            <td><input value="${t.slug}" id="slug_${t.id}" class="inline-edit" style="width:100px;"></td>
             <td>
-              <select id="plan_${t.id}" style="background:#0f3460;color:#fff;border:1px solid #444;border-radius:4px;padding:4px;">
+              <select id="plan_${t.id}" class="inline-edit" style="width:auto;min-width:70px;">
                 <option value="free" ${t.plan==='free'?'selected':''}>Free</option>
                 <option value="pro" ${t.plan==='pro'?'selected':''}>Pro</option>
               </select>
@@ -235,8 +916,8 @@ function loadTenants() {
             <td>${t.student_count}</td>
             <td>${t.admin_email || '-'}</td>
             <td>
-              <button onclick="updateTenant('${t.id}')">保存</button>
-              <button class="danger" onclick="deleteTenant('${t.id}', '${t.name}')">削除</button>
+              <button onclick="updateTenant('${t.id}')" style="padding:6px 12px;font-size:13px;">保存</button>
+              <button class="danger" onclick="deleteTenant('${t.id}', '${t.name}')" style="padding:6px 12px;font-size:13px;">削除</button>
             </td>
           </tr>`;
       });
@@ -274,6 +955,8 @@ function createTenant() {
     body: JSON.stringify({ name, slug, adminEmail, adminPassword, plan })
   }).then(() => { alert('作成しました！'); loadTenants(); });
 }
+
+// ===== ゲーム CRUD =====
 function broadcastGame() {
   const emoji = document.getElementById('gameEmoji').value;
   const name = document.getElementById('gameName').value;
@@ -285,13 +968,14 @@ function broadcastGame() {
     headers: { 'x-super-admin': authHeader, 'Content-Type': 'application/json' },
     body: JSON.stringify({ emoji, name, url, category })
   }).then(r => r.json()).then(d => {
-    alert(`✅ ${d.count}教室に登録しました！`);
+    alert(`${d.count}教室に登録しました！`);
     document.getElementById('gameEmoji').value = '';
     document.getElementById('gameName').value = '';
     document.getElementById('gameUrl').value = '';
-  document.getElementById('gameCategory').value = '';
+    document.getElementById('gameCategory').value = '';
   });
 }
+
 function loadGames() {
   fetch('/api/super/games', { headers: { 'x-super-admin': authHeader } })
     .then(r => r.json())
@@ -301,14 +985,14 @@ function loadGames() {
       games.forEach(g => {
         tbody.innerHTML += `
           <tr>
-            <td><input value="${g.name}" id="gname_${g.id}" style="width:120px;padding:4px;background:#0f3460;color:#fff;border:1px solid #444;border-radius:4px;"></td>
-            <td><input value="${g.emoji}" id="gemoji_${g.id}" style="width:50px;padding:4px;background:#0f3460;color:#fff;border:1px solid #444;border-radius:4px;"></td>
-            <td><input value="${g.category||''}" id="gcat_${g.id}" style="width:80px;padding:4px;background:#0f3460;color:#fff;border:1px solid #444;border-radius:4px;"></td>
-            <td><input value="${g.url||''}" id="gurl_${g.id}" style="width:150px;padding:4px;background:#0f3460;color:#fff;border:1px solid #444;border-radius:4px;"></td>
+            <td><input value="${g.name}" id="gname_${g.id}" class="inline-edit" style="width:120px;"></td>
+            <td><input value="${g.emoji}" id="gemoji_${g.id}" class="inline-edit" style="width:50px;"></td>
+            <td><input value="${g.category||''}" id="gcat_${g.id}" class="inline-edit" style="width:80px;"></td>
+            <td><input value="${g.url||''}" id="gurl_${g.id}" class="inline-edit" style="width:150px;"></td>
             <td>${g.tenant_name}</td>
             <td>
-              <button onclick="updateGame('${g.id}','${g.tenant_id}')">保存</button>
-              <button class="danger" onclick="deleteGame('${g.id}','${g.tenant_id}','${g.name}')">削除</button>
+              <button onclick="updateGame('${g.id}','${g.tenant_id}')" style="padding:6px 12px;font-size:13px;">保存</button>
+              <button class="danger" onclick="deleteGame('${g.id}','${g.tenant_id}','${g.name}')" style="padding:6px 12px;font-size:13px;">削除</button>
             </td>
           </tr>`;
       });
@@ -343,6 +1027,25 @@ let tenantTimeChartObj = null;
 let tenantAccuracyChartObj = null;
 let studentDailyChartObj = null;
 let studentGameChartObj = null;
+let dailyPlaysChartObj = null;
+let gamePopularityChartObj = null;
+
+// Chart.js共通設定
+Chart.defaults.color = '#94a3b8';
+Chart.defaults.borderColor = 'rgba(148, 163, 184, 0.1)';
+Chart.defaults.font.family = "'Noto Sans JP', 'Segoe UI', sans-serif";
+
+// 正答率色分けヘルパー
+function accClass(val) {
+  if (val == null) return '';
+  if (val >= 80) return 'acc-high';
+  if (val >= 50) return 'acc-mid';
+  return 'acc-low';
+}
+function accHtml(val) {
+  if (val == null) return '-';
+  return `<span class="${accClass(val)}">${val}%</span>`;
+}
 
 function formatTime(seconds) {
   if (!seconds || seconds === 0) return '0分';
@@ -352,23 +1055,19 @@ function formatTime(seconds) {
   return m + '分';
 }
 
-// タブ切替
+// 旧タブ切替（互換性のため残す）
 function switchDashTab(tab) {
-  document.querySelectorAll('.dash-tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.dash-panel').forEach(p => p.classList.remove('active'));
-  event.target.classList.add('active');
-  document.getElementById('dash-' + tab).classList.add('active');
-
-  if (tab === 'overview') loadTenantComparison();
-  if (tab === 'students') { populateTenantSelects(); }
-  if (tab === 'games') { populateTenantSelects(); }
-  if (tab === 'export') { populateTenantSelects(); }
+  // Map old dash tabs to new sidebar panels
+  const mapping = { 'overview': 'overview', 'students': 'students', 'games': 'games-dash', 'export': 'export' };
+  const panelId = mapping[tab] || tab;
+  switchPanel(panelId);
 }
 
 // テナント選択肢を埋める
 async function populateTenantSelects() {
   try {
-const res = await fetch(API + '/api/super/tenants', { headers: { 'x-super-admin': authHeader } });    const tenants = await res.json();
+    const res = await fetch(API + '/api/super/tenants', { headers: { 'x-super-admin': authHeader } });
+    const tenants = await res.json();
     ['dashTenantSelect', 'dashGameTenantSelect', 'exportTenant'].forEach(id => {
       const sel = document.getElementById(id);
       if (!sel) return;
@@ -387,16 +1086,32 @@ const res = await fetch(API + '/api/super/tenants', { headers: { 'x-super-admin'
 // ===== 教室比較 =====
 async function loadTenantComparison() {
   try {
-    const res = await fetch(API + '/api/play-sessions/stats/tenants/compare');
-    const data = await res.json();
+    // Also load tenants for KPI
+    const [compRes, tenantRes] = await Promise.all([
+      fetch(API + '/api/play-sessions/stats/tenants/compare'),
+      fetch(API + '/api/super/tenants', { headers: { 'x-super-admin': authHeader } })
+    ]);
+    const data = await compRes.json();
+    const tenants = await tenantRes.json();
 
-    // 概要カード
+    // KPI cards
+    const totalStudents = tenants.reduce((s, t) => s + (t.student_count || 0), 0);
     const totalPlays = data.reduce((s, t) => s + t.total_plays, 0);
-    const totalStudents = data.reduce((s, t) => s + t.active_students, 0);
+    const totalAccSum = data.reduce((s, t) => t.avg_accuracy != null ? s + t.avg_accuracy : s, 0);
+    const totalAccCount = data.filter(t => t.avg_accuracy != null).length;
+    const overallAccuracy = totalAccCount > 0 ? (totalAccSum / totalAccCount).toFixed(1) + '%' : '--';
+
+    document.getElementById('kpiTotalStudents').textContent = totalStudents;
+    document.getElementById('kpiActiveToday').textContent = '--'; // Placeholder for Task 2
+    document.getElementById('kpiTotalPlays').textContent = totalPlays.toLocaleString();
+    document.getElementById('kpiAvgAccuracy').textContent = overallAccuracy;
+
+    // 概要カード (smaller stat cards below KPIs)
+    const activeStudents = data.reduce((s, t) => s + t.active_students, 0);
     const totalSeconds = data.reduce((s, t) => s + t.total_seconds, 0);
     document.getElementById('overviewCards').innerHTML = `
       <div class="stat-card"><div class="num">${data.length}</div><div class="label">教室数</div></div>
-      <div class="stat-card"><div class="num">${totalStudents}</div><div class="label">アクティブ生徒</div></div>
+      <div class="stat-card"><div class="num">${activeStudents}</div><div class="label">アクティブ生徒</div></div>
       <div class="stat-card"><div class="num">${totalPlays}</div><div class="label">総プレイ数</div></div>
       <div class="stat-card"><div class="num">${formatTime(totalSeconds)}</div><div class="label">総学習時間</div></div>
     `;
@@ -423,21 +1138,23 @@ async function loadTenantComparison() {
         datasets: [{
           label: '総学習時間（分）',
           data: data.map(t => Math.round(t.total_seconds / 60)),
-          backgroundColor: '#00d4ff88',
-          borderColor: '#00d4ff',
-          borderWidth: 1
+          backgroundColor: 'rgba(124,58,237,0.5)',
+          borderColor: '#7c3aed',
+          borderWidth: 1,
+          borderRadius: 6
         }, {
           label: '生徒あたり平均（分）',
           data: data.map(t => Math.round(t.avg_seconds_per_student / 60)),
-          backgroundColor: '#f1c40f88',
-          borderColor: '#f1c40f',
-          borderWidth: 1
+          backgroundColor: 'rgba(59,130,246,0.5)',
+          borderColor: '#3b82f6',
+          borderWidth: 1,
+          borderRadius: 6
         }]
       },
       options: {
         responsive: true, maintainAspectRatio: false,
-        plugins: { title: { display: true, text: '教室別 学習時間', color: '#eee' }, legend: { labels: { color: '#ccc' } } },
-        scales: { x: { ticks: { color: '#ccc' } }, y: { ticks: { color: '#ccc' }, beginAtZero: true } }
+        plugins: { title: { display: true, text: '教室別 学習時間', color: '#e2e8f0', font: { size: 14 } }, legend: { labels: { color: '#94a3b8' } } },
+        scales: { x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(148,163,184,0.08)' } }, y: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(148,163,184,0.08)' }, beginAtZero: true } }
       }
     });
 
@@ -450,19 +1167,150 @@ async function loadTenantComparison() {
         datasets: [{
           label: '平均正答率（%）',
           data: data.map(t => t.avg_accuracy || 0),
-          backgroundColor: '#2ecc7188',
-          borderColor: '#2ecc71',
-          borderWidth: 1
+          backgroundColor: 'rgba(34,197,94,0.5)',
+          borderColor: '#22c55e',
+          borderWidth: 1,
+          borderRadius: 6
         }]
       },
       options: {
         responsive: true, maintainAspectRatio: false,
-        plugins: { title: { display: true, text: '教室別 平均正答率', color: '#eee' }, legend: { labels: { color: '#ccc' } } },
-        scales: { x: { ticks: { color: '#ccc' } }, y: { ticks: { color: '#ccc' }, beginAtZero: true, max: 100 } }
+        plugins: { title: { display: true, text: '教室別 平均正答率', color: '#e2e8f0', font: { size: 14 } }, legend: { labels: { color: '#94a3b8' } } },
+        scales: { x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(148,163,184,0.08)' } }, y: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(148,163,184,0.08)' }, beginAtZero: true, max: 100 } }
       }
     });
 
+    // ===== 日別プレイ数推移（7日間）=====
+    loadDailyPlaysChart();
+    // ===== ゲーム人気ランキング =====
+    loadGamePopularityChart();
+
   } catch (e) { console.error('教室比較エラー:', e); }
+}
+
+// 日別プレイ数推移グラフ
+async function loadDailyPlaysChart() {
+  try {
+    const res = await fetch(API + '/api/play-sessions?limit=5000');
+    const sessions = await res.json();
+
+    // 直近7日のデータを集計
+    const dayMap = {};
+    const now = new Date();
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(d.getDate() - i);
+      const key = d.toISOString().slice(0, 10);
+      dayMap[key] = 0;
+    }
+
+    sessions.forEach(s => {
+      if (!s.ended_at) return;
+      const day = s.ended_at.slice(0, 10);
+      if (day in dayMap) dayMap[day]++;
+    });
+
+    const labels = Object.keys(dayMap).map(d => d.slice(5));
+    const values = Object.values(dayMap);
+
+    if (values.every(v => v === 0)) {
+      document.getElementById('dailyPlaysBox').innerHTML = '<div class="chart-placeholder">データがありません</div>';
+      return;
+    }
+
+    if (dailyPlaysChartObj) dailyPlaysChartObj.destroy();
+    const ctx = document.getElementById('dailyPlaysChart');
+    if (!ctx) return;
+    const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 280);
+    gradient.addColorStop(0, 'rgba(124,58,237,0.3)');
+    gradient.addColorStop(1, 'rgba(59,130,246,0.02)');
+
+    dailyPlaysChartObj = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          label: 'プレイ数',
+          data: values,
+          borderColor: '#7c3aed',
+          backgroundColor: gradient,
+          fill: true,
+          tension: 0.4,
+          pointRadius: 4,
+          pointBackgroundColor: '#7c3aed',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { title: { display: true, text: '日別プレイ数推移（7日間）', color: '#e2e8f0', font: { size: 14 } }, legend: { display: false } },
+        scales: {
+          x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(148,163,184,0.08)' } },
+          y: { ticks: { color: '#94a3b8', stepSize: 1 }, grid: { color: 'rgba(148,163,184,0.08)' }, beginAtZero: true }
+        }
+      }
+    });
+  } catch (e) { console.error('日別プレイ数エラー:', e); }
+}
+
+// ゲーム人気ランキンググラフ
+async function loadGamePopularityChart() {
+  try {
+    const res = await fetch(API + '/api/play-sessions?limit=5000');
+    const sessions = await res.json();
+
+    const gameMap = {};
+    sessions.forEach(s => {
+      if (!s.ended_at) return;
+      const name = (s.game_emoji || '') + ' ' + (s.game_name || '不明');
+      if (!gameMap[name]) gameMap[name] = 0;
+      gameMap[name]++;
+    });
+
+    const sorted = Object.entries(gameMap).sort((a, b) => b[1] - a[1]).slice(0, 10);
+
+    if (sorted.length === 0) {
+      document.getElementById('gamePopularityBox').innerHTML = '<div class="chart-placeholder">データがありません</div>';
+      return;
+    }
+
+    if (gamePopularityChartObj) gamePopularityChartObj.destroy();
+    const ctx = document.getElementById('gamePopularityChart');
+    if (!ctx) return;
+
+    const barColors = sorted.map((_, i) => {
+      const ratio = i / Math.max(sorted.length - 1, 1);
+      const r = Math.round(124 + (59 - 124) * ratio);
+      const g = Math.round(58 + (130 - 58) * ratio);
+      const b = Math.round(237 + (246 - 237) * ratio);
+      return `rgba(${r},${g},${b},0.7)`;
+    });
+
+    gamePopularityChartObj = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: sorted.map(s => s[0]),
+        datasets: [{
+          label: 'プレイ回数',
+          data: sorted.map(s => s[1]),
+          backgroundColor: barColors,
+          borderColor: barColors.map(c => c.replace('0.7', '1')),
+          borderWidth: 1,
+          borderRadius: 6
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true, maintainAspectRatio: false,
+        plugins: { title: { display: true, text: 'ゲーム人気ランキング TOP10', color: '#e2e8f0', font: { size: 14 } }, legend: { display: false } },
+        scales: {
+          x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(148,163,184,0.08)' }, beginAtZero: true },
+          y: { ticks: { color: '#94a3b8', font: { size: 12 } }, grid: { display: false } }
+        }
+      }
+    });
+  } catch (e) { console.error('ゲーム人気エラー:', e); }
 }
 
 // ===== 生徒別 =====
@@ -481,30 +1329,50 @@ async function loadStudentList() {
     const map = {};
     sessions.forEach(s => {
       if (!s.ended_at) return;
-      if (!map[s.student_id]) map[s.student_id] = { name: s.student_name, plays: 0, seconds: 0, accuracySum: 0, accuracyCount: 0, bestScore: 0 };
+      if (!map[s.student_id]) map[s.student_id] = { name: s.student_name, plays: 0, seconds: 0, accuracySum: 0, accuracyCount: 0, bestScore: 0, lastPlay: null };
       const st = map[s.student_id];
       st.plays++;
       st.seconds += s.duration_seconds || 0;
       if (s.accuracy_pct != null) { st.accuracySum += s.accuracy_pct; st.accuracyCount++; }
       if (s.score > st.bestScore) st.bestScore = s.score;
+      if (!st.lastPlay || s.ended_at > st.lastPlay) st.lastPlay = s.ended_at;
     });
 
-    const students = Object.entries(map).map(([id, s]) => ({
-      id, name: s.name, plays: s.plays, seconds: s.seconds,
-      avgAccuracy: s.accuracyCount > 0 ? (s.accuracySum / s.accuracyCount).toFixed(1) : null,
-      bestScore: s.bestScore
-    })).sort((a, b) => b.seconds - a.seconds);
+    const now = new Date();
+    const students = Object.entries(map).map(([id, s]) => {
+      const lastDate = s.lastPlay ? new Date(s.lastPlay) : null;
+      const daysAgo = lastDate ? Math.floor((now - lastDate) / (1000 * 60 * 60 * 24)) : null;
+      return {
+        id, name: s.name, plays: s.plays, seconds: s.seconds,
+        avgAccuracy: s.accuracyCount > 0 ? (s.accuracySum / s.accuracyCount).toFixed(1) : null,
+        bestScore: s.bestScore,
+        lastPlay: s.lastPlay ? s.lastPlay.slice(0, 10) : '-',
+        daysAgo
+      };
+    }).sort((a, b) => b.seconds - a.seconds);
 
-    document.getElementById('studentStatsBody').innerHTML = students.map(s => `
-      <tr>
+    document.getElementById('studentStatsBody').innerHTML = students.map(s => {
+      const warnIcon = s.daysAgo != null && s.daysAgo >= 7 ? '<span class="inactive-warn" title="7日以上未プレイ">&#9888;&#65039;</span>' : '';
+      return `
+      <tr onclick="toggleExpandRow('expand-${s.id}')" style="cursor:pointer;">
         <td>${s.name}</td>
         <td>${s.plays}</td>
         <td>${formatTime(s.seconds)}</td>
-        <td>${s.avgAccuracy != null ? s.avgAccuracy + '%' : '-'}</td>
+        <td>${accHtml(s.avgAccuracy != null ? parseFloat(s.avgAccuracy) : null)}</td>
         <td>${s.bestScore || '-'}</td>
-        <td><button onclick="loadStudentDetail(${s.id})">📊 詳細</button></td>
+        <td>${s.lastPlay}${warnIcon}</td>
+        <td><button onclick="event.stopPropagation();loadStudentDetail(${s.id})" style="padding:6px 12px;font-size:13px;">📊 詳細</button></td>
       </tr>
-    `).join('') || '<tr><td colspan="6" style="text-align:center;">データなし</td></tr>';
+      <tr class="expand-row" id="expand-${s.id}">
+        <td colspan="7">
+          <div class="expand-detail">
+            <div class="expand-item">最高スコア: <strong>${s.bestScore || '-'}</strong></div>
+            <div class="expand-item">最終プレイ: <strong>${s.lastPlay}</strong></div>
+            <div class="expand-item">平均正答率: <strong>${s.avgAccuracy != null ? s.avgAccuracy + '%' : '-'}</strong></div>
+          </div>
+        </td>
+      </tr>`;
+    }).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--text-secondary);">データなし</td></tr>';
 
   } catch (e) { console.error('生徒一覧エラー:', e); }
 }
@@ -540,16 +1408,16 @@ async function loadStudentDetail(studentId) {
         datasets: [{
           label: '学習時間（分）',
           data: daily.map(d => Math.round(d.total_seconds / 60)),
-          borderColor: '#00d4ff',
-          backgroundColor: '#00d4ff33',
+          borderColor: '#7c3aed',
+          backgroundColor: 'rgba(124,58,237,0.15)',
           fill: true,
           tension: 0.3,
           yAxisID: 'y'
         }, {
           label: '正答率（%）',
           data: daily.map(d => d.avg_accuracy),
-          borderColor: '#2ecc71',
-          backgroundColor: '#2ecc7133',
+          borderColor: '#22c55e',
+          backgroundColor: 'rgba(34,197,94,0.15)',
           fill: false,
           tension: 0.3,
           yAxisID: 'y1'
@@ -557,18 +1425,18 @@ async function loadStudentDetail(studentId) {
       },
       options: {
         responsive: true, maintainAspectRatio: false,
-        plugins: { title: { display: true, text: '日別推移', color: '#eee' }, legend: { labels: { color: '#ccc' } } },
+        plugins: { title: { display: true, text: '日別推移', color: '#e2e8f0', font: { size: 14 } }, legend: { labels: { color: '#94a3b8' } } },
         scales: {
-          x: { ticks: { color: '#ccc' } },
-          y: { position: 'left', ticks: { color: '#00d4ff' }, beginAtZero: true, title: { display: true, text: '学習時間（分）', color: '#00d4ff' } },
-          y1: { position: 'right', ticks: { color: '#2ecc71' }, beginAtZero: true, max: 100, grid: { drawOnChartArea: false }, title: { display: true, text: '正答率（%）', color: '#2ecc71' } }
+          x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(148,163,184,0.08)' } },
+          y: { position: 'left', ticks: { color: '#7c3aed' }, grid: { color: 'rgba(148,163,184,0.08)' }, beginAtZero: true, title: { display: true, text: '学習時間（分）', color: '#7c3aed' } },
+          y1: { position: 'right', ticks: { color: '#22c55e' }, beginAtZero: true, max: 100, grid: { drawOnChartArea: false }, title: { display: true, text: '正答率（%）', color: '#22c55e' } }
         }
       }
     });
 
     // ゲーム別円グラフ
     if (studentGameChartObj) studentGameChartObj.destroy();
-    const colors = ['#00d4ff', '#f1c40f', '#e74c3c', '#2ecc71', '#9b59b6', '#e67e22', '#1abc9c', '#3498db'];
+    const colors = ['#7c3aed', '#3b82f6', '#22c55e', '#eab308', '#ef4444', '#ec4899', '#14b8a6', '#f97316'];
     studentGameChartObj = new Chart(document.getElementById('studentGameChart'), {
       type: 'doughnut',
       data: {
@@ -583,8 +1451,8 @@ async function loadStudentDetail(studentId) {
       options: {
         responsive: true, maintainAspectRatio: false,
         plugins: {
-          title: { display: true, text: 'ゲーム別 学習時間（分）', color: '#eee' },
-          legend: { labels: { color: '#ccc' } }
+          title: { display: true, text: 'ゲーム別 学習時間（分）', color: '#e2e8f0', font: { size: 14 } },
+          legend: { labels: { color: '#94a3b8' } }
         }
       }
     });
@@ -606,6 +1474,12 @@ async function loadStudentDetail(studentId) {
 function backToStudentList() {
   document.getElementById('studentListView').style.display = '';
   document.getElementById('studentDetailView').style.display = 'none';
+}
+
+// 行クリック展開トグル
+function toggleExpandRow(id) {
+  const row = document.getElementById(id);
+  if (row) row.classList.toggle('open');
 }
 
 // ===== ゲーム別 =====
@@ -638,16 +1512,31 @@ async function loadGameList() {
       avgAccuracy: g.accuracyCount > 0 ? (g.accuracySum / g.accuracyCount).toFixed(1) : null
     })).sort((a, b) => b.plays - a.plays);
 
+    // ミニ統計カード
+    document.getElementById('gameMiniStats').innerHTML = games.slice(0, 8).map(g => `
+      <div class="game-mini-card">
+        <div class="game-mini-emoji">${g.emoji || '🎮'}</div>
+        <div class="game-mini-info">
+          <div class="game-mini-name">${g.name}</div>
+          <div class="game-mini-row">
+            <span>👤 ${g.players}人</span>
+            <span>${accHtml(g.avgAccuracy != null ? parseFloat(g.avgAccuracy) : null)}</span>
+            <span>⏱ ${formatTime(g.seconds)}</span>
+          </div>
+        </div>
+      </div>
+    `).join('');
+
     document.getElementById('gameStatsBody').innerHTML = games.map(g => `
       <tr>
         <td>${g.emoji} ${g.name}</td>
         <td>${g.players}</td>
         <td>${g.plays}</td>
         <td>${formatTime(g.seconds)}</td>
-        <td>${g.avgAccuracy != null ? g.avgAccuracy + '%' : '-'}</td>
-        <td><button onclick="loadGameDetail(${g.id})">📊 詳細</button></td>
+        <td>${accHtml(g.avgAccuracy != null ? parseFloat(g.avgAccuracy) : null)}</td>
+        <td><button onclick="loadGameDetail(${g.id})" style="padding:6px 12px;font-size:13px;">📊 詳細</button></td>
       </tr>
-    `).join('') || '<tr><td colspan="6" style="text-align:center;">データなし</td></tr>';
+    `).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--text-secondary);">データなし</td></tr>';
 
   } catch (e) { console.error('ゲーム一覧エラー:', e); }
 }
@@ -707,6 +1596,90 @@ function downloadDBBackup() {
   alert('DBバックアップ機能は今後追加予定です。現在はCSVエクスポートをご利用ください。');
 }
 
+// ===== AI分析 =====
+async function runMorningAI() {
+  alert('AI生成機能はまもなく追加されます');
+}
+async function runEveningAI() {
+  alert('AI生成機能はまもなく追加されます');
+}
+
+function renderAlerts(alerts) {
+  const container = document.getElementById('ai-alerts-container');
+  if (!container) return;
+  if (!alerts || alerts.length === 0) {
+    container.innerHTML = '<p style="color:var(--text-secondary);font-size:13px;">要注意の生徒はいません 🎉</p>';
+    return;
+  }
+  const typeMap = { inactive: { icon: '🔴', label: '未プレイ', color: 'var(--danger)' }, struggling: { icon: '🟡', label: '正答率低下', color: 'var(--warning)' }, streak_broken: { icon: '🟠', label: 'ストリーク途切れ', color: '#f97316' } };
+  container.innerHTML = alerts.map(a => {
+    const t = typeMap[a.type] || { icon: '⚪', label: a.type, color: 'var(--text-secondary)' };
+    return `<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--bg-card-hover);border-left:3px solid ${t.color};border-radius:8px;margin-bottom:8px;">
+      <span style="font-size:14px;">${t.icon}</span>
+      <strong style="font-size:14px;">${a.studentName}</strong>
+      <span style="font-size:12px;color:${t.color};">${t.label}</span>
+      <span style="font-size:12px;color:var(--text-secondary);margin-left:auto;">${a.detail || ''}</span>
+    </div>`;
+  }).join('');
+}
+
+function renderGrowthHighlights(highlights) {
+  const container = document.getElementById('ai-growth-container');
+  if (!container) return;
+  if (!highlights || highlights.length === 0) {
+    container.innerHTML = '<p style="color:var(--text-secondary);font-size:13px;">まだ成長ハイライトはありません</p>';
+    return;
+  }
+  container.innerHTML = highlights.map(h => `
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--bg-card-hover);border-left:3px solid var(--success);border-radius:8px;margin-bottom:8px;">
+      <span style="font-size:14px;">🌟</span>
+      <strong style="font-size:14px;">${h.studentName}</strong>
+      <span style="font-size:12px;color:var(--success);">${h.type === 'accuracy_up' ? '正答率UP' : 'プレイ数UP'}</span>
+      <span style="font-size:12px;color:var(--text-secondary);margin-left:auto;">${h.detail || ''}</span>
+    </div>
+  `).join('');
+}
+
+function renderAIComments(comments) {
+  const container = document.getElementById('ai-comments-container');
+  if (!container) return;
+  if (!comments || comments.length === 0) {
+    container.innerHTML = '<p style="color:var(--text-secondary);font-size:13px;">AIコメントが生成されると、ここに一覧表示されます</p>';
+    return;
+  }
+  let html = '<table><thead><tr><th>生徒名</th><th>ハイライト</th><th>バッジ</th><th>生成日</th></tr></thead><tbody>';
+  comments.forEach(c => {
+    const badges = Array.isArray(c.badges) ? c.badges.map(b => `<span style="display:inline-block;background:var(--accent-purple);color:#fff;padding:2px 8px;border-radius:10px;font-size:11px;margin:2px;">${b}</span>`).join('') : '';
+    html += `<tr onclick="this.nextElementSibling.classList.toggle('open')" style="cursor:pointer;">
+      <td>${c.student_name || '-'}</td>
+      <td>${c.highlight || '-'}</td>
+      <td>${badges || '-'}</td>
+      <td>${c.generated_at ? c.generated_at.slice(0,10) : '-'}</td>
+    </tr>
+    <tr class="expand-row">
+      <td colspan="4">
+        <div style="padding:8px 0;"><strong>コメント:</strong> ${c.comment || '-'}</div>
+        ${c.home_hints ? '<div style="padding:8px 0;border-top:1px dashed rgba(148,163,184,0.2);"><span style="color:var(--warning);">💡</span> ' + c.home_hints + '</div>' : ''}
+      </td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  container.innerHTML = html;
+}
+
+async function loadAIData(tenantSlug) {
+  // Phase 2で実装
+  // const comments = await fetch(`/api/ai/comments/${tenantSlug}`).then(r => r.json());
+  // const summary = await fetch(`/api/ai/class-summary/${tenantSlug}`).then(r => r.json());
+  // const alerts = await fetch(`/api/ai/alerts/${tenantSlug}`).then(r => r.json());
+  // const highlights = await fetch(`/api/ai/growth-highlights/${tenantSlug}`).then(r => r.json());
+
+  // 今はプレースホルダー表示
+  renderAlerts([]);
+  renderGrowthHighlights([]);
+  renderAIComments([]);
+}
+
 // ===== ログイン後にダッシュボードも初期化 =====
 const _origLogin = typeof login === 'function' ? login : null;
 
@@ -714,10 +1687,6 @@ function initDashboard() {
   loadTenantComparison();
   populateTenantSelects();
 }
-
-// 既存のlogin成功時にダッシュボードも読み込む
-// → 既存コードの login() 内で mainArea を表示した後に initDashboard() を呼んでください
-// 例: document.getElementById('mainArea').style.display = ''; の直後に initDashboard();
 </script>
 </body>
 </html>
