@@ -117,8 +117,8 @@ export function buildRecentGames(sessions, games) {
         name: game.name || 'ゲーム' + s.game_id,
         emoji: game.emoji || '🎮',
         category: game.category || 'その他',
-        lastScore: s.score || 0,
-        bestScore: s.score || 0,
+        lastScore: Math.min(100, Math.max(0, s.accuracy_pct ?? 0)),
+        bestScore: Math.min(100, Math.max(0, s.accuracy_pct ?? 0)),
         lastPlayed: formatTimeAgo(s.ended_at),
       };
     });
