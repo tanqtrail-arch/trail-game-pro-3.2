@@ -330,9 +330,12 @@ export default function App() {
     rank: student?.rank || 'F',
     rankLabel: student?.rankLabel || '見習い',
     totalAlt: student?.totalAlt || 0,
-    streak: streak?.current_streak || 0,
+    streak: streak?.streak?.current || 0,
     avatar: (student?.name || '?').charAt(0),
   };
+
+  // Game count = unique game_ids the student has actually played
+  const playedGameCount = new Set(sessions.map(s => s.game_id)).size;
 
   const recentGames = buildRecentGames(sessions, games);
   const weeklyRanking = buildWeeklyRanking(rankings, studentId);
@@ -367,7 +370,7 @@ export default function App() {
         </div>
       </div>
 
-      <StatusHeader student={studentData} gameCount={games.length} />
+      <StatusHeader student={studentData} gameCount={playedGameCount} />
       <MissionSection missions={missions} />
       <RecentGamesSection recent={recentGames} games={games} />
       <SubjectLevels subjects={subjectLevels} />

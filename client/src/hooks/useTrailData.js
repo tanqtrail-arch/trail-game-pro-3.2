@@ -27,18 +27,32 @@ export function useTrailData(studentId) {
             api.getPlaySessions(),
           ]);
 
-        const allCoins = coins.status === 'fulfilled' ? coins.value : [];
-        const myCoins = Array.isArray(allCoins)
-          ? allCoins.filter(c => c.student_id === studentId)
-          : [];
+        // coins API returns { logs: [...] } — already filtered by auth token
+        const coinsData = coins.status === 'fulfilled' ? coins.value : {};
+        const coinLogs = Array.isArray(coinsData.logs) ? coinsData.logs : [];
 
-        const totalAlt = myCoins.reduce((sum, c) => sum + (c.amount || 0), 0);
+        // rankings API returns { rankings: [...] }
+        const rankingsData = rankings.status === 'fulfilled' ? rankings.value : {};
+        const rankingsList = Array.isArray(rankingsData.rankings) ? rankingsData.rankings : [];
+
+        // ALT total: prefer rankings total_coins (authoritative), fallback to sum of coin logs
+        const myRanking = rankingsList.find(r => r.student_id === studentId);
+        const totalAlt = myRanking
+          ? myRanking.total_coins
+          : coinLogs.reduce((sum, c) => sum + (c.amount || 0), 0);
         const rank = calculateRank(totalAlt);
 
-        const allSessions = sessions.status === 'fulfilled' ? sessions.value : [];
-        const mySessions = Array.isArray(allSessions)
-          ? allSessions.filter(s => s.student_id === studentId)
+        // games API returns { games: [...] }
+        const gamesData = games.status === 'fulfilled' ? games.value : {};
+        const gamesList = Array.isArray(gamesData.games) ? gamesData.games : [];
+
+        // play-sessions API returns array directly
+        const sessionsList = sessions.status === 'fulfilled' && Array.isArray(sessions.value)
+          ? sessions.value
           : [];
+
+        // streak API returns { streak: { current, max, ... }, ... }
+        const streakData = streak.status === 'fulfilled' ? streak.value : null;
 
         setData({
           student: (() => {
@@ -52,11 +66,11 @@ export function useTrailData(studentId) {
               ...rank,
             };
           })(),
-          games: games.status === 'fulfilled' && Array.isArray(games.value) ? games.value : [],
-          coins: myCoins,
-          streak: streak.status === 'fulfilled' ? streak.value : null,
-          rankings: rankings.status === 'fulfilled' && Array.isArray(rankings.value) ? rankings.value : [],
-          sessions: mySessions,
+          games: gamesList,
+          coins: coinLogs,
+          streak: streakData,
+          rankings: rankingsList,
+          sessions: sessionsList,
           loading: false,
           error: null,
         });
@@ -113,12 +127,12 @@ export function buildRecentGames(sessions, games) {
 export function buildWeeklyRanking(rankings, myId) {
   if (!Array.isArray(rankings)) return [];
   return rankings
-    .sort((a, b) => (b.total_alt || 0) - (a.total_alt || 0))
+    .sort((a, b) => (b.total_coins || 0) - (a.total_coins || 0))
     .slice(0, 10)
     .map((r, i) => ({
       rank: i + 1,
       name: r.student_name || r.name || '---',
-      alt: r.total_alt || 0,
+      alt: r.total_coins || 0,
       isMe: r.student_id === myId,
     }));
 }
@@ -171,7 +185,7 @@ export function buildMissions(sessions, streak) {
     },
     {
       id: 4, title: '4日間ログインしよう', reward: 90,
-      progress: streak?.current_streak || 0,
+      progress: streak?.streak?.current || 0,
       goal: 4, emoji: '📅', category: 'weekly',
     },
   ];
