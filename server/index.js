@@ -33,6 +33,11 @@ const limiter = rateLimit({
 });
 app.use('/api/', limiter);
 
+// ═══ ルート → 新UI リダイレクト ═══
+app.get('/', (req, res) => {
+  res.redirect(301, '/app/');
+});
+
 // ═══ Static Files ═══
 app.use(express.static(path.join(__dirname, '../public')));
 
@@ -102,9 +107,9 @@ app.get('/course', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/course.html'));
 });
 
-// ═══ SPA Fallback ═══
+// ═══ SPA Fallback（未知のパスは新UIへリダイレクト） ═══
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../public/index.html'));
+  res.redirect(301, '/app/');
 });
 
 // ═══ Error Handler ═══

@@ -297,7 +297,7 @@ function buildGameUrl(baseUrl){
   if(S.tenant&&S.tenant.slug)retP.set('tenant_slug',S.tenant.slug);
   if(S.tenant&&S.tenant.id)retP.set('tenant_id',S.tenant.id);
   retP.set('refresh_alt','1');
-  p.set('return_url',location.origin+'/?'+retP.toString());
+  p.set('return_url',location.origin+'/app/?'+retP.toString());
   const qs=p.toString();
   return qs?baseUrl+(baseUrl.includes('?')?'&':'?')+qs:baseUrl;
 }
