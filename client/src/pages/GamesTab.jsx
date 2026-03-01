@@ -4,12 +4,12 @@ export default function GamesTab({ games }) {
   const active = games.filter(g => g.is_active === 1);
   const categories = [...new Set(active.map(g => g.category))];
   return (
-    <div>
+    <div style={{ width: "100%" }}>
       <PageHeader emoji="🎮" title="ゲーム一覧" />
       {categories.map(cat => (
         <div key={cat} style={{ marginBottom: 16 }}>
           <div style={{ fontSize: 13, fontWeight: 700, color: "#718096", marginBottom: 8, paddingLeft: 2 }}>{cat}</div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: 8, width: "100%" }}>
             {active.filter(g => g.category === cat).map(g => {
               const hasUrl = !!g.url;
               return (

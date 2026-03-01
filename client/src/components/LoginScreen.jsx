@@ -28,8 +28,8 @@ export default function LoginScreen({ onLogin, expiredMessage }) {
 
   return (
     <div style={{
-      minHeight: "100vh", background: "linear-gradient(180deg, #0f1628 0%, #1a2444 100%)",
-      display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 20,
+      minHeight: "100vh", width: "100%", background: "linear-gradient(180deg, #0f1628 0%, #1a2444 100%)",
+      display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "1rem",
     }}>
       <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+JP:wght@400;600;700;800&display=swap" rel="stylesheet" />
       <div style={{ fontSize: 28, fontWeight: 900, fontFamily: "'Orbitron', monospace", background: "linear-gradient(135deg, #0090d9, #7c5cbf)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", marginBottom: 4 }}>
@@ -37,7 +37,7 @@ export default function LoginScreen({ onLogin, expiredMessage }) {
       </div>
       <div style={{ fontSize: 11, color: "#a0aec0", marginBottom: 40, letterSpacing: 2 }}>EXPLORE · PLAY · GROW</div>
 
-      <div style={{ width: "100%", maxWidth: 320 }}>
+      <div style={{ width: "100%", maxWidth: 480 }}>
         {expiredMessage && (
           <div style={{ background: "rgba(224,80,112,0.15)", border: "1px solid rgba(224,80,112,0.3)", borderRadius: 12, padding: "10px 14px", marginBottom: 16, textAlign: "center", fontSize: 13, color: "#ff8fa3" }}>
             {expiredMessage}
@@ -52,8 +52,9 @@ export default function LoginScreen({ onLogin, expiredMessage }) {
           style={{
             width: "100%", padding: "12px 16px", borderRadius: 12, marginBottom: 12,
             background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)",
-            color: "#fff", fontSize: 14, outline: "none",
+            color: "#fff", fontSize: 16, outline: "none",
             fontFamily: "'Noto Sans JP', sans-serif",
+            boxSizing: "border-box",
           }}
         >
           <option value="探究個別" style={{ color: "#000" }}>探究個別</option>
@@ -71,6 +72,7 @@ export default function LoginScreen({ onLogin, expiredMessage }) {
             background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)",
             color: "#fff", fontSize: 16, outline: "none",
             fontFamily: "'Noto Sans JP', sans-serif",
+            boxSizing: "border-box",
           }}
         />
         {error && (
@@ -81,8 +83,9 @@ export default function LoginScreen({ onLogin, expiredMessage }) {
           disabled={loading || !name.trim()}
           style={{
             width: "100%", padding: "14px", borderRadius: 12, marginTop: 16,
+            minHeight: 44,
             background: name.trim() ? "linear-gradient(135deg, #0090d9, #7c5cbf)" : "rgba(255,255,255,0.1)",
-            border: "none", color: "#fff", fontSize: 15, fontWeight: 700,
+            border: "none", color: "#fff", fontSize: 16, fontWeight: 700,
             cursor: name.trim() ? "pointer" : "default",
             opacity: loading ? 0.6 : 1,
             transition: "all 0.2s",

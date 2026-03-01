@@ -27,7 +27,7 @@ export default function MypageTab({ student, streak, sessions, playedGameCount, 
   const maxAlt = altByGame.length > 0 ? altByGame[0].total : 0;
 
   return (
-    <div>
+    <div style={{ width: "100%" }}>
       <PageHeader emoji="👤" title="マイページ" />
       <div style={{ background: "linear-gradient(135deg, #0f1628 0%, #1a2444 50%, #0d1a3a 100%)", borderRadius: 20, padding: "28px 20px", color: "#fff", textAlign: "center", marginBottom: 16 }}>
         <div style={{ width: 72, height: 72, borderRadius: "50%", background: `linear-gradient(135deg, ${rc.bg}, ${rc.bg}99)`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, fontWeight: 800, margin: "0 auto 12px", boxShadow: `0 0 24px ${rc.glow}`, border: "2px solid rgba(255,255,255,0.2)" }}>
@@ -89,8 +89,9 @@ export default function MypageTab({ student, streak, sessions, playedGameCount, 
         onClick={onLogout}
         style={{
           width: "100%", padding: "14px", borderRadius: 12,
+          minHeight: 44,
           background: "transparent", border: "1px solid #e05070",
-          color: "#e05070", fontSize: 14, fontWeight: 700, cursor: "pointer",
+          color: "#e05070", fontSize: 16, fontWeight: 700, cursor: "pointer",
         }}
       >
         ログアウト

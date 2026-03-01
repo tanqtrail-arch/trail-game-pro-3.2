@@ -2,7 +2,7 @@ import PageHeader from "../components/PageHeader";
 
 export default function CoursesTab() {
   return (
-    <div>
+    <div style={{ width: "100%" }}>
       <PageHeader emoji="📚" title="コース" />
       <div style={{ textAlign: "center", padding: "60px 0", color: "#a0aec0" }}>
         <div style={{ fontSize: 48, marginBottom: 16 }}>🚧</div>

@@ -94,6 +94,7 @@ export default function RankingTab({ ranking, games, studentName, studentId, ses
     whiteSpace: "nowrap",
     cursor: "pointer",
     border: "none",
+    minHeight: 44,
     background: active ? "#0090d9" : "#fff",
     color: active ? "#fff" : "#4a5568",
     boxShadow: active ? "0 2px 8px rgba(0,144,217,0.3)" : "0 1px 3px rgba(0,0,0,0.08)",
@@ -137,7 +138,7 @@ export default function RankingTab({ ranking, games, studentName, studentId, ses
   };
 
   return (
-    <div>
+    <div style={{ width: "100%" }}>
       <PageHeader emoji="🏆" title="ランキング" />
 
       {/* Filter chips */}

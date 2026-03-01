@@ -5,7 +5,7 @@ export default function SubjectLevels({ subjects }) {
   if (subjects.length === 0) return null;
   return (
     <Section title="科目レベル" emoji="📊">
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: 8, width: "100%" }}>
         {subjects.map(s => {
           const c = colors[s.subject] || "#718096";
           const pct = Math.min(100, (s.totalAlt / s.nextAt) * 100);

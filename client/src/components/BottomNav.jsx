@@ -3,11 +3,14 @@ import { TABS } from "../constants";
 export default function BottomNav({ activeTab, onTabChange }) {
   return (
     <div style={{
-      position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)",
-      width: "100%", maxWidth: 480,
+      position: "fixed", bottom: 0, left: 0, right: 0,
+      width: "100%",
+      height: "calc(60px + env(safe-area-inset-bottom, 0px))",
+      paddingBottom: "env(safe-area-inset-bottom, 0px)",
       background: "rgba(255,255,255,0.95)", backdropFilter: "blur(16px)",
       borderTop: "1px solid #e8ecf2",
-      display: "flex", justifyContent: "space-around", padding: "8px 0 12px", zIndex: 100,
+      display: "flex", justifyContent: "space-around", alignItems: "center",
+      zIndex: 100,
     }}>
       {TABS.map(tab => {
         const isActive = tab.id === activeTab;

@@ -52,7 +52,7 @@ function AppInner() {
   if (loginMode) return <LoginScreen onLogin={handleLogin} expiredMessage={expiredMessage} />;
 
   if (loading) return (
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", background: "#eef1f8", animation: "fadeIn 0.3s ease-out" }}>
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", width: "100%", background: "#eef1f8", animation: "fadeIn 0.3s ease-out" }}>
       <style>{`@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } } @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }`}</style>
       <div style={{ textAlign: "center" }}>
         <div style={{ fontSize: 40, marginBottom: 16, animation: "pulse 1.5s ease-in-out infinite" }}>🚀</div>
@@ -62,7 +62,7 @@ function AppInner() {
   );
 
   if (error) return (
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", background: "#eef1f8", padding: 20 }}>
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", width: "100%", background: "#eef1f8", padding: 20 }}>
       <div style={{ textAlign: "center" }}>
         <div style={{ fontSize: 40, marginBottom: 16 }}>⚠️</div>
         <div style={{ fontSize: 14, color: "#e05070", marginBottom: 12 }}>{error}</div>
@@ -103,32 +103,42 @@ function AppInner() {
 
   return (
     <div style={{
-      maxWidth: 480, margin: "0 auto", padding: "0 12px 80px",
+      width: "100%",
+      minHeight: "100vh",
       fontFamily: "'Noto Sans JP', 'Hiragino Sans', sans-serif",
       background: "linear-gradient(180deg, #eef1f8 0%, #f6f7fb 40%, #f0f2f5 100%)",
-      minHeight: "100vh",
-      opacity: loaded ? 1 : 0,
-      transform: loaded ? "none" : "translateY(8px)",
-      transition: "all 0.4s ease-out",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
     }}>
       <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+JP:wght@400;600;700;800&display=swap" rel="stylesheet" />
       <style>{`
         @keyframes twinkle { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
         ::-webkit-scrollbar { height: 4px; }
         ::-webkit-scrollbar-thumb { background: #d0d5dd; border-radius: 4px; }
       `}</style>
 
-      {activeTab === 'home' && (
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 4px 12px" }}>
-          <div style={{ fontSize: 18, fontWeight: 900, letterSpacing: -1, fontFamily: "'Orbitron', monospace", background: "linear-gradient(135deg, #0090d9, #7c5cbf)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-            TRAIL GP3
+      <div style={{
+        width: "100%",
+        maxWidth: 480,
+        padding: "0 12px",
+        paddingBottom: "calc(70px + env(safe-area-inset-bottom, 0px))",
+        opacity: loaded ? 1 : 0,
+        transform: loaded ? "none" : "translateY(8px)",
+        transition: "all 0.4s ease-out",
+        flex: 1,
+      }}>
+        {activeTab === 'home' && (
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 4px 12px" }}>
+            <div style={{ fontSize: 18, fontWeight: 900, letterSpacing: -1, fontFamily: "'Orbitron', monospace", background: "linear-gradient(135deg, #0090d9, #7c5cbf)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+              TRAIL GP3
+            </div>
+            <span style={{ fontSize: 11, color: "#a0aec0" }}>{student?.class_name || ''}</span>
           </div>
-          <span style={{ fontSize: 11, color: "#a0aec0" }}>{student?.class_name || ''}</span>
-        </div>
-      )}
+        )}
 
-      {renderTab()}
+        {renderTab()}
+      </div>
 
       <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
     </div>
