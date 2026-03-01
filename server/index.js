@@ -423,6 +423,20 @@ db.exec(`UPDATE parent_tokens SET pin = '0000' WHERE pin IS NULL OR pin = ''`);
   const { runMigrationsV2 } = require('./lib/migrateV2');
   runMigrationsV2(db);
 
+  // ── コースいいね（オープン希望）テーブル ──
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS course_likes (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      course_id TEXT NOT NULL,
+      student_id INTEGER NOT NULL,
+      tenant_id TEXT NOT NULL,
+      created_at TEXT DEFAULT (datetime('now')),
+      UNIQUE(course_id, student_id),
+      FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE
+    )
+  `);
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_course_likes_course ON course_likes(course_id)`);
+
   console.log('  Migrations: OK');
 
   // ── Auto-add new games to all existing tenants ──

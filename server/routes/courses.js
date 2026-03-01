@@ -7,7 +7,7 @@
 
 const { Router } = require('express');
 const db = require('../db');
-const { requireAdmin, optionalAuth } = require('../middleware/auth');
+const { requireAdmin, requireStudent, optionalAuth } = require('../middleware/auth');
 const { getCourseGameAccess } = require('../lib/courseEngine');
 const { COURSE_GRADE_THRESHOLDS } = require('../config/gameBalance');
 
@@ -37,7 +37,19 @@ router.get('/:tenantSlug/courses', optionalAuth, (req, res) => {
         sortOrder: c.sort_order,
       };
 
+      // いいね数
+      const likeRow = db.prepare(
+        'SELECT COUNT(*) AS cnt FROM course_likes WHERE course_id = ?'
+      ).get(c.id);
+      data.likeCount = likeRow?.cnt || 0;
+
+      // 自分がいいね済みか
       if (studentId) {
+        const myLike = db.prepare(
+          'SELECT 1 FROM course_likes WHERE course_id = ? AND student_id = ?'
+        ).get(c.id, studentId);
+        data.liked = !!myLike;
+
         const grade = db.prepare(
           'SELECT * FROM student_course_grades WHERE student_id = ? AND course_id = ?'
         ).get(studentId, c.id);
@@ -129,6 +141,42 @@ router.get('/:tenantSlug/courses/:courseId', optionalAuth, (req, res) => {
   } catch (err) {
     console.error('コース詳細取得エラー:', err);
     res.status(500).json({ error: 'コース詳細の取得に失敗しました' });
+  }
+});
+
+// ═══ コースいいね（トグル）═══
+router.post('/:tenantSlug/courses/:courseId/like', requireStudent, (req, res) => {
+  try {
+    const tenant = db.prepare('SELECT * FROM tenants WHERE slug = ?').get(req.params.tenantSlug);
+    if (!tenant) return res.status(404).json({ error: 'テナントが見つかりません' });
+
+    const courseId = req.params.courseId;
+    const studentId = req.user.studentId;
+    const tenantId = req.user.tenantId;
+
+    const course = db.prepare('SELECT id FROM course_definitions WHERE id = ?').get(courseId);
+    if (!course) return res.status(404).json({ error: 'コースが見つかりません' });
+
+    const existing = db.prepare(
+      'SELECT id FROM course_likes WHERE course_id = ? AND student_id = ?'
+    ).get(courseId, studentId);
+
+    if (existing) {
+      db.prepare('DELETE FROM course_likes WHERE id = ?').run(existing.id);
+    } else {
+      db.prepare(
+        'INSERT INTO course_likes (course_id, student_id, tenant_id) VALUES (?, ?, ?)'
+      ).run(courseId, studentId, tenantId);
+    }
+
+    const count = db.prepare(
+      'SELECT COUNT(*) AS cnt FROM course_likes WHERE course_id = ?'
+    ).get(courseId);
+
+    res.json({ ok: true, liked: !existing, likeCount: count.cnt });
+  } catch (err) {
+    console.error('コースいいねエラー:', err);
+    res.status(500).json({ error: 'いいね処理に失敗しました' });
   }
 });
 

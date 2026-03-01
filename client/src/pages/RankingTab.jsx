@@ -83,22 +83,23 @@ export default function RankingTab({ ranking, games, studentName, studentId, ses
     return buildGameRanking(sessions || [], selectedGame);
   }, [sessions, selectedGame]);
 
-  const chipStyle = (active) => ({
-    display: "inline-flex",
+  const gameButtonStyle = (active) => ({
+    display: "flex",
     alignItems: "center",
-    gap: 4,
-    padding: "6px 12px",
-    borderRadius: 20,
-    fontSize: 12,
+    justifyContent: "center",
+    gap: 6,
+    padding: "10px 8px",
+    borderRadius: 14,
+    fontSize: 13,
     fontWeight: 700,
-    whiteSpace: "nowrap",
     cursor: "pointer",
-    border: "none",
-    minHeight: 44,
-    background: active ? "#0090d9" : "#fff",
-    color: active ? "#fff" : "#4a5568",
-    boxShadow: active ? "0 2px 8px rgba(0,144,217,0.3)" : "0 1px 3px rgba(0,0,0,0.08)",
+    border: active ? "2px solid #0090d9" : "1px solid #e8ecf2",
+    minHeight: 48,
+    background: active ? "linear-gradient(135deg, #e3f2fd, #e8eaf6)" : "#fff",
+    color: active ? "#0090d9" : "#4a5568",
+    boxShadow: active ? "0 2px 8px rgba(0,144,217,0.15)" : "none",
     transition: "all 0.2s",
+    width: "100%",
   });
 
   const periodChipStyle = (active) => ({
@@ -141,14 +142,20 @@ export default function RankingTab({ ranking, games, studentName, studentId, ses
     <div style={{ width: "100%" }}>
       <PageHeader emoji="🏆" title="ランキング" />
 
-      {/* Filter chips */}
-      <div style={{ display: "flex", gap: 8, overflowX: "auto", padding: "0 0 12px", marginBottom: 4 }}>
-        <button style={chipStyle(selectedGame === null)} onClick={() => setSelectedGame(null)}>
-          🏆 総合ALT
+      {/* Game selector grid */}
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(2, 1fr)",
+        gap: 8,
+        marginBottom: 12,
+      }}>
+        <button style={gameButtonStyle(selectedGame === null)} onClick={() => setSelectedGame(null)}>
+          <span style={{ fontSize: 18 }}>🏆</span> 総合ALT
         </button>
         {activeGames.map(g => (
-          <button key={g.id} style={chipStyle(selectedGame === g.id)} onClick={() => setSelectedGame(g.id)}>
-            {g.emoji || "🎮"} {g.name}
+          <button key={g.id} style={gameButtonStyle(selectedGame === g.id)} onClick={() => setSelectedGame(g.id)}>
+            <span style={{ fontSize: 18 }}>{g.emoji || "🎮"}</span>
+            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{g.name}</span>
           </button>
         ))}
       </div>

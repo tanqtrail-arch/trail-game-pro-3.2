@@ -65,6 +65,11 @@ export function getCachedStudent() {
   return cachedStudent;
 }
 
+// ─── クラス一覧 ─────────────────────
+export async function getClasses() {
+  return apiFetch(`/api/t/${TENANT_SLUG}/classes`);
+}
+
 // ─── テナント情報 ──────────────────
 export async function getTenantInfo() {
   return apiFetch(`/api/t/${TENANT_SLUG}/info`);
@@ -105,4 +110,15 @@ export async function getPlaySessions() {
 // ─── バッジ ────────────────────────
 export async function getBadges() {
   return apiFetch(`/api/t/${TENANT_SLUG}/badges`);
+}
+
+// ─── コース ────────────────────────
+export async function getCourses() {
+  return apiFetch(`/api/t/${TENANT_SLUG}/courses`);
+}
+
+export async function likeCourse(courseId) {
+  return apiFetch(`/api/t/${TENANT_SLUG}/courses/${courseId}/like`, {
+    method: 'POST',
+  });
 }
