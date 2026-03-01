@@ -20,7 +20,7 @@ function buildGameRanking(sessions, gameId) {
 }
 
 export default function RankingTab({ ranking, games, studentName, sessions }) {
-  const medals = ["", "\u{1F947}", "\u{1F948}", "\u{1F949}"];
+  const medals = ["", "🥇", "🥈", "🥉"];
   const [selectedGame, setSelectedGame] = useState(null);
 
   const activeGames = (games || []).filter(g => g.is_active === 1);
@@ -49,7 +49,7 @@ export default function RankingTab({ ranking, games, studentName, sessions }) {
 
   return (
     <div>
-      <PageHeader emoji="\u{1F3C6}" title="\u30E9\u30F3\u30AD\u30F3\u30B0" />
+      <PageHeader emoji="🏆" title="ランキング" />
 
       {/* Filter chips */}
       <div style={{ display: "flex", gap: 8, overflowX: "auto", padding: "0 0 12px", marginBottom: 8 }}>
