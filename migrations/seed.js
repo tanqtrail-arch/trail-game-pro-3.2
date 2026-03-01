@@ -60,6 +60,7 @@ db.transaction(() => {
     { name: 'ここどこ？ドロップ', emoji: '🗾', url: 'https://tanqtrail-arch.github.io/kokodoko-drop/', category: '地理' },
     { name: 'どっちがデカい？', emoji: '📐', url: 'https://tanqtrail-arch.github.io/menseki-h-l/', category: '算数' },
     { name: '漢字道場【地理編】', emoji: '✍️', url: 'https://tanqtrail-arch.github.io/kanji-dojo-geography/', category: '国語' },
+    { name: '猫の細道', emoji: '🐱', url: 'https://tanqtrail-arch.github.io/neko-no-hosomichi/', category: '算数' },
   ];
   const insertGame = db.prepare('INSERT OR IGNORE INTO games (tenant_id, name, emoji, url, category) VALUES (?, ?, ?, ?, ?)');
   defaultGames.forEach(g => insertGame.run(tenantId, g.name, g.emoji, g.url || null, g.category));

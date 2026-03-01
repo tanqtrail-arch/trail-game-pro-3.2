@@ -454,6 +454,7 @@ db.exec(`UPDATE parent_tokens SET pin = '0000' WHERE pin IS NULL OR pin = ''`);
   const newGames = [
     { name: '書き順マスター', emoji: '✍️', url: 'https://tanqtrail-arch.github.io/kanji-stroke/', category: '国語' },
     { name: 'ビルビルタウン', emoji: '🏙️', url: 'https://tanqtrail-arch.github.io/building-town-v2/', category: '算数' },
+    { name: '猫の細道', emoji: '🐱', url: 'https://tanqtrail-arch.github.io/neko-no-hosomichi/', category: '算数' },
   ];
   const allTenants = db.prepare('SELECT id FROM tenants').all();
   const insertNewGame = db.prepare(`
