@@ -13,6 +13,14 @@ async function apiFetch(path, options = {}) {
   };
   const res = await fetch(`${BASE_URL}${path}`, { ...options, headers });
   if (!res.ok) {
+    if (res.status === 401) {
+      authToken = null;
+      currentStudentId = null;
+      localStorage.removeItem('trail_token');
+      localStorage.removeItem('trail_student_id');
+      localStorage.removeItem('trail_student_name');
+      window.dispatchEvent(new CustomEvent('trail:auth-expired'));
+    }
     const err = await res.json().catch(() => ({}));
     throw new Error(err.message || `API Error: ${res.status}`);
   }

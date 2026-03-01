@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, Component } from "react";
 import { useTrailData, buildRecentGames, buildWeeklyRanking, buildSubjectLevels, buildMissions } from "./hooks/useTrailData";
 import * as api from "./api/trailApi";
 
@@ -13,7 +13,7 @@ const RANK_COLORS = {
 };
 
 // ─── Login Screen ──────────────────────────────────
-function LoginScreen({ onLogin }) {
+function LoginScreen({ onLogin, expiredMessage }) {
   const [name, setName] = useState('');
   const [className, setClassName] = useState('探究個別');
   const [loading, setLoading] = useState(false);
@@ -50,6 +50,11 @@ function LoginScreen({ onLogin }) {
       <div style={{ fontSize: 11, color: "#a0aec0", marginBottom: 40, letterSpacing: 2 }}>EXPLORE · PLAY · GROW</div>
 
       <div style={{ width: "100%", maxWidth: 320 }}>
+        {expiredMessage && (
+          <div style={{ background: "rgba(224,80,112,0.15)", border: "1px solid rgba(224,80,112,0.3)", borderRadius: 12, padding: "10px 14px", marginBottom: 16, textAlign: "center", fontSize: 13, color: "#ff8fa3" }}>
+            {expiredMessage}
+          </div>
+        )}
         <div style={{ fontSize: 14, fontWeight: 700, color: "#fff", marginBottom: 16, textAlign: "center" }}>なまえを入力してログイン</div>
 
         <div style={{ fontSize: 12, color: "#a0aec0", marginBottom: 6 }}>クラス</div>
@@ -418,6 +423,42 @@ function Section({ title, emoji, badge, action, children }) {
   );
 }
 
+function SectionError({ message }) {
+  return (
+    <div style={{ textAlign: "center", padding: "12px", background: "#fff5f5", borderRadius: 12, border: "1px solid #fed7d7", marginBottom: 16 }}>
+      <div style={{ fontSize: 12, color: "#e05070" }}>{message || 'データを取得できませんでした'}</div>
+    </div>
+  );
+}
+
+class ErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  componentDidCatch(error, info) {
+    console.error('ErrorBoundary caught:', error, info);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", background: "#eef1f8", padding: 20 }}>
+          <div style={{ textAlign: "center" }}>
+            <div style={{ fontSize: 40, marginBottom: 16 }}>⚠️</div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: "#2d3748", marginBottom: 8 }}>エラーが発生しました</div>
+            <div style={{ fontSize: 13, color: "#a0aec0", marginBottom: 16 }}>予期しないエラーが発生しました</div>
+            <button onClick={() => window.location.reload()} style={{ padding: "10px 28px", borderRadius: 10, border: "1px solid #0090d9", background: "transparent", color: "#0090d9", fontSize: 14, fontWeight: 600, cursor: "pointer" }}>再読み込み</button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 // ─── Main App ────────────────────────────────────────
 const TABS = [
   { id: 'home', icon: "🏠", label: "ホーム" },
@@ -427,20 +468,34 @@ const TABS = [
   { id: 'mypage', icon: "👤", label: "マイページ" },
 ];
 
-export default function App() {
+function AppInner() {
   const [studentId, setStudentId] = useState(api.getStoredStudentId());
   const [loginMode, setLoginMode] = useState(!api.isLoggedIn());
   const [loaded, setLoaded] = useState(false);
   const [activeTab, setActiveTab] = useState('home');
+  const [expiredMessage, setExpiredMessage] = useState(null);
 
-  const { student, games, coins, streak, rankings, sessions, loading, error } = useTrailData(studentId);
+  const { student, games, coins, streak, rankings, sessions, loading, error, failedSections } = useTrailData(studentId);
 
   useEffect(() => { if (!loading) setTimeout(() => setLoaded(true), 100); }, [loading]);
+
+  useEffect(() => {
+    const handleAuthExpired = () => {
+      setStudentId(null);
+      setLoginMode(true);
+      setLoaded(false);
+      setActiveTab('home');
+      setExpiredMessage('セッションが切れました。再ログインしてください');
+    };
+    window.addEventListener('trail:auth-expired', handleAuthExpired);
+    return () => window.removeEventListener('trail:auth-expired', handleAuthExpired);
+  }, []);
 
   const handleLogin = (id) => {
     localStorage.setItem('trail_student_id', id);
     setStudentId(id);
     setLoginMode(false);
+    setExpiredMessage(null);
   };
 
   const handleLogout = () => {
@@ -451,13 +506,14 @@ export default function App() {
     setActiveTab('home');
   };
 
-  if (loginMode) return <LoginScreen onLogin={handleLogin} />;
+  if (loginMode) return <LoginScreen onLogin={handleLogin} expiredMessage={expiredMessage} />;
 
   if (loading) return (
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", background: "#eef1f8" }}>
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", background: "#eef1f8", animation: "fadeIn 0.3s ease-out" }}>
+      <style>{`@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } } @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }`}</style>
       <div style={{ textAlign: "center" }}>
-        <div style={{ fontSize: 40, marginBottom: 16 }}>🚀</div>
-        <div style={{ fontSize: 14, color: "#a0aec0" }}>データを読み込み中...</div>
+        <div style={{ fontSize: 40, marginBottom: 16, animation: "pulse 1.5s ease-in-out infinite" }}>🚀</div>
+        <div style={{ fontSize: 14, color: "#a0aec0", fontFamily: "'Noto Sans JP', sans-serif" }}>データを読み込み中...</div>
       </div>
     </div>
   );
@@ -501,10 +557,10 @@ export default function App() {
         return (
           <>
             <StatusHeader student={studentData} gameCount={playedGameCount} />
-            <MissionSection missions={missions} />
-            <RecentGamesSection recent={recentGames} games={games} />
-            <SubjectLevels subjects={subjectLevels} />
-            <WeeklyRanking ranking={weeklyRanking} />
+            {failedSections.includes('sessions') ? <SectionError message="ミッションデータを取得できませんでした" /> : <MissionSection missions={missions} />}
+            {failedSections.includes('sessions') ? <SectionError message="プレイ履歴を取得できませんでした" /> : <RecentGamesSection recent={recentGames} games={games} />}
+            {failedSections.includes('coins') ? <SectionError message="科目レベルを取得できませんでした" /> : <SubjectLevels subjects={subjectLevels} />}
+            {failedSections.includes('rankings') ? <SectionError message="ランキングを取得できませんでした" /> : <WeeklyRanking ranking={weeklyRanking} />}
           </>
         );
     }
@@ -558,5 +614,13 @@ export default function App() {
         })}
       </div>
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <ErrorBoundary>
+      <AppInner />
+    </ErrorBoundary>
   );
 }

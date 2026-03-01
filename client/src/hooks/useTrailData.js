@@ -11,6 +11,7 @@ export function useTrailData(studentId) {
     sessions: [],
     loading: true,
     error: null,
+    failedSections: [],
   });
 
   useEffect(() => {
@@ -54,6 +55,13 @@ export function useTrailData(studentId) {
         // streak API returns { streak: { current, max, ... }, ... }
         const streakData = streak.status === 'fulfilled' ? streak.value : null;
 
+        const failedSections = [];
+        if (games.status === 'rejected') failedSections.push('games');
+        if (coins.status === 'rejected') failedSections.push('coins');
+        if (streak.status === 'rejected') failedSections.push('streak');
+        if (rankings.status === 'rejected') failedSections.push('rankings');
+        if (sessions.status === 'rejected') failedSections.push('sessions');
+
         setData({
           student: (() => {
             const cached = api.getCachedStudent();
@@ -73,6 +81,7 @@ export function useTrailData(studentId) {
           sessions: sessionsList,
           loading: false,
           error: null,
+          failedSections,
         });
       } catch (err) {
         setData(prev => ({ ...prev, loading: false, error: err.message }));
