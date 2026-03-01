@@ -59,6 +59,33 @@ router.put('/:tenantSlug/games/:id', requireAdmin, (req, res) => {
   res.json({ ok: true });
 });
 
+// ═══ [一時] 新規ゲーム3件追加マイグレーション（デプロイ後に削除） ═══
+router.post('/_migrate/add-games', (req, res) => {
+  if (req.headers['x-migrate-key'] !== 'migrate-2026-03-add-games') {
+    return res.status(403).json({ error: 'forbidden' });
+  }
+  const tenant = db.prepare("SELECT id FROM tenants WHERE slug = 'trail'").get();
+  if (!tenant) return res.status(404).json({ error: 'tenant not found' });
+  const games = [
+    { name: 'ここどこ？ドロップ', emoji: '🗾', url: 'https://tanqtrail-arch.github.io/kokodoko-drop/', category: '地理' },
+    { name: 'どっちがデカい？', emoji: '📐', url: 'https://tanqtrail-arch.github.io/menseki-h-l/', category: '算数' },
+    { name: '漢字道場【地理編】', emoji: '✍️', url: 'https://tanqtrail-arch.github.io/kanji-dojo-geography/', category: '国語' },
+  ];
+  const stmt = db.prepare(`
+    INSERT INTO games (tenant_id, name, emoji, url, category)
+    SELECT ?, ?, ?, ?, ?
+    WHERE NOT EXISTS (SELECT 1 FROM games WHERE tenant_id = ? AND name = ?)
+  `);
+  const results = [];
+  db.transaction(() => {
+    for (const g of games) {
+      const r = stmt.run(tenant.id, g.name, g.emoji, g.url, g.category, tenant.id, g.name);
+      results.push({ name: g.name, inserted: r.changes > 0, id: r.lastInsertRowid });
+    }
+  })();
+  res.json({ ok: true, results });
+});
+
 // ═══ ゲーム削除 ═══
 router.delete('/:tenantSlug/games/:id', requireAdmin, (req, res) => {
   const tenant = db.prepare('SELECT * FROM tenants WHERE slug = ?').get(req.params.tenantSlug);
