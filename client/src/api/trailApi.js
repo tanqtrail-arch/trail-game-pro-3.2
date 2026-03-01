@@ -19,13 +19,13 @@ async function apiFetch(path, options = {}) {
 }
 
 // ─── 認証 ─────────────────────────
-export async function loginStudent(name, tenantId) {
+export async function loginStudent(studentName, className) {
   const data = await apiFetch('/api/auth/student/login', {
     method: 'POST',
     body: JSON.stringify({
-      name,
-      tenant_id: tenantId || TENANT_SLUG,
-      slug: TENANT_SLUG,
+      tenantSlug: TENANT_SLUG,
+      className: className,
+      studentName: studentName,
     }),
   });
   authToken = data.token;

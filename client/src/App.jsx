@@ -15,26 +15,16 @@ const RANK_COLORS = {
 // ─── Login Screen ──────────────────────────────────
 function LoginScreen({ onLogin }) {
   const [name, setName] = useState('');
+  const [className, setClassName] = useState('探究個別');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [tenantId, setTenantId] = useState(null);
-
-  // テナントID取得（起動時）
-  useEffect(() => {
-    api.getTenantInfo()
-      .then(data => setTenantId(data.id || data.tenant_id))
-      .catch(() => {
-        // テナント情報が取れない場合はハードコード
-        setTenantId('0bca4097-51d0-4fed-90d5-3e1f22538806');
-      });
-  }, []);
 
   const handleLogin = async () => {
     if (!name.trim()) return;
     setLoading(true);
     setError(null);
     try {
-      const data = await api.loginStudent(name.trim(), tenantId || 'trail');
+      const data = await api.loginStudent(name.trim(), className);
       const sid = data.student?.id || data.studentId || data.id;
       if (sid) {
         onLogin(sid);
@@ -60,7 +50,23 @@ function LoginScreen({ onLogin }) {
       <div style={{ fontSize: 11, color: "#a0aec0", marginBottom: 40, letterSpacing: 2 }}>EXPLORE · PLAY · GROW</div>
 
       <div style={{ width: "100%", maxWidth: 320 }}>
-        <div style={{ fontSize: 14, fontWeight: 700, color: "#fff", marginBottom: 12, textAlign: "center" }}>なまえを入力してログイン</div>
+        <div style={{ fontSize: 14, fontWeight: 700, color: "#fff", marginBottom: 16, textAlign: "center" }}>なまえを入力してログイン</div>
+
+        <div style={{ fontSize: 12, color: "#a0aec0", marginBottom: 6 }}>クラス</div>
+        <select
+          value={className}
+          onChange={e => setClassName(e.target.value)}
+          style={{
+            width: "100%", padding: "12px 16px", borderRadius: 12, marginBottom: 12,
+            background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)",
+            color: "#fff", fontSize: 14, outline: "none",
+            fontFamily: "'Noto Sans JP', sans-serif",
+          }}
+        >
+          <option value="探究個別" style={{ color: "#000" }}>探究個別</option>
+        </select>
+
+        <div style={{ fontSize: 12, color: "#a0aec0", marginBottom: 6 }}>なまえ</div>
         <input
           type="text"
           value={name}
