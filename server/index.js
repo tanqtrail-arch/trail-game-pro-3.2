@@ -36,6 +36,11 @@ app.use('/api/', limiter);
 // ═══ Static Files ═══
 app.use(express.static(path.join(__dirname, '../public')));
 
+app.use('/app', express.static(path.join(__dirname, '..', 'public', 'app')));
+app.get('/app/*', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'public', 'app', 'index.html'));
+});
+
 // ═══ API Routes ═══
 const authRoutes = require('./routes/auth');
 const gameRoutes = require('./routes/games');

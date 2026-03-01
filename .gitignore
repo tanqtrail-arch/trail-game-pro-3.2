@@ -4,3 +4,6 @@ data/
 *.db
 *.db-journal
 .DS_Store
+public/app/
+client/node_modules/
+client/dist/
