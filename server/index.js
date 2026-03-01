@@ -91,6 +91,9 @@ app.use('/api/t', coursesRoutes);
 
 app.use('/api', parentRoutes);                         // ★ NEW: 保護者ダッシュボード
 
+const parentCalendarRoutes = require('./routes/parentCalendar');
+app.use('/api/parent', parentCalendarRoutes);          // /api/parent/calendar, /api/parent/goals
+
 const aiRoutes = require('./routes/aiRoutes');
 app.use('/api/ai', aiRoutes);
 

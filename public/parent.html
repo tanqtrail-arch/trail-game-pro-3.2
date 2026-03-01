@@ -225,6 +225,67 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 /* ── Footer ── */
 .parent-footer{text-align:center;padding:20px 16px 8px;font-size:.7rem;color:var(--text-light);line-height:1.5}
 
+/* ── Enhanced Calendar ── */
+.enhanced-calendar{margin:0}
+.calendar-nav{display:flex;justify-content:space-between;align-items:center;padding:12px 16px 8px}
+.cal-nav-btn{background:var(--cream);border:1px solid var(--border);color:var(--brown);width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:16px;transition:all .2s}
+.cal-nav-btn:hover{background:var(--cream-dark)}
+#cal-month-title{font-size:.9rem;font-weight:700;color:var(--sage-dark)}
+.enhanced-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;padding:0 12px 8px}
+.cal-dow{text-align:center;font-size:.6rem;color:var(--text-dim);font-weight:700;padding:4px 0}
+.cal-day{position:relative;text-align:center;padding:8px 2px;min-height:38px;border-radius:8px;font-size:.75rem;background:transparent;color:var(--text-dim);transition:all .2s;display:flex;align-items:center;justify-content:center}
+.cal-day.has-activity{color:var(--text);font-weight:700;cursor:pointer}
+.cal-day.acc-high{background:var(--sage-light);color:var(--sage-dark)}
+.cal-day.acc-mid{background:var(--gold-light);color:var(--gold-dark)}
+.cal-day.acc-low{background:var(--accent-light);color:var(--accent)}
+.cal-day.cal-today{box-shadow:inset 0 0 0 2px var(--gold)}
+.cal-day:hover.has-activity{filter:brightness(.95)}
+.play-badge{position:absolute;top:1px;right:1px;background:var(--sage);color:#fff;font-size:9px;width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700}
+.cal-monthly-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:8px 12px 12px}
+.cal-stat{text-align:center;padding:10px 4px;background:var(--bg);border-radius:8px}
+.cal-stat-value{display:block;font-size:1.1rem;font-weight:900;color:var(--sage-dark)}
+.cal-stat-label{font-size:.6rem;color:var(--text-dim);font-weight:500}
+
+.day-detail{margin:8px 12px 12px;padding:14px;background:var(--bg);border-radius:12px;border-left:4px solid var(--sage)}
+.day-detail-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.day-detail-header h4{font-size:.85rem;font-weight:700;color:var(--sage-dark)}
+.day-detail .close-btn{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:16px;padding:4px}
+.day-detail-stats{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0;font-size:.8rem;color:var(--text)}
+.day-detail-stats span{background:var(--bg-card);padding:4px 8px;border-radius:6px;border:1px solid var(--border);font-size:.75rem}
+.session-row{display:flex;gap:6px;align-items:center;padding:8px;border-radius:8px;background:var(--bg-card);margin-bottom:3px;font-size:.75rem}
+.session-time{color:var(--text-dim);min-width:36px;flex-shrink:0}
+.session-game{flex:1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.session-score{color:var(--text);font-weight:700}
+.session-acc.acc-high{color:var(--sage-dark)}
+.session-acc.acc-mid{color:var(--gold-dark)}
+.session-acc.acc-low{color:var(--accent)}
+.session-dur{color:var(--text-dim)}
+.no-data{text-align:center;color:var(--text-dim);font-size:.8rem;padding:12px}
+
+/* ── Goals & Progress ── */
+.goals-section{margin-bottom:16px}
+.goal-bar-item{margin-bottom:12px}
+.goal-bar-label{display:flex;justify-content:space-between;font-size:.8rem;margin-bottom:4px;color:var(--text)}
+.goal-bar-numbers{color:var(--text-dim);font-size:.75rem}
+.progress-track{height:10px;border-radius:5px;background:var(--cream);overflow:hidden}
+.progress-fill{height:100%;border-radius:5px;background:linear-gradient(90deg,var(--sage),var(--sage-dark));transition:width .6s ease}
+.progress-fill.complete{background:linear-gradient(90deg,#22c55e,#16a34a)}
+
+.monthly-goals-section{margin-bottom:16px}
+.goal-donuts{display:flex;justify-content:space-around;flex-wrap:wrap;gap:12px;padding:12px}
+.goal-donut{text-align:center}
+.donut-label{font-size:.65rem;color:var(--text-dim);margin-top:4px;font-weight:500}
+.donut-value{font-size:1rem;font-weight:900;color:var(--text)}
+
+.streak-week{padding:12px 0}
+.streak-header{display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:8px;color:var(--text)}
+.streak-best{color:var(--text-dim);font-size:.75rem}
+.streak-dots{display:flex;justify-content:space-around}
+.streak-dot{text-align:center}
+.dot-circle{width:30px;height:30px;border-radius:50%;background:var(--cream);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text-dim);margin:0 auto 3px;border:1px solid var(--border)}
+.streak-dot.active .dot-circle{background:linear-gradient(135deg,var(--sage),var(--sage-dark));color:#fff;border-color:var(--sage)}
+.dot-label{font-size:.6rem;color:var(--text-dim)}
+
 /* ── Responsive ── */
 @media (min-width: 768px) {
   .app { max-width: 720px; }
@@ -234,7 +295,12 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 @media (min-width: 1024px) {
   .app { max-width: 960px; }
 }
+@media (max-width: 480px) {
+  .cal-monthly-summary{grid-template-columns:repeat(2,1fr)}
+  .day-detail-stats{flex-direction:column}
+}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
 <div class="app" id="app">
@@ -526,9 +592,38 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
     }
     html += '</div>';
 
-    // ⑥ 学習カレンダー
-    html += `<div class="section-title"><span>\uD83D\uDCC5</span> \u5B66\u7FD2\u30AB\u30EC\u30F3\u30C0\u30FC</div>`;
-    html += '<div class="card">' + renderCalendar(data.calendar || []) + '</div>';
+    // ⑤c 週間目標 & ストリーク
+    html += `<div class="section-title"><span>\uD83D\uDCCB</span> 今週のもくひょう</div>`;
+    html += '<div class="card"><div class="goals-section" style="padding:14px 16px" id="weekly-goals"><div class="card-empty">読み込み中...</div></div></div>';
+
+    // ⑤d 月間達成ドーナツ
+    html += `<div class="section-title"><span>\uD83D\uDCCA</span> 今月のせいせき</div>`;
+    html += `<div class="card">
+      <div class="monthly-goals-section" id="monthly-goals-section">
+        <div class="goal-donuts">
+          <div class="goal-donut">
+            <canvas id="donut-accuracy" width="90" height="90"></canvas>
+            <div class="donut-label">平均正答率</div>
+            <div class="donut-value" id="donut-accuracy-val">-</div>
+          </div>
+          <div class="goal-donut">
+            <canvas id="donut-days" width="90" height="90"></canvas>
+            <div class="donut-label">プレイ日数</div>
+            <div class="donut-value" id="donut-days-val">-</div>
+          </div>
+          <div class="goal-donut">
+            <canvas id="donut-games" width="90" height="90"></canvas>
+            <div class="donut-label">ゲーム種類</div>
+            <div class="donut-value" id="donut-games-val">-</div>
+          </div>
+        </div>
+      </div>
+      <div class="streak-week" style="padding:0 16px 14px" id="streak-week"></div>
+    </div>`;
+
+    // ⑥ 学習カレンダー（拡張版）
+    html += '<div class="section-title"><span>\uD83D\uDCC5</span> 学習カレンダー</div>';
+    html += '<div class="card enhanced-calendar" id="enhanced-calendar">' + renderSimpleCalendar(data.calendar || []) + '</div>';
 
     // ⑦ カテゴリ別得意・苦手
     html += `<div class="section-title"><span>\uD83D\uDCCA</span> \u30AB\u30C6\u30B4\u30EA\u5225\u6210\u7E3E</div>`;
@@ -641,8 +736,8 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
         tabs.forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
         const key = tab.dataset.tab;
-        const s = data.stats ? data.stats[key] : {alt:0,plays:0,minutes:0};
-        grid.innerHTML = renderStats(s || {alt:0,plays:0,minutes:0});
+        const ss = data.stats ? data.stats[key] : {alt:0,plays:0,minutes:0};
+        grid.innerHTML = renderStats(ss || {alt:0,plays:0,minutes:0});
       });
     });
 
@@ -650,6 +745,11 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
     const pinChangeBtn = document.getElementById('pinChangeBtn');
     if (pinChangeBtn) {
       pinChangeBtn.addEventListener('click', function() { showPinChangeModal(); });
+    }
+
+    // ── 新機能: 目標＆カレンダーデータ取得 ──
+    if (isJwt && s.id) {
+      loadGoalsAndCalendar(s.id);
     }
   }
 
@@ -728,8 +828,8 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
     return groups;
   }
 
-  // ── カレンダー描画 ──
-  function renderCalendar(calData) {
+  // ── カレンダー描画（既存・簡易版） ──
+  function renderSimpleCalendar(calData) {
     const now = new Date();
     const year = now.getFullYear();
     const month = now.getMonth();
@@ -771,6 +871,295 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 
     html += '</div></div>';
     return html;
+  }
+
+  // ══════════════════════════════════════════════════
+  // ── 新機能: 目標・カレンダー ──
+  // ══════════════════════════════════════════════════
+
+  let currentCalYear, currentCalMonth; // カレンダー状態
+  let calStudentId; // カレンダー用studentId保持
+
+  async function loadGoalsAndCalendar(studentId) {
+    calStudentId = studentId;
+    // 目標データ
+    try {
+      const goalsRes = await fetch('/api/parent/goals/' + studentId, {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      if (goalsRes.ok) {
+        const goals = await goalsRes.json();
+        renderWeeklyGoals(goals);
+        renderMonthlyGoals(goals);
+        renderStreakWeek(goals.streak);
+      }
+    } catch (e) {
+      console.error('Goals load error:', e);
+    }
+
+    // カレンダーデータ
+    const now = new Date();
+    currentCalYear = now.getFullYear();
+    currentCalMonth = now.getMonth(); // 0-indexed
+    loadCalendar(studentId);
+  }
+
+  async function loadCalendar(studentId) {
+    const sid = studentId || calStudentId;
+    if (!sid) return;
+    const monthStr = currentCalYear + '-' + String(currentCalMonth + 1).padStart(2, '0');
+    try {
+      const res = await fetch('/api/parent/calendar/' + sid + '?month=' + monthStr, {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      if (res.ok) {
+        const calData = await res.json();
+        renderEnhancedCalendar(calData);
+      }
+    } catch (e) {
+      console.error('Calendar load error:', e);
+    }
+  }
+
+  function renderEnhancedCalendar(data) {
+    const container = document.getElementById('enhanced-calendar');
+    if (!container) return;
+
+    const year = currentCalYear;
+    const month = currentCalMonth; // 0-indexed
+    const monthNames = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+
+    let html = '';
+    // Nav
+    html += '<div class="calendar-nav">';
+    html += '<button class="cal-nav-btn" id="cal-prev">\u25C0</button>';
+    html += '<span id="cal-month-title">' + year + '\u5E74' + monthNames[month] + '</span>';
+    html += '<button class="cal-nav-btn" id="cal-next">\u25B6</button>';
+    html += '</div>';
+
+    // Grid
+    html += '<div class="enhanced-cal-grid" id="cal-grid">';
+    var dowLabels = ['\u6708','\u706B','\u6C34','\u6728','\u91D1','\u571F','\u65E5'];
+    dowLabels.forEach(function(d) { html += '<div class="cal-dow">' + d + '</div>'; });
+
+    const firstDay = new Date(year, month, 1).getDay(); // 0=Sun
+    const startOffset = (firstDay + 6) % 7; // Monday-based
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const todayStr = new Date().toISOString().slice(0, 10);
+
+    // Day data map
+    const dayMap = {};
+    if (data.days) {
+      data.days.forEach(function(d) { dayMap[d.date] = d; });
+    }
+
+    // Empty cells
+    for (var i = 0; i < startOffset; i++) {
+      html += '<div class="cal-day"></div>';
+    }
+
+    // Day cells
+    for (var d = 1; d <= daysInMonth; d++) {
+      var dateStr = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+      var dayData = dayMap[dateStr];
+      var cls = 'cal-day';
+
+      if (dateStr === todayStr) cls += ' cal-today';
+
+      if (dayData && dayData.has_activity) {
+        cls += ' has-activity';
+        if (dayData.avg_accuracy >= 80) cls += ' acc-high';
+        else if (dayData.avg_accuracy >= 50) cls += ' acc-mid';
+        else cls += ' acc-low';
+        html += '<div class="' + cls + '" data-date="' + dateStr + '">' + d;
+        if (dayData.play_count > 1) {
+          html += '<span class="play-badge">' + dayData.play_count + '</span>';
+        }
+        html += '</div>';
+      } else {
+        html += '<div class="' + cls + '">' + d + '</div>';
+      }
+    }
+    html += '</div>';
+
+    // Monthly summary
+    var sum = data.summary || {};
+    html += '<div class="cal-monthly-summary">';
+    html += '<div class="cal-stat"><span class="cal-stat-value">' + (sum.active_days || 0) + '</span><span class="cal-stat-label">\u65E5\u30D7\u30EC\u30A4</span></div>';
+    html += '<div class="cal-stat"><span class="cal-stat-value">' + (sum.total_plays || 0) + '</span><span class="cal-stat-label">\u56DE\u30D7\u30EC\u30A4</span></div>';
+    html += '<div class="cal-stat"><span class="cal-stat-value">' + (sum.total_duration_min || 0) + '</span><span class="cal-stat-label">\u5206\u5B66\u7FD2</span></div>';
+    html += '<div class="cal-stat"><span class="cal-stat-value">' + (sum.avg_accuracy || 0) + '%</span><span class="cal-stat-label">\u5E73\u5747\u6B63\u7B54\u7387</span></div>';
+    html += '</div>';
+
+    // Day detail placeholder
+    html += '<div class="day-detail" id="day-detail" style="display:none">';
+    html += '<div class="day-detail-header"><h4 id="detail-title"></h4><button class="close-btn" id="close-detail">\u2715</button></div>';
+    html += '<div class="day-detail-stats" id="detail-stats"></div>';
+    html += '<div class="day-detail-list" id="detail-list"></div>';
+    html += '</div>';
+
+    container.innerHTML = html;
+
+    // Event: nav buttons
+    var prevBtn = document.getElementById('cal-prev');
+    var nextBtn = document.getElementById('cal-next');
+    if (prevBtn) prevBtn.addEventListener('click', function() {
+      currentCalMonth--;
+      if (currentCalMonth < 0) { currentCalMonth = 11; currentCalYear--; }
+      loadCalendar();
+    });
+    if (nextBtn) nextBtn.addEventListener('click', function() {
+      currentCalMonth++;
+      if (currentCalMonth > 11) { currentCalMonth = 0; currentCalYear++; }
+      loadCalendar();
+    });
+
+    // Event: day click
+    container.querySelectorAll('.cal-day.has-activity').forEach(function(el) {
+      el.addEventListener('click', function() {
+        showDayDetail(el.getAttribute('data-date'));
+      });
+    });
+
+    // Event: close detail
+    var closeBtn = document.getElementById('close-detail');
+    if (closeBtn) closeBtn.addEventListener('click', function() {
+      document.getElementById('day-detail').style.display = 'none';
+    });
+  }
+
+  async function showDayDetail(date) {
+    if (!calStudentId) return;
+    try {
+      var res = await fetch('/api/parent/calendar/' + calStudentId + '/day/' + date, {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      if (!res.ok) return;
+      var data = await res.json();
+
+      var d = new Date(date + 'T00:00:00');
+      var dayNames = ['\u65E5','\u6708','\u706B','\u6C34','\u6728','\u91D1','\u571F'];
+      document.getElementById('detail-title').textContent =
+        (d.getMonth() + 1) + '\u6708' + d.getDate() + '\u65E5\uFF08' + dayNames[d.getDay()] + '\uFF09\u306E\u5B66\u7FD2';
+
+      var stats = document.getElementById('detail-stats');
+      var sm = data.summary || {};
+      stats.innerHTML =
+        '<span>\uD83C\uDFAE ' + (sm.play_count || 0) + '\u56DE</span>' +
+        '<span>\u23F1 ' + (sm.duration_min || 0) + '\u5206</span>' +
+        '<span>\uD83C\uDFAF ' + (sm.avg_accuracy || 0) + '%</span>' +
+        '<span>\uD83E\uDE99 ' + (sm.coins_earned || 0) + '\u30B3\u30A4\u30F3</span>';
+
+      var list = document.getElementById('detail-list');
+      if (!data.sessions || data.sessions.length === 0) {
+        list.innerHTML = '<p class="no-data">\u3053\u306E\u65E5\u306E\u30D7\u30EC\u30A4\u8A18\u9332\u306F\u3042\u308A\u307E\u305B\u3093</p>';
+      } else {
+        list.innerHTML = data.sessions.map(function(s) {
+          var accCls = s.accuracy >= 80 ? 'acc-high' : s.accuracy >= 50 ? 'acc-mid' : 'acc-low';
+          return '<div class="session-row">' +
+            '<span class="session-time">' + esc(s.played_at) + '</span>' +
+            '<span class="session-game">' + esc(s.game_name) + '</span>' +
+            '<span class="session-score">' + (s.score || 0) + '\u70B9</span>' +
+            '<span class="session-acc ' + accCls + '">' + (s.accuracy || 0) + '%</span>' +
+            '<span class="session-dur">' + (s.duration_min || 0) + '\u5206</span>' +
+            '</div>';
+        }).join('');
+      }
+
+      document.getElementById('day-detail').style.display = 'block';
+      document.getElementById('day-detail').scrollIntoView({ behavior: 'smooth' });
+    } catch (e) {
+      console.error('Day detail error:', e);
+    }
+  }
+
+  function renderWeeklyGoals(goals) {
+    var container = document.getElementById('weekly-goals');
+    if (!container) return;
+    var items = [
+      { icon: '\uD83D\uDCC5', label: '\u30D7\u30EC\u30A4\u65E5\u6570', data: goals.weekly.play_days, unit: '\u65E5' },
+      { icon: '\uD83C\uDFAE', label: '\u30D7\u30EC\u30A4\u56DE\u6570', data: goals.weekly.play_count, unit: '\u56DE' },
+      { icon: '\u23F1', label: '\u5B66\u7FD2\u6642\u9593', data: goals.weekly.duration_min, unit: '\u5206' }
+    ];
+    container.innerHTML = items.map(function(item) {
+      var pct = Math.min(item.data.pct, 100);
+      var isComplete = item.data.pct >= 100;
+      var isOver = item.data.pct > 100;
+      return '<div class="goal-bar-item">' +
+        '<div class="goal-bar-label">' +
+          '<span>' + item.icon + ' ' + item.label + '</span>' +
+          '<span class="goal-bar-numbers">' + item.data.actual + ' / ' + item.data.target + item.unit +
+            (isOver ? ' \uD83C\uDF1F' : isComplete ? ' \u2705' : '') +
+          '</span>' +
+        '</div>' +
+        '<div class="progress-track">' +
+          '<div class="progress-fill' + (isComplete ? ' complete' : '') + '" style="width:' + pct + '%"></div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  var donutCharts = [];
+  function renderMonthlyGoals(goals) {
+    // Destroy previous charts
+    donutCharts.forEach(function(c) { c.destroy(); });
+    donutCharts = [];
+
+    var configs = [
+      { id: 'donut-accuracy', data: goals.monthly.avg_accuracy, valId: 'donut-accuracy-val', suffix: '%' },
+      { id: 'donut-days', data: goals.monthly.play_days, valId: 'donut-days-val', suffix: '\u65E5' },
+      { id: 'donut-games', data: goals.monthly.game_types, valId: 'donut-games-val', suffix: '\u7A2E\u985E' }
+    ];
+
+    configs.forEach(function(cfg) {
+      var canvas = document.getElementById(cfg.id);
+      var valEl = document.getElementById(cfg.valId);
+      if (!canvas || !valEl) return;
+
+      var pct = Math.min(cfg.data.pct, 100);
+      var color = pct >= 100 ? '#22c55e' : pct >= 70 ? 'var(--sage)' : 'var(--gold)';
+      // Use actual color values for Chart.js
+      var colorActual = pct >= 100 ? '#22c55e' : pct >= 70 ? '#7a9e7e' : '#c8a04a';
+
+      valEl.textContent = cfg.data.actual + cfg.suffix;
+
+      var chart = new Chart(canvas, {
+        type: 'doughnut',
+        data: {
+          datasets: [{
+            data: [pct, Math.max(100 - pct, 0)],
+            backgroundColor: [colorActual, 'rgba(107,84,67,0.08)'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          cutout: '72%',
+          responsive: false,
+          plugins: { legend: { display: false }, tooltip: { enabled: false } }
+        }
+      });
+      donutCharts.push(chart);
+    });
+  }
+
+  function renderStreakWeek(streak) {
+    var container = document.getElementById('streak-week');
+    if (!container || !streak) return;
+    var dayLabels = ['\u6708','\u706B','\u6C34','\u6728','\u91D1','\u571F','\u65E5'];
+    var html = '<div class="streak-header">' +
+      '<span>\uD83D\uDD25 \u9023\u7D9A ' + (streak.current || 0) + '\u65E5</span>' +
+      '<span class="streak-best">\u6700\u9577 ' + (streak.longest || 0) + '\u65E5</span>' +
+    '</div>';
+    html += '<div class="streak-dots">';
+    var pattern = streak.week_pattern || [false,false,false,false,false,false,false];
+    pattern.forEach(function(active, i) {
+      html += '<div class="streak-dot' + (active ? ' active' : '') + '">' +
+        '<div class="dot-circle">' + (active ? '\u2713' : '') + '</div>' +
+        '<div class="dot-label">' + dayLabels[i] + '</div>' +
+      '</div>';
+    });
+    html += '</div>';
+    container.innerHTML = html;
   }
 
   // ── ランキング推移グラフ ──
