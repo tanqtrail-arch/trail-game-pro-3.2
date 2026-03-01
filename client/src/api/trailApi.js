@@ -86,8 +86,9 @@ export async function getCoins() {
 }
 
 // ─── ランキング ────────────────────
-export async function getRankings() {
-  return apiFetch(`/api/t/${TENANT_SLUG}/rankings`);
+export async function getRankings(period) {
+  const qs = period ? `?period=${period}` : '';
+  return apiFetch(`/api/t/${TENANT_SLUG}/rankings${qs}`);
 }
 
 
