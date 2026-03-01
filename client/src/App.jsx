@@ -34,12 +34,12 @@ function LoginScreen({ onLogin }) {
     setLoading(true);
     setError(null);
     try {
-      const data = await api.loginStudent(name.trim(), tenantId);
-      const sid = data.student?.id || data.studentId;
+      const data = await api.loginStudent(name.trim(), tenantId || 'trail');
+      const sid = data.student?.id || data.studentId || data.id;
       if (sid) {
         onLogin(sid);
       } else {
-        setError('ログインできませんでした');
+        setError('生徒が見つかりませんでした');
       }
     } catch (err) {
       setError(err.message || 'ログインに失敗しました');

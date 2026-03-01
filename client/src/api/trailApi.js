@@ -22,10 +22,14 @@ async function apiFetch(path, options = {}) {
 export async function loginStudent(name, tenantId) {
   const data = await apiFetch('/api/auth/student/login', {
     method: 'POST',
-    body: JSON.stringify({ name, tenant_id: tenantId }),
+    body: JSON.stringify({
+      name,
+      tenant_id: tenantId || TENANT_SLUG,
+      slug: TENANT_SLUG,
+    }),
   });
   authToken = data.token;
-  currentStudentId = data.student?.id || data.studentId;
+  currentStudentId = data.student?.id || data.studentId || data.id;
   localStorage.setItem('trail_token', data.token);
   localStorage.setItem('trail_student_id', currentStudentId);
   return data;
