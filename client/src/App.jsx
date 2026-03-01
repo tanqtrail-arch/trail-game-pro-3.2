@@ -265,6 +265,143 @@ function WeeklyRanking({ ranking }) {
   );
 }
 
+// ─── Tab Pages ──────────────────────────────────────
+
+function PageHeader({ emoji, title }) {
+  return (
+    <div style={{ padding: "16px 4px 12px", display: "flex", alignItems: "center", gap: 8 }}>
+      <span style={{ fontSize: 20 }}>{emoji}</span>
+      <span style={{ fontSize: 18, fontWeight: 800, color: "#2d3748", letterSpacing: -0.3 }}>{title}</span>
+    </div>
+  );
+}
+
+function GamesTab({ games }) {
+  const active = games.filter(g => g.is_active === 1);
+  const categories = [...new Set(active.map(g => g.category))];
+  return (
+    <div>
+      <PageHeader emoji="🎮" title="ゲーム一覧" />
+      {categories.map(cat => (
+        <div key={cat} style={{ marginBottom: 16 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: "#718096", marginBottom: 8, paddingLeft: 2 }}>{cat}</div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+            {active.filter(g => g.category === cat).map(g => {
+              const hasUrl = !!g.url;
+              return (
+                <div
+                  key={g.id}
+                  onClick={() => hasUrl && window.open(g.url, '_blank')}
+                  style={{
+                    background: hasUrl ? "#fff" : "#f0f2f5",
+                    borderRadius: 16, padding: 16, border: "1px solid #e8ecf2",
+                    cursor: hasUrl ? "pointer" : "default",
+                    opacity: hasUrl ? 1 : 0.5,
+                    transition: "all 0.2s",
+                    textAlign: "center",
+                  }}
+                >
+                  <div style={{ fontSize: 36, marginBottom: 8 }}>{g.emoji || '🎮'}</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: "#2d3748", lineHeight: 1.3 }}>{g.name}</div>
+                  {!hasUrl && <div style={{ fontSize: 10, color: "#a0aec0", marginTop: 4 }}>準備中</div>}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+      {active.length === 0 && (
+        <div style={{ textAlign: "center", padding: "40px 0", color: "#a0aec0", fontSize: 14 }}>ゲームがありません</div>
+      )}
+    </div>
+  );
+}
+
+function RankingTab({ ranking }) {
+  const medals = ["", "🥇", "🥈", "🥉"];
+  return (
+    <div>
+      <PageHeader emoji="🏆" title="ランキング" />
+      {ranking.length > 0 ? (
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          {ranking.map(r => (
+            <div key={r.rank} style={{ display: "flex", alignItems: "center", gap: 10, background: r.isMe ? "linear-gradient(135deg, #e3f2fd, #e8eaf6)" : "#fff", borderRadius: 12, padding: "12px 14px", border: r.isMe ? "1px solid #90caf9" : "1px solid #e8ecf2" }}>
+              <span style={{ fontSize: 20, width: 32, textAlign: "center", fontWeight: 800 }}>{medals[r.rank] || r.rank}</span>
+              <span style={{ flex: 1, fontSize: 14, fontWeight: r.isMe ? 800 : 600, color: "#2d3748" }}>
+                {r.name} {r.isMe && <span style={{ fontSize: 10, color: "#0090d9" }}>← あなた</span>}
+              </span>
+              <span style={{ fontSize: 15, fontWeight: 800, color: "#e8a020", fontFamily: "'Orbitron', monospace" }}>{r.alt.toLocaleString()}</span>
+              <span style={{ fontSize: 10, color: "#a0aec0" }}>ALT</span>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div style={{ textAlign: "center", padding: "40px 0", color: "#a0aec0", fontSize: 14 }}>ランキングデータがありません</div>
+      )}
+    </div>
+  );
+}
+
+function MypageTab({ student, streak, sessions, playedGameCount, onLogout }) {
+  const rc = RANK_COLORS[student.rank] || RANK_COLORS.F;
+  const stats = [
+    { icon: "🎮", label: "プレイゲーム数", value: String(playedGameCount) },
+    { icon: "🕹️", label: "総プレイ回数", value: String(sessions.length) },
+    { icon: "🔥", label: "連続ログイン", value: `${student.streak}日` },
+  ];
+  return (
+    <div>
+      <PageHeader emoji="👤" title="マイページ" />
+      <div style={{ background: "linear-gradient(135deg, #0f1628 0%, #1a2444 50%, #0d1a3a 100%)", borderRadius: 20, padding: "28px 20px", color: "#fff", textAlign: "center", marginBottom: 16 }}>
+        <div style={{ width: 72, height: 72, borderRadius: "50%", background: `linear-gradient(135deg, ${rc.bg}, ${rc.bg}99)`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, fontWeight: 800, margin: "0 auto 12px", boxShadow: `0 0 24px ${rc.glow}`, border: "2px solid rgba(255,255,255,0.2)" }}>
+          {student.avatar}
+        </div>
+        <div style={{ fontSize: 20, fontWeight: 800 }}>{student.name}</div>
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 8, marginTop: 8, background: "rgba(255,255,255,0.1)", borderRadius: 12, padding: "6px 16px" }}>
+          <span style={{ fontSize: 20, fontWeight: 900, fontFamily: "'Orbitron', monospace", color: rc.bg }}>{student.rank}</span>
+          <span style={{ fontSize: 12, opacity: 0.7 }}>{student.rankLabel}</span>
+        </div>
+        <div style={{ marginTop: 12, fontSize: 24, fontWeight: 900, color: "#e8a020", fontFamily: "'Orbitron', monospace" }}>
+          {student.totalAlt.toLocaleString()}
+          <span style={{ fontSize: 12, opacity: 0.6, marginLeft: 4 }}>ALT</span>
+        </div>
+      </div>
+      <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+        {stats.map(s => (
+          <div key={s.label} style={{ flex: 1, background: "#fff", borderRadius: 14, padding: "14px 8px", textAlign: "center", border: "1px solid #e8ecf2" }}>
+            <div style={{ fontSize: 18 }}>{s.icon}</div>
+            <div style={{ fontSize: 16, fontWeight: 800, color: "#2d3748", marginTop: 4, fontFamily: "'Orbitron', monospace" }}>{s.value}</div>
+            <div style={{ fontSize: 9, color: "#a0aec0", marginTop: 2 }}>{s.label}</div>
+          </div>
+        ))}
+      </div>
+      <button
+        onClick={onLogout}
+        style={{
+          width: "100%", padding: "14px", borderRadius: 12,
+          background: "transparent", border: "1px solid #e05070",
+          color: "#e05070", fontSize: 14, fontWeight: 700, cursor: "pointer",
+        }}
+      >
+        ログアウト
+      </button>
+    </div>
+  );
+}
+
+function CoursesTab() {
+  return (
+    <div>
+      <PageHeader emoji="📚" title="コース" />
+      <div style={{ textAlign: "center", padding: "60px 0", color: "#a0aec0" }}>
+        <div style={{ fontSize: 48, marginBottom: 16 }}>🚧</div>
+        <div style={{ fontSize: 16, fontWeight: 700 }}>準備中です</div>
+        <div style={{ fontSize: 13, marginTop: 8 }}>コース機能は近日公開予定です</div>
+      </div>
+    </div>
+  );
+}
+
 function Section({ title, emoji, badge, action, children }) {
   return (
     <div style={{ marginBottom: 16 }}>
@@ -282,10 +419,19 @@ function Section({ title, emoji, badge, action, children }) {
 }
 
 // ─── Main App ────────────────────────────────────────
+const TABS = [
+  { id: 'home', icon: "🏠", label: "ホーム" },
+  { id: 'games', icon: "🎮", label: "ゲーム" },
+  { id: 'courses', icon: "📚", label: "コース" },
+  { id: 'ranking', icon: "🏆", label: "ランキング" },
+  { id: 'mypage', icon: "👤", label: "マイページ" },
+];
+
 export default function App() {
   const [studentId, setStudentId] = useState(api.getStoredStudentId());
   const [loginMode, setLoginMode] = useState(!api.isLoggedIn());
   const [loaded, setLoaded] = useState(false);
+  const [activeTab, setActiveTab] = useState('home');
 
   const { student, games, coins, streak, rankings, sessions, loading, error } = useTrailData(studentId);
 
@@ -302,6 +448,7 @@ export default function App() {
     setStudentId(null);
     setLoginMode(true);
     setLoaded(false);
+    setActiveTab('home');
   };
 
   if (loginMode) return <LoginScreen onLogin={handleLogin} />;
@@ -334,13 +481,34 @@ export default function App() {
     avatar: (student?.name || '?').charAt(0),
   };
 
-  // Game count = unique game_ids the student has actually played
   const playedGameCount = new Set(sessions.map(s => s.game_id)).size;
-
   const recentGames = buildRecentGames(sessions, games);
   const weeklyRanking = buildWeeklyRanking(rankings, studentId);
   const subjectLevels = buildSubjectLevels(coins, games);
   const missions = buildMissions(sessions, streak);
+
+  const renderTab = () => {
+    switch (activeTab) {
+      case 'games':
+        return <GamesTab games={games} />;
+      case 'courses':
+        return <CoursesTab />;
+      case 'ranking':
+        return <RankingTab ranking={weeklyRanking} />;
+      case 'mypage':
+        return <MypageTab student={studentData} streak={streak} sessions={sessions} playedGameCount={playedGameCount} onLogout={handleLogout} />;
+      default:
+        return (
+          <>
+            <StatusHeader student={studentData} gameCount={playedGameCount} />
+            <MissionSection missions={missions} />
+            <RecentGamesSection recent={recentGames} games={games} />
+            <SubjectLevels subjects={subjectLevels} />
+            <WeeklyRanking ranking={weeklyRanking} />
+          </>
+        );
+    }
+  };
 
   return (
     <div style={{
@@ -360,21 +528,16 @@ export default function App() {
         ::-webkit-scrollbar-thumb { background: #d0d5dd; border-radius: 4px; }
       `}</style>
 
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 4px 12px" }}>
-        <div style={{ fontSize: 18, fontWeight: 900, letterSpacing: -1, fontFamily: "'Orbitron', monospace", background: "linear-gradient(135deg, #0090d9, #7c5cbf)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-          TRAIL GP3
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+      {activeTab === 'home' && (
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 4px 12px" }}>
+          <div style={{ fontSize: 18, fontWeight: 900, letterSpacing: -1, fontFamily: "'Orbitron', monospace", background: "linear-gradient(135deg, #0090d9, #7c5cbf)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+            TRAIL GP3
+          </div>
           <span style={{ fontSize: 11, color: "#a0aec0" }}>{student?.class_name || ''}</span>
-          <div onClick={handleLogout} style={{ padding: "4px 12px", borderRadius: 8, border: "1px solid #e05070", color: "#e05070", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>ログアウト</div>
         </div>
-      </div>
+      )}
 
-      <StatusHeader student={studentData} gameCount={playedGameCount} />
-      <MissionSection missions={missions} />
-      <RecentGamesSection recent={recentGames} games={games} />
-      <SubjectLevels subjects={subjectLevels} />
-      <WeeklyRanking ranking={weeklyRanking} />
+      {renderTab()}
 
       <div style={{
         position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)",
@@ -383,19 +546,16 @@ export default function App() {
         borderTop: "1px solid #e8ecf2",
         display: "flex", justifyContent: "space-around", padding: "8px 0 12px", zIndex: 100,
       }}>
-        {[
-          { icon: "🏠", label: "ホーム", active: true },
-          { icon: "🎮", label: "ゲーム", active: false },
-          { icon: "📚", label: "コース", active: false },
-          { icon: "🏆", label: "ランキング", active: false },
-          { icon: "👤", label: "マイページ", active: false },
-        ].map(tab => (
-          <div key={tab.label} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, cursor: "pointer", opacity: tab.active ? 1 : 0.4 }}>
-            <span style={{ fontSize: 20 }}>{tab.icon}</span>
-            <span style={{ fontSize: 9, fontWeight: tab.active ? 800 : 600, color: tab.active ? "#0090d9" : "#718096" }}>{tab.label}</span>
-            {tab.active && <div style={{ width: 4, height: 4, borderRadius: "50%", background: "#0090d9", marginTop: -1 }} />}
-          </div>
-        ))}
+        {TABS.map(tab => {
+          const isActive = tab.id === activeTab;
+          return (
+            <div key={tab.id} onClick={() => setActiveTab(tab.id)} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, cursor: "pointer", opacity: isActive ? 1 : 0.4 }}>
+              <span style={{ fontSize: 20 }}>{tab.icon}</span>
+              <span style={{ fontSize: 9, fontWeight: isActive ? 800 : 600, color: isActive ? "#0090d9" : "#718096" }}>{tab.label}</span>
+              {isActive && <div style={{ width: 4, height: 4, borderRadius: "50%", background: "#0090d9", marginTop: -1 }} />}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
