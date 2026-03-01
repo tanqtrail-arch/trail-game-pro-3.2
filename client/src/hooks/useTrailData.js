@@ -136,15 +136,22 @@ export function buildRecentGames(sessions, games) {
 
 export function buildWeeklyRanking(rankings, myId) {
   if (!Array.isArray(rankings)) return [];
-  return rankings
+  const sorted = rankings
     .sort((a, b) => (b.total_coins || 0) - (a.total_coins || 0))
-    .slice(0, 10)
     .map((r, i) => ({
       rank: i + 1,
       name: r.student_name || r.name || '---',
       alt: r.total_coins || 0,
       isMe: r.student_id === myId,
     }));
+  const top10 = sorted.slice(0, 10);
+  // 自分がトップ10外なら末尾に追加
+  const meInTop10 = top10.some(r => r.isMe);
+  if (!meInTop10) {
+    const me = sorted.find(r => r.isMe);
+    if (me) top10.push(me);
+  }
+  return top10;
 }
 
 export function buildSubjectLevels(coins, games) {
