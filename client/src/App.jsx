@@ -95,7 +95,7 @@ function AppInner() {
       case 'ranking':
         return <RankingTab ranking={weeklyRanking} games={games} studentName={studentData.name} studentId={studentId} sessions={sessions} />;
       case 'mypage':
-        return <MypageTab student={studentData} streak={streak} sessions={sessions} playedGameCount={playedGameCount} onLogout={handleLogout} />;
+        return <MypageTab student={studentData} streak={streak} sessions={sessions} playedGameCount={playedGameCount} coins={coins} onLogout={handleLogout} />;
       default:
         return <HomePage studentData={studentData} playedGameCount={playedGameCount} missions={missions} recentGames={recentGames} subjectLevels={subjectLevels} weeklyRanking={weeklyRanking} failedSections={failedSections} />;
     }

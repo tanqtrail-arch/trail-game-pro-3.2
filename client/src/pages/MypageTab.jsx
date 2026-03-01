@@ -1,13 +1,31 @@
+import { useMemo } from "react";
 import { RANK_COLORS } from "../constants";
 import PageHeader from "../components/PageHeader";
 
-export default function MypageTab({ student, streak, sessions, playedGameCount, onLogout }) {
+function buildAltByGame(coins) {
+  const map = {};
+  (coins || []).forEach(c => {
+    if (!c.game_name || !c.amount) return;
+    const key = c.game_name;
+    if (!map[key]) map[key] = { game_name: key, emoji: c.game_emoji || "🎮", total: 0 };
+    map[key].total += c.amount;
+  });
+  return Object.values(map)
+    .filter(g => g.total > 0)
+    .sort((a, b) => b.total - a.total);
+}
+
+export default function MypageTab({ student, streak, sessions, playedGameCount, coins, onLogout }) {
   const rc = RANK_COLORS[student.rank] || RANK_COLORS.F;
   const stats = [
     { icon: "🎮", label: "プレイゲーム数", value: String(playedGameCount) },
     { icon: "🕹️", label: "総プレイ回数", value: String(sessions.length) },
     { icon: "🔥", label: "連続ログイン", value: `${student.streak}日` },
   ];
+
+  const altByGame = useMemo(() => buildAltByGame(coins), [coins]);
+  const maxAlt = altByGame.length > 0 ? altByGame[0].total : 0;
+
   return (
     <div>
       <PageHeader emoji="👤" title="マイページ" />
@@ -34,6 +52,39 @@ export default function MypageTab({ student, streak, sessions, playedGameCount, 
           </div>
         ))}
       </div>
+
+      {/* ALT獲得履歴 */}
+      {altByGame.length > 0 && (
+        <div style={{ background: "#fff", borderRadius: 16, padding: "18px 16px", marginBottom: 16, border: "1px solid #e8ecf2" }}>
+          <div style={{ fontSize: 14, fontWeight: 800, color: "#2d3748", marginBottom: 14, display: "flex", alignItems: "center", gap: 6 }}>
+            <span style={{ fontSize: 16 }}>📊</span> ALT獲得履歴
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {altByGame.map(g => (
+              <div key={g.game_name}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: "#4a5568" }}>
+                    {g.emoji} {g.game_name}
+                  </span>
+                  <span style={{ fontSize: 12, fontWeight: 800, color: "#e8a020", fontFamily: "'Orbitron', monospace" }}>
+                    {g.total.toLocaleString()} <span style={{ fontSize: 9, color: "#a0aec0", fontFamily: "inherit" }}>ALT</span>
+                  </span>
+                </div>
+                <div style={{ height: 8, background: "#f0f2f5", borderRadius: 4, overflow: "hidden" }}>
+                  <div style={{
+                    height: "100%",
+                    width: `${Math.max(4, (g.total / maxAlt) * 100)}%`,
+                    background: "linear-gradient(90deg, #0090d9, #00b4d8)",
+                    borderRadius: 4,
+                    transition: "width 0.4s ease",
+                  }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <button
         onClick={onLogout}
         style={{
