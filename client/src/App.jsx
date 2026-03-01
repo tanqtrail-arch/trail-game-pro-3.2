@@ -93,7 +93,7 @@ function AppInner() {
       case 'courses':
         return <CoursesTab />;
       case 'ranking':
-        return <RankingTab ranking={weeklyRanking} games={games} studentName={studentData.name} />;
+        return <RankingTab ranking={weeklyRanking} games={games} studentName={studentData.name} sessions={sessions} />;
       case 'mypage':
         return <MypageTab student={studentData} streak={streak} sessions={sessions} playedGameCount={playedGameCount} onLogout={handleLogout} />;
       default:

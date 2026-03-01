@@ -90,9 +90,6 @@ export async function getRankings() {
   return apiFetch(`/api/t/${TENANT_SLUG}/rankings`);
 }
 
-export async function getGameRankings(gameId) {
-  return apiFetch(`/api/t/${TENANT_SLUG}/rankings?gameId=${gameId}`);
-}
 
 // ─── ストリーク ────────────────────
 export async function getStreak(studentId) {
