@@ -3,16 +3,16 @@ import PageHeader from "../components/PageHeader";
 
 function buildGameRanking(sessions, gameId) {
   const gameSessions = sessions.filter(s => s.game_id === gameId);
-  // Best accuracy_pct per student
   const best = {};
   gameSessions.forEach(s => {
     const name = s.student_name;
-    const pct = s.accuracy_pct ?? 0;
-    if (!best[name] || pct > best[name]) best[name] = pct;
+    const val = s.score ?? 0;
+    if (!best[name] || val > best[name]) best[name] = val;
   });
   return Object.entries(best)
-    .map(([name, pct]) => ({ student_name: name, score: pct }))
-    .sort((a, b) => b.score - a.score);
+    .map(([name, val]) => ({ student_name: name, score: val }))
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 10);
 }
 
 export default function RankingTab({ ranking, games, studentName, sessions }) {
@@ -92,7 +92,7 @@ export default function RankingTab({ ranking, games, studentName, sessions }) {
                   <span style={{ flex: 1, fontSize: 14, fontWeight: isMe ? 800 : 600, color: "#2d3748" }}>
                     {r.student_name} {isMe && <span style={{ fontSize: 10, color: "#0090d9" }}>← あなた</span>}
                   </span>
-                  <span style={{ fontSize: 15, fontWeight: 800, color: "#e8a020", fontFamily: "'Orbitron', monospace" }}>{r.score}%</span>
+                  <span style={{ fontSize: 15, fontWeight: 800, color: "#e8a020", fontFamily: "'Orbitron', monospace" }}>{r.score.toLocaleString()}</span>
                 </div>
               );
             })}
