@@ -37,7 +37,7 @@ export function useTrailData(studentId) {
         const rankingsList = Array.isArray(rankingsData.rankings) ? rankingsData.rankings : [];
 
         // ALT total: prefer rankings total_coins (authoritative), fallback to sum of coin logs
-        const myRanking = rankingsList.find(r => r.student_id === studentId);
+        const myRanking = rankingsList.find(r => String(r.student_id) === String(studentId));
         const totalAlt = myRanking
           ? myRanking.total_coins
           : coinLogs.reduce((sum, c) => sum + (c.amount || 0), 0);
@@ -71,6 +71,7 @@ export function useTrailData(studentId) {
               name: cached?.name || storedName || '---',
               class_name: cached?.class_name || '',
               totalAlt,
+              streak: streakData?.streak?.current || 0,
               ...rank,
             };
           })(),
