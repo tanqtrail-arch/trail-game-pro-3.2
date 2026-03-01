@@ -138,29 +138,32 @@ export default function RankingTab({ ranking, games, studentName, studentId, ses
     );
   };
 
+  // 選択中のゲーム情報
+  const selectedGameInfo = selectedGame === null
+    ? { emoji: "🏆", name: "総合ALT" }
+    : (() => { const g = activeGames.find(g => g.id === selectedGame); return g ? { emoji: g.emoji || "🎮", name: g.name } : { emoji: "🎮", name: "---" }; })();
+
+  // グリッドに表示するゲーム（選択中のものを除外）
+  const otherGames = selectedGame === null
+    ? activeGames
+    : [{ id: null, emoji: "🏆", name: "総合ALT" }, ...activeGames.filter(g => g.id !== selectedGame)];
+
   return (
     <div style={{ width: "100%" }}>
       <PageHeader emoji="🏆" title="ランキング" />
 
-      {/* Game selector grid */}
+      {/* 1. 選択中のゲーム名 */}
       <div style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(2, 1fr)",
-        gap: 8,
-        marginBottom: 12,
+        display: "flex", alignItems: "center", gap: 10,
+        padding: "12px 14px", marginBottom: 10,
+        background: "linear-gradient(135deg, #0f1628, #1a2444)",
+        borderRadius: 14, color: "#fff",
       }}>
-        <button style={gameButtonStyle(selectedGame === null)} onClick={() => setSelectedGame(null)}>
-          <span style={{ fontSize: 18 }}>🏆</span> 総合ALT
-        </button>
-        {activeGames.map(g => (
-          <button key={g.id} style={gameButtonStyle(selectedGame === g.id)} onClick={() => setSelectedGame(g.id)}>
-            <span style={{ fontSize: 18 }}>{g.emoji || "🎮"}</span>
-            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{g.name}</span>
-          </button>
-        ))}
+        <span style={{ fontSize: 28 }}>{selectedGameInfo.emoji}</span>
+        <span style={{ fontSize: 17, fontWeight: 800, letterSpacing: -0.3 }}>{selectedGameInfo.name}</span>
       </div>
 
-      {/* Period toggle — only for overall ALT */}
+      {/* 2. 期間切り替えタブ */}
       {selectedGame === null && (
         <div style={{
           display: "flex", gap: 2, background: "#f0f2f5", borderRadius: 20,
@@ -174,7 +177,7 @@ export default function RankingTab({ ranking, games, studentName, studentId, ses
         </div>
       )}
 
-      {/* 総合ALT ranking — top 5 + my rank */}
+      {/* 3. ランキング結果一覧 */}
       {selectedGame === null && (
         loadingPeriod && !periodRankings[period] ? (
           <div style={{ textAlign: "center", padding: "40px 0", color: "#a0aec0", fontSize: 14 }}>読み込み中...</div>
@@ -188,7 +191,6 @@ export default function RankingTab({ ranking, games, studentName, studentId, ses
         )
       )}
 
-      {/* Game-specific ranking */}
       {selectedGame !== null && (
         gameRanking.length > 0 ? (
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
@@ -221,6 +223,27 @@ export default function RankingTab({ ranking, games, studentName, studentId, ses
           <div style={{ textAlign: "center", padding: "40px 0", color: "#a0aec0", fontSize: 14 }}>まだランキングデータがありません</div>
         )
       )}
+
+      {/* 4. 区切り */}
+      <div style={{ borderTop: "1px solid #e8ecf2", margin: "20px 0 16px" }} />
+
+      {/* 5. 他のゲームを選ぶグリッド */}
+      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10, paddingLeft: 2 }}>
+        <span style={{ fontSize: 15 }}>🎮</span>
+        <span style={{ fontSize: 13, fontWeight: 700, color: "#718096" }}>他のゲームのランキング</span>
+      </div>
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(2, 1fr)",
+        gap: 8,
+      }}>
+        {otherGames.map(g => (
+          <button key={g.id ?? '_overall'} style={gameButtonStyle(false)} onClick={() => setSelectedGame(g.id)}>
+            <span style={{ fontSize: 18 }}>{g.emoji || "🎮"}</span>
+            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{g.name}</span>
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
