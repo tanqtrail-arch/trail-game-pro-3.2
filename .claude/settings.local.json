@@ -1,7 +1,25 @@
 {
   "permissions": {
     "allow": [
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(git:*)",
+      "Bash(gh repo:*)",
+      "Bash(xargs grep:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:tanqtrail-arch.github.io)",
+      "WebFetch(domain:api.github.com)",
+      "Bash(curl:*)",
+      "Bash(echo {\"tenantSlug\":\"demo\",\"className\":\"探究キッズ\",\"studentName\":\"てすと\"}:*)",
+      "WebFetch(domain:trail-game-pro-3-2.onrender.com)",
+      "Bash(npm install:*)",
+      "Bash(npm run:*)",
+      "Bash(cp:*)",
+      "Bash(sqlite3:*)",
+      "Bash(ls:*)",
+      "Bash(wc:*)",
+      "Bash(npm create:*)",
+      "Bash(mkdir:*)"
     ]
   }
 }
