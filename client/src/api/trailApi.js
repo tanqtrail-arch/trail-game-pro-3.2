@@ -3,6 +3,7 @@ const TENANT_SLUG = 'trail';
 
 let authToken = localStorage.getItem('trail_token') || null;
 let currentStudentId = localStorage.getItem('trail_student_id') || null;
+let cachedStudent = null;
 
 async function apiFetch(path, options = {}) {
   const headers = {
@@ -30,8 +31,10 @@ export async function loginStudent(studentName, className) {
   });
   authToken = data.token;
   currentStudentId = data.student?.id || data.studentId || data.id;
+  cachedStudent = data.student || { id: currentStudentId, name: studentName };
   localStorage.setItem('trail_token', data.token);
   localStorage.setItem('trail_student_id', currentStudentId);
+  localStorage.setItem('trail_student_name', studentName);
   return data;
 }
 
@@ -48,6 +51,10 @@ export function isLoggedIn() {
 
 export function getStoredStudentId() {
   return currentStudentId ? Number(currentStudentId) : null;
+}
+
+export function getCachedStudent() {
+  return cachedStudent;
 }
 
 // ─── テナント情報 ──────────────────

@@ -18,20 +18,14 @@ export function useTrailData(studentId) {
 
     async function fetchAll() {
       try {
-        const [students, games, coins, streak, rankings, sessions] =
+        const [games, coins, streak, rankings, sessions] =
           await Promise.allSettled([
-            api.getStudents(),
             api.getGames(),
             api.getCoins(),
             api.getStreak(studentId),
             api.getRankings(),
             api.getPlaySessions(),
           ]);
-
-        const studentList = students.status === 'fulfilled' ? students.value : [];
-        const student = Array.isArray(studentList)
-          ? studentList.find(s => s.id === studentId)
-          : null;
 
         const allCoins = coins.status === 'fulfilled' ? coins.value : [];
         const myCoins = Array.isArray(allCoins)
@@ -47,7 +41,17 @@ export function useTrailData(studentId) {
           : [];
 
         setData({
-          student: student ? { ...student, totalAlt, ...rank } : null,
+          student: (() => {
+            const cached = api.getCachedStudent();
+            const storedName = localStorage.getItem('trail_student_name');
+            return {
+              id: studentId,
+              name: cached?.name || storedName || '---',
+              class_name: cached?.class_name || '',
+              totalAlt,
+              ...rank,
+            };
+          })(),
           games: games.status === 'fulfilled' && Array.isArray(games.value) ? games.value : [],
           coins: myCoins,
           streak: streak.status === 'fulfilled' ? streak.value : null,
