@@ -68,4 +68,25 @@ router.delete('/:tenantSlug/games/:id', requireAdmin, (req, res) => {
   res.json({ ok: true });
 });
 
+// ═══ [一時] ゲームURL一括更新マイグレーション（認証不要・デプロイ後に削除） ═══
+router.post('/_migrate/game-urls-v2', (req, res) => {
+  const SECRET = 'migrate-2026-03-trailnav-v2';
+  if (req.headers['x-migrate-key'] !== SECRET) {
+    return res.status(403).json({ error: 'forbidden' });
+  }
+  const updates = [
+    { id: 12, url: 'https://tanqtrail-arch.github.io/Meiro-atakku/' },
+    { id: 10, url: 'https://tanqtrail-arch.github.io/Painting-quiz2/' },
+  ];
+  const stmt = db.prepare("UPDATE games SET url = ?, updated_at = datetime('now') WHERE id = ?");
+  const results = [];
+  db.transaction(() => {
+    for (const u of updates) {
+      const r = stmt.run(u.url, u.id);
+      results.push({ id: u.id, url: u.url, changes: r.changes });
+    }
+  })();
+  res.json({ ok: true, results });
+});
+
 module.exports = router;
