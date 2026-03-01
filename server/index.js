@@ -74,6 +74,10 @@ const questionsRoutes = require('./routes/questions');
 app.use('/api/questions', questionsRoutes);
 const gameSavesRoutes = require('./routes/gameSaves');
 app.use('/api/game-saves', gameSavesRoutes);
+const subjectLevelsRoutes = require('./routes/subjectLevels');
+app.use('/api/t', subjectLevelsRoutes);
+const coursesRoutes = require('./routes/courses');
+app.use('/api/t', coursesRoutes);
 
 app.use('/api', parentRoutes);                         // ★ NEW: 保護者ダッシュボード
 
@@ -88,6 +92,9 @@ app.get('/parent', (req, res) => {
 });
 app.get('/super-admin', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/super-admin.html'));
+});
+app.get('/course', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/course.html'));
 });
 
 // ═══ SPA Fallback ═══
@@ -407,6 +414,10 @@ try {
 db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_parent_tokens_tenant_student ON parent_tokens(tenant_id, student_id)`);
 // PIN初期値を0000に統一（NULLまたは空文字のもの）
 db.exec(`UPDATE parent_tokens SET pin = '0000' WHERE pin IS NULL OR pin = ''`);
+  // ── V2 マイグレーション（コース機能等の新スキーマ）──
+  const { runMigrationsV2 } = require('./lib/migrateV2');
+  runMigrationsV2(db);
+
   console.log('  Migrations: OK');
 
   // ── Auto-add new games to all existing tenants ──

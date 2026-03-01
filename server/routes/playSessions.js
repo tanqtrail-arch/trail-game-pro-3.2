@@ -9,6 +9,8 @@
 const { Router } = require('express');
 const db = require('../db');
 const { processSessionALT } = require('../lib/altEngine'); // ★ 0-5追加
+const { updateSubjectLevel } = require('../lib/subjectLevelUpdater');
+const courseEngine = require('../lib/courseEngine');
 
 const router = Router();
 
@@ -59,7 +61,7 @@ router.patch('/:id/end', (req, res) => {
       return res.status(400).json({ error: '無効なセッションIDです' });
     }
 
-    const { score, correct_count, total_count, max_streak, metadata } = req.body;
+    const { score, correct_count, total_count, max_streak, metadata, skip_alt } = req.body;
 
     // セッション存在確認（ALT計算に必要な student_id / tenant_id / game_id も取得）
     const session = db.prepare(`
@@ -108,26 +110,70 @@ router.patch('/:id/end', (req, res) => {
       sessionId
     );
 
+    // ── ★ コースゲーム判定（ALT非付与・courseEngineで処理）──
+    const _gameInfo = db.prepare('SELECT is_course_game FROM games WHERE id = ?').get(session.game_id);
+    if (_gameInfo && _gameInfo.is_course_game === 1) {
+      const _courseGame = db.prepare(
+        'SELECT course_id FROM course_games WHERE game_id = ?'
+      ).get(session.game_id);
+      if (_courseGame) {
+        try {
+          const courseResult = courseEngine.onCourseGameEnd(
+            session.student_id, session.tenant_id, _courseGame.course_id, session.game_id,
+            { correct_count: correct_count ?? 0, total_count: total_count ?? 0 }, db
+          );
+          return res.json({
+            success: true,
+            isCourseGame: true,
+            duration_seconds: durationSeconds,
+            achievement: courseResult.achievement,
+            passed: courseResult.passed,
+            mastered: courseResult.mastered,
+            gradeUp: courseResult.gradeUp,
+            oldGrade: courseResult.oldGrade,
+            newGrade: courseResult.newGrade,
+            newBadge: courseResult.newBadge,
+          });
+        } catch (courseErr) {
+          console.error('[playSessions] courseEngine error:', courseErr.message);
+          return res.json({ success: true, isCourseGame: true, duration_seconds: durationSeconds });
+        }
+      }
+    }
+
     // ── ★ ALTエンジン呼び出し ──
     // ended_at が記録された＝completed とみなす
+    // skip_alt=true の場合はALT計算をスキップ（外部ゲームが/api/external/game-resultで別途ALT処理するため）
     // エラーが起きてもプレイ記録は既に保存済みなので 200 を返す
     let altResult = { total: 0, breakdown: {}, awards: [] };
+    if (!skip_alt) {
+      try {
+        altResult = processSessionALT({
+          id:              sessionId,
+          studentId:       session.student_id,
+          tenantId:        session.tenant_id,
+          gameId:          session.game_id,
+          completed:       true,
+          accuracy,
+          durationSeconds,
+          score:           score ?? null,
+          correctCount:    correct_count ?? null,
+          totalCount:      total_count ?? null,
+          maxStreak:       max_streak ?? 0,
+        });
+      } catch (altErr) {
+        console.error('[playSessions] altEngine error (non-fatal):', altErr.message);
+      }
+    }
+
+    // ── ★ 科目レベル更新（ALT計算とは独立・失敗してもレスポンスに影響しない）──
     try {
-      altResult = processSessionALT({
-        id:              sessionId,
-        studentId:       session.student_id,
-        tenantId:        session.tenant_id,
-        gameId:          session.game_id,
-        completed:       true,
-        accuracy,
-        durationSeconds,
-        score:           score ?? null,
-        correctCount:    correct_count ?? null,
-        totalCount:      total_count ?? null,
-        maxStreak:       max_streak ?? 0,
-      });
-    } catch (altErr) {
-      console.error('[playSessions] altEngine error (non-fatal):', altErr.message);
+      updateSubjectLevel(
+        session.student_id, session.tenant_id, session.game_id,
+        altResult.total, correct_count ?? 0, total_count ?? 0, db
+      );
+    } catch (slErr) {
+      console.error('[playSessions] subjectLevelUpdater error (non-fatal):', slErr.message);
     }
 
     res.json({
