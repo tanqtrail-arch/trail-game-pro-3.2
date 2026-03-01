@@ -59,28 +59,6 @@ router.put('/:tenantSlug/games/:id', requireAdmin, (req, res) => {
   res.json({ ok: true });
 });
 
-// ═══ [一時] ゲームURL一括更新マイグレーション（認証不要・デプロイ後に削除） ═══
-router.post('/_migrate/game-urls', (req, res) => {
-  const SECRET = 'migrate-2026-03-url-update';
-  if (req.headers['x-migrate-key'] !== SECRET) {
-    return res.status(403).json({ error: 'forbidden' });
-  }
-  const updates = [
-    { id: 1,  url: 'https://tanqtrail-arch.github.io/bunsu-fusion/' },
-    { id: 8,  url: 'https://tanqtrail-arch.github.io/silhouette-quiz-47/' },
-    { id: 13, url: 'https://tanqtrail-arch.github.io/omiyage-anzan/' },
-  ];
-  const stmt = db.prepare("UPDATE games SET url = ?, updated_at = datetime('now') WHERE id = ?");
-  const results = [];
-  db.transaction(() => {
-    for (const u of updates) {
-      const r = stmt.run(u.url, u.id);
-      results.push({ id: u.id, url: u.url, changes: r.changes });
-    }
-  })();
-  res.json({ ok: true, results });
-});
-
 // ═══ ゲーム削除 ═══
 router.delete('/:tenantSlug/games/:id', requireAdmin, (req, res) => {
   const tenant = db.prepare('SELECT * FROM tenants WHERE slug = ?').get(req.params.tenantSlug);
