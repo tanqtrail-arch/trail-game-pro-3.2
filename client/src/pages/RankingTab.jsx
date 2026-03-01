@@ -6,12 +6,16 @@ function buildGameRanking(sessions, gameId) {
   const best = {};
   gameSessions.forEach(s => {
     const name = s.student_name;
-    const val = s.score ?? 0;
-    if (!best[name] || val > best[name]) best[name] = val;
+    const score = s.score;
+    const pct = s.accuracy_pct;
+    const sortVal = score ?? pct ?? 0;
+    if (!best[name] || sortVal > (best[name].sortVal)) {
+      best[name] = { score, accuracy_pct: pct, sortVal };
+    }
   });
   return Object.entries(best)
-    .map(([name, val]) => ({ student_name: name, score: val }))
-    .sort((a, b) => b.score - a.score)
+    .map(([name, d]) => ({ student_name: name, score: d.score, accuracy_pct: d.accuracy_pct }))
+    .sort((a, b) => (b.score ?? b.accuracy_pct ?? 0) - (a.score ?? a.accuracy_pct ?? 0))
     .slice(0, 10);
 }
 
@@ -92,7 +96,18 @@ export default function RankingTab({ ranking, games, studentName, sessions }) {
                   <span style={{ flex: 1, fontSize: 14, fontWeight: isMe ? 800 : 600, color: "#2d3748" }}>
                     {r.student_name} {isMe && <span style={{ fontSize: 10, color: "#0090d9" }}>← あなた</span>}
                   </span>
-                  <span style={{ fontSize: 15, fontWeight: 800, color: "#e8a020", fontFamily: "'Orbitron', monospace" }}>{r.score.toLocaleString()}</span>
+                  <div style={{ textAlign: "right" }}>
+                    {r.score != null ? (
+                      <>
+                        <span style={{ fontSize: 15, fontWeight: 800, color: "#e8a020", fontFamily: "'Orbitron', monospace" }}>{r.score.toLocaleString()}</span>
+                        {r.accuracy_pct != null && <div style={{ fontSize: 10, color: "#a0aec0" }}>正解率 {r.accuracy_pct}%</div>}
+                      </>
+                    ) : r.accuracy_pct != null ? (
+                      <span style={{ fontSize: 14, fontWeight: 700, color: "#6c9" }}>正解率 {r.accuracy_pct}%</span>
+                    ) : (
+                      <span style={{ fontSize: 12, color: "#a0aec0" }}>プレイ済み</span>
+                    )}
+                  </div>
                 </div>
               );
             })}
