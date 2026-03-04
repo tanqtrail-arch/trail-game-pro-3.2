@@ -112,15 +112,24 @@
       if (!config.tenantId) throw new TrailSDKError('tenantId は必須です');
 
       // localStorageから復元（引数が優先）
+      // ① TrailSDK 固有キー → ② React アプリのキー の順でフォールバック
       const saved = Storage.get('auth') || {};
+      let fallbackToken     = null;
+      let fallbackStudentId = null;
+      try {
+        fallbackToken     = localStorage.getItem('trail_token');
+        fallbackStudentId = localStorage.getItem('trail_student_id');
+        if (fallbackStudentId) fallbackStudentId = Number(fallbackStudentId) || fallbackStudentId;
+      } catch (e) { /* localStorage unavailable */ }
+
       _config = {
         gameId:    config.gameId,
         tenantId:  config.tenantId,
-        studentId: config.studentId ?? saved.studentId ?? null,
-        token:     config.token     ?? saved.token     ?? null,
+        studentId: config.studentId ?? saved.studentId ?? fallbackStudentId ?? null,
+        token:     config.token     ?? saved.token     ?? fallbackToken     ?? null,
       };
 
-      console.log(`[TrailSDK] init: gameId=${_config.gameId}, studentId=${_config.studentId}`);
+      console.log(`[TrailSDK] init: gameId=${_config.gameId}, studentId=${_config.studentId}, hasToken=${!!_config.token}`);
       return this;
     },
 
@@ -136,9 +145,10 @@
         tenantId: _config.tenantId,
         pin,
       });
-      // トークン・生徒情報を保存
+      // トークン・生徒情報を保存 + tenantId を UUID に更新
       _config.token     = data.token;
       _config.studentId = data.student.id;
+      if (data.tenant?.id) _config.tenantId = data.tenant.id;
       Storage.set('auth', { token: data.token, studentId: data.student.id });
       return data;
     },

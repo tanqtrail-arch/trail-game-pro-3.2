@@ -20,10 +20,24 @@ const router = Router();
 // ════════════════════════════════════════════════════════
 router.post('/start', (req, res) => {
   try {
-    const { tenant_id, student_id, game_id } = req.body;
+    let { tenant_id, student_id, game_id } = req.body;
 
     if (!tenant_id || !student_id || !game_id) {
       return res.status(400).json({ error: 'tenant_id, student_id, game_id は必須です' });
+    }
+
+    // ── tenant_id 解決: slug → UUID ──
+    if (typeof tenant_id === 'string' && !tenant_id.includes('-')) {
+      const t = db.prepare('SELECT id FROM tenants WHERE slug = ?').get(tenant_id);
+      if (t) tenant_id = t.id;
+    }
+
+    // ── game_id 解決: game_code → integer ──
+    if (isNaN(Number(game_id))) {
+      const g = db.prepare(
+        'SELECT id FROM games WHERE tenant_id = ? AND game_code = ?'
+      ).get(tenant_id, game_id);
+      if (g) game_id = g.id;
     }
 
     const student = db.prepare(

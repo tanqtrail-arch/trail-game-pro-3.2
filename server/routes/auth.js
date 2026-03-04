@@ -149,4 +149,54 @@ router.post('/student/login', (req, res) => {
   });
 });
 
+// ═══ 生徒PINログイン（TrailSDK用） ═══
+router.post('/student/pin', (req, res) => {
+  const { tenantId, pin } = req.body;
+  if (!tenantId || !pin) {
+    return res.status(400).json({ error: 'tenantId と pin は必須です' });
+  }
+
+  // tenant 解決: slug → UUID（slug優先、なければ id で検索）
+  let tenant = db.prepare('SELECT * FROM tenants WHERE slug = ?').get(tenantId);
+  if (!tenant) {
+    tenant = db.prepare('SELECT * FROM tenants WHERE id = ?').get(tenantId);
+  }
+  if (!tenant) {
+    return res.status(404).json({ error: 'テナントが見つかりません' });
+  }
+
+  const student = db.prepare(
+    'SELECT s.*, c.name as class_name FROM students s JOIN classes c ON s.class_id = c.id WHERE s.tenant_id = ? AND s.pin = ?'
+  ).get(tenant.id, pin);
+  if (!student) {
+    return res.status(401).json({ error: 'PINが正しくありません' });
+  }
+
+  // ログイン記録
+  db.prepare('INSERT INTO login_logs (tenant_id, student_id) VALUES (?, ?)').run(tenant.id, student.id);
+
+  // ストリーク更新
+  try {
+    updateAndGetStreak(student.id, tenant.id);
+  } catch (e) {
+    console.error('[auth/pin] streak update error (non-fatal):', e.message);
+  }
+
+  const expiresIn = `${process.env.STUDENT_SESSION_EXPIRY_HOURS || 2}h`;
+  const token = signToken({
+    studentId: student.id,
+    tenantId: tenant.id,
+    name: student.name,
+    className: student.class_name,
+    classId: student.class_id,
+    role: 'student',
+  }, expiresIn);
+
+  res.json({
+    token,
+    student: { id: student.id, name: student.name, className: student.class_name },
+    tenant: { id: tenant.id, name: tenant.name, slug: tenant.slug },
+  });
+});
+
 module.exports = router;

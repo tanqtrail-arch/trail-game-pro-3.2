@@ -283,6 +283,15 @@ db.exec(`
   WHERE pin IS NOT NULL
 `);
 
+// ── games に game_code カラム追加（内部ゲーム識別用） ──
+try {
+  db.exec(`ALTER TABLE games ADD COLUMN game_code TEXT`);
+} catch (e) { /* 既に存在する場合は無視 */ }
+db.exec(`
+  CREATE UNIQUE INDEX IF NOT EXISTS idx_games_code
+  ON games(tenant_id, game_code) WHERE game_code IS NOT NULL
+`);
+
 // ── 0-1c: streaks テーブル（連続プレイ管理） ──
 db.exec(`
   CREATE TABLE IF NOT EXISTS streaks (
@@ -455,16 +464,17 @@ db.exec(`UPDATE parent_tokens SET pin = '0000' WHERE pin IS NULL OR pin = ''`);
     { name: '書き順マスター', emoji: '✍️', url: 'https://tanqtrail-arch.github.io/kanji-stroke/', category: '国語' },
     { name: 'ビルビルタウン', emoji: '🏙️', url: 'https://tanqtrail-arch.github.io/building-town-v2/', category: '算数' },
     { name: '猫の細道', emoji: '🐱', url: 'https://tanqtrail-arch.github.io/neko-no-hosomichi/', category: '算数' },
+    { name: '四角形ファクトリー', emoji: '🏭', url: '/games/a-3/', category: '算数', game_code: 'A-3' },
   ];
   const allTenants = db.prepare('SELECT id FROM tenants').all();
   const insertNewGame = db.prepare(`
-    INSERT INTO games (tenant_id, name, emoji, url, category)
-    SELECT ?, ?, ?, ?, ?
+    INSERT INTO games (tenant_id, name, emoji, url, category, game_code)
+    SELECT ?, ?, ?, ?, ?, ?
     WHERE NOT EXISTS (SELECT 1 FROM games WHERE tenant_id = ? AND name = ? AND is_active = 1)
   `);
   for (const t of allTenants) {
     for (const g of newGames) {
-      insertNewGame.run(t.id, g.name, g.emoji, g.url, g.category, t.id, g.name);
+      insertNewGame.run(t.id, g.name, g.emoji, g.url, g.category, g.game_code || null, t.id, g.name);
     }
   }
 

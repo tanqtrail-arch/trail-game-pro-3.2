@@ -19,6 +19,7 @@ async function apiFetch(path, options = {}) {
       localStorage.removeItem('trail_token');
       localStorage.removeItem('trail_student_id');
       localStorage.removeItem('trail_student_name');
+      localStorage.removeItem('trail_auth');
       window.dispatchEvent(new CustomEvent('trail:auth-expired'));
     }
     const err = await res.json().catch(() => ({}));
@@ -49,6 +50,8 @@ export async function loginStudent(studentName, className) {
   localStorage.setItem('trail_token', data.token);
   localStorage.setItem('trail_student_id', currentStudentId);
   localStorage.setItem('trail_student_name', studentName);
+  // TrailSDK 互換: ゲーム内から認証情報を読めるようにする
+  try { localStorage.setItem('trail_auth', JSON.stringify({ token: data.token, studentId: currentStudentId })); } catch {}
   return data;
 }
 
@@ -57,6 +60,7 @@ export function logout() {
   currentStudentId = null;
   localStorage.removeItem('trail_token');
   localStorage.removeItem('trail_student_id');
+  localStorage.removeItem('trail_auth');
 }
 
 export function isLoggedIn() {
