@@ -10,6 +10,7 @@ const { v4: uuidv4 } = require('uuid');
 const db = require('../db');
 const { signToken } = require('../middleware/auth');
 const jwt = require('jsonwebtoken');
+const { updateAndGetStreak } = require('../lib/altEngine');
 
 const router = Router();
 
@@ -122,6 +123,14 @@ router.post('/student/login', (req, res) => {
   db.prepare(`INSERT INTO activity_logs (tenant_id, type, actor, detail) VALUES (?, 'login', ?, ?)`).run(
     tenant.id, studentName, `${className} - ${studentName} がログインしました`
   );
+
+  // ★ ログイン連続日数を更新（ログインした日を streak の基準にする）
+  try {
+    updateAndGetStreak(student.id, tenant.id);
+  } catch (e) {
+    // streak 更新失敗はログインを妨げない
+    console.error('[auth] streak update error (non-fatal):', e.message);
+  }
 
   const expiresIn = `${process.env.STUDENT_SESSION_EXPIRY_HOURS || 2}h`;
   const token = signToken({

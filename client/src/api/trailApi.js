@@ -39,7 +39,13 @@ export async function loginStudent(studentName, className) {
   });
   authToken = data.token;
   currentStudentId = data.student?.id || data.studentId || data.id;
-  cachedStudent = data.student || { id: currentStudentId, name: studentName };
+  // class_name を正規化（APIはcamelCase "className"で返すため）
+  cachedStudent = {
+    id: currentStudentId,
+    name: studentName,
+    class_name: data.student?.className || data.student?.class_name || '',
+    ...(data.student || {}),
+  };
   localStorage.setItem('trail_token', data.token);
   localStorage.setItem('trail_student_id', currentStudentId);
   localStorage.setItem('trail_student_name', studentName);
@@ -103,8 +109,9 @@ export async function getStreak(studentId) {
 }
 
 // ─── プレイセッション ──────────────
-export async function getPlaySessions() {
-  return apiFetch('/api/play-sessions');
+export async function getPlaySessions(studentId) {
+  const qs = studentId ? `?student_id=${studentId}` : '';
+  return apiFetch(`/api/play-sessions${qs}`);
 }
 
 // ─── バッジ ────────────────────────

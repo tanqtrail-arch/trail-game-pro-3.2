@@ -17,7 +17,7 @@ router.get('/:tenantSlug/coins', requireAuth, (req, res) => {
   if (req.user.role === 'student') {
     // 生徒は自分のログのみ
     logs = db.prepare(`
-      SELECT cl.id, cl.amount, cl.note, cl.created_at,
+      SELECT cl.id, cl.game_id, cl.amount, cl.note, cl.created_at,
         s.name as student_name, g.name as game_name, g.emoji as game_emoji
       FROM coin_logs cl
       JOIN students s ON cl.student_id = s.id

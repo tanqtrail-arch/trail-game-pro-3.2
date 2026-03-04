@@ -25,7 +25,7 @@ export function useTrailData(studentId) {
             api.getCoins(),
             api.getStreak(studentId),
             api.getRankings(),
-            api.getPlaySessions(),
+            api.getPlaySessions(studentId),  // ★ Fix: studentId でフィルタ
           ]);
 
         // coins API returns { logs: [...] } — already filtered by auth token
