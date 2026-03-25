@@ -89,7 +89,7 @@ function AppInner() {
   const renderTab = () => {
     switch (activeTab) {
       case 'games':
-        return <GamesTab games={games} />;
+        return <GamesTab games={games} playerName={studentData.name} />;
       case 'courses':
         return <CoursesTab />;
       case 'ranking':

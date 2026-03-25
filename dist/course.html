@@ -146,7 +146,7 @@ function renderCourse(data){
       else statusHtml='<span class="not-passed">未挑戦</span>';
 
       const actionHtml=g.unlocked
-        ?(g.gameUrl?`<a href="${esc(g.gameUrl)}" target="_blank" rel="noopener" class="play-btn">PLAY</a>`:'<span class="play-btn" style="opacity:.5;cursor:default">準備中</span>')
+        ?(g.gameUrl?`<a href="${esc(g.gameUrl)}${g.gameUrl.includes('?')?'&':'?'}${new URLSearchParams({player:(USER&&USER.name)||'',gameId:String(g.gameId||''),gameName:g.gameName||''}).toString()}" target="_blank" rel="noopener" class="play-btn">PLAY</a>`:'<span class="play-btn" style="opacity:.5;cursor:default">準備中</span>')
         :'<span class="lock-icon">🔒</span>';
 
       return`<div class="game-item ${g.unlocked?'unlocked':'locked'}">

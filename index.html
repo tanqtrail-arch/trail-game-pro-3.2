@@ -296,6 +296,12 @@ function isSafeUrl(url){
   const trimmed = url.trim().toLowerCase();
   return trimmed.startsWith('https://') || trimmed.startsWith('http://');
 }
+function buildGameUrl(url, gameId, gameName){
+  if(!url) return url;
+  const sep=url.includes('?')?'&':'?';
+  const p=new URLSearchParams({player:state.user||'',gameId:gameId||'',gameName:gameName||''});
+  return url+sep+p.toString();
+}
 
 // ═══ セキュリティ: 管理者トークン管理 ═══
 const ADMIN_TOKEN = {
@@ -713,7 +719,7 @@ function renderLogin(){
 
 function renderGuest(){
   const cards=state.games.map(g=>{
-    const hasUrl=g.url&&isSafeUrl(g.url);const tag=hasUrl?'a':'div';const href=hasUrl?` href="${escHtml(g.url)}" target="_blank" rel="noopener"`:'';
+    const hasUrl=g.url&&isSafeUrl(g.url);const tag=hasUrl?'a':'div';const gUrl=hasUrl?buildGameUrl(escHtml(g.url),g.id,g.name):'';const href=hasUrl?` href="${gUrl}" target="_blank" rel="noopener"`:'';
     return`<${tag} class="game-card" data-gid="${g.id}"${href}><span class="game-emoji">${escHtml(g.emoji)}</span><div class="game-name">${escHtml(g.name)}</div>${g.category?`<span class="game-category-badge">${escHtml(g.category)}</span>`:''}<div class="game-link-hint">${hasUrl?'▶ タップでプレイ':'準備中...'}</div></${tag}>`;
   }).join('');
 
@@ -770,7 +776,7 @@ function renderPortalHome(){
   const available=state.games.filter(g=>g.url&&g.url.trim());
   const newGames=(available.length?available:[...state.games]).slice().reverse();
   const cards=newGames.map(g=>{
-    const hasUrl=g.url&&isSafeUrl(g.url);const tag=hasUrl?'a':'div';const href=hasUrl?` href="${escHtml(g.url)}" target="_blank" rel="noopener"`:'';
+    const hasUrl=g.url&&isSafeUrl(g.url);const tag=hasUrl?'a':'div';const gUrl=hasUrl?buildGameUrl(escHtml(g.url),g.id,g.name):'';const href=hasUrl?` href="${gUrl}" target="_blank" rel="noopener"`:'';
     const c=getPlayerGameCoins(state.user,g.id);
     return`<${tag} class="game-card" data-gid="${g.id}"${href}><span class="game-emoji">${escHtml(g.emoji)}</span><div class="game-name">${escHtml(g.name)}</div>${g.category?`<span class="game-category-badge">${escHtml(g.category)}</span>`:''}<div class="game-coins">🪙 ${c} ALT</div>${hasUrl?'<div class="game-link-hint">▶ タップでプレイ</div>':'<div class="game-link-hint">準備中...</div>'}</${tag}>`;
   }).join('');
@@ -868,7 +874,7 @@ function getCatEmoji(cat){
 
 function makeGameCard(g){
   const c=getPlayerGameCoins(state.user,g.id);
-  const hasUrl=g.url&&isSafeUrl(g.url);const tag=hasUrl?'a':'div';const href=hasUrl?` href="${escHtml(g.url)}" target="_blank" rel="noopener"`:'';
+  const hasUrl=g.url&&isSafeUrl(g.url);const tag=hasUrl?'a':'div';const gUrl=hasUrl?buildGameUrl(escHtml(g.url),g.id,g.name):'';const href=hasUrl?` href="${gUrl}" target="_blank" rel="noopener"`:'';
   const gr=getGameRanking(g.id);const myRank=gr.findIndex(r=>r.player===state.user);
   const myRankTag=myRank>=0?`<div style="font-size:.6rem;color:var(--accent-cyan);margin-top:3px">#${myRank+1} / ${gr.length}人</div>`:'';
   return`<${tag} class="game-card" data-gid="${g.id}"${href}><span class="game-emoji">${escHtml(g.emoji)}</span><div class="game-name">${escHtml(g.name)}</div><div class="game-coins">🪙 ${c} ALT</div>${myRankTag}${hasUrl?'<div class="game-link-hint">▶ タップでプレイ</div>':'<div class="game-link-hint">準備中...</div>'}</${tag}>`;

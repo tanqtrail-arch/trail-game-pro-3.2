@@ -1,6 +1,6 @@
 import PageHeader from "../components/PageHeader";
 
-export default function GamesTab({ games }) {
+export default function GamesTab({ games, playerName }) {
   const active = games.filter(g => g.is_active === 1);
   const categories = [...new Set(active.map(g => g.category))];
   return (
@@ -15,7 +15,12 @@ export default function GamesTab({ games }) {
               return (
                 <div
                   key={g.id}
-                  onClick={() => hasUrl && window.open(g.url, '_blank')}
+                  onClick={() => {
+                    if (!hasUrl) return;
+                    const sep = g.url.includes('?') ? '&' : '?';
+                    const p = new URLSearchParams({ player: playerName || '', gameId: String(g.id), gameName: g.name || '' });
+                    window.open(g.url + sep + p.toString(), '_blank');
+                  }}
                   style={{
                     background: hasUrl ? "#fff" : "#f0f2f5",
                     borderRadius: 16, padding: 16, border: "1px solid #e8ecf2",
